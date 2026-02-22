@@ -11,12 +11,19 @@ class ResolveTenant
     public function handle($request, Closure $next)
     {
         $host = $request->getHost();
+        $tenant = cache()->remember("tenant_meta_{$host}", 86400, function () use ($host) {
+            return DB::connection('LMS_CENTER')
+                ->table('tenants')
+                ->where('domain', $host)
+                ->where('active', 1)
+                ->first();
+        });
 
-        $tenant = DB::connection('LMS_CENTER')
-            ->table('tenants')
-            ->where('domain', $host)
-            ->where('active', 1)
-            ->first();
+        // $tenant = DB::connection('LMS_CENTER')
+        //     ->table('tenants')
+        //     ->where('domain', $host)
+        //     ->where('active', 1)
+        //     ->first();
 
         if (!$tenant) {
             abort(403, 'Tenant not found');

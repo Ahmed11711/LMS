@@ -2,9 +2,10 @@
 
 namespace App\Services\TenantService;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Laravel\Telescope\Telescope;
 
 class TenantService
 {
@@ -49,6 +50,8 @@ class TenantService
 
         // -------------------------------
         // -------------------------------
+
+        Telescope::stopRecording();
         Artisan::call('migrate', [
             '--database' => 'tenant',
             '--path' => 'database/migrations',
