@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\UserPackage\UserPackageRepositoryInterface;
+use App\Repositories\UserPackage\UserPackageRepository;
+
 use App\Repositories\FeaturePackage\FeaturePackageRepositoryInterface;
 use App\Repositories\FeaturePackage\FeaturePackageRepository;
 
@@ -31,6 +34,7 @@ $this->app->bind(
         $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
         $this->app->bind(FeaturesRepositoryInterface::class, FeaturesRepository::class);
         $this->app->bind(FeaturePackageRepositoryInterface::class, FeaturePackageRepository::class);
+        $this->app->bind(UserPackageRepositoryInterface::class, UserPackageRepository::class);
 }
 
     /**

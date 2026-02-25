@@ -19,8 +19,6 @@ class CreateAccountAcademyController extends Controller
         $data = $request->validated();
         $data['role'] = UserRole::ACADEMY->value;
         $user = User::create($data);
-
-
         return $this->successResponse($user, 'Academy account created successfully');
     }
 }
