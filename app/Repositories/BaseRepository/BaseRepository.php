@@ -16,10 +16,10 @@ class BaseRepository implements BaseRepositoryInterface
         $this->model = $model;
     }
 
-   public function query()
-{
-    return $this->model->newQuery();
-}
+    public function query()
+    {
+        return $this->model->newQuery();
+    }
 
     public function all()
     {
@@ -29,6 +29,10 @@ class BaseRepository implements BaseRepositoryInterface
     public function allRelations(array $relations)
     {
         return $this->model->with($relations)->get();
+    }
+    public function allRelationsActive(array $relations, $key)
+    {
+        return $this->model->where($key, 1)->with($relations)->get();
     }
 
     public function paginate()
@@ -47,8 +51,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function getByUserId($userId)
     {
-     return $this->model->where('user_id', $userId)->get();
-
+        return $this->model->where('user_id', $userId)->get();
     }
 
 

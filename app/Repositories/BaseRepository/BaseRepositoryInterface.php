@@ -2,7 +2,8 @@
 
 namespace App\Repositories\BaseRepository;
 
-interface BaseRepositoryInterface {
+interface BaseRepositoryInterface
+{
 
     public function all();
 
@@ -10,11 +11,12 @@ interface BaseRepositoryInterface {
     public function query();
 
     public function find($id);
-    public function findBYKey($key,$value);
+    public function findBYKey($key, $value);
     public function getByUserId($userId);
 
 
     public function allRelations(array $data);
+    public function allRelationsActive(array $data, string $key);
     public function create(array $data);
 
     public function update($id, array $data);

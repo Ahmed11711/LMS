@@ -15,6 +15,7 @@ class CreateAccountController extends Controller
     public function create(CreateAccountRequest $request)
     {
         $data = $request->validated();
+        $data['role'] = 'super_admin';
         $user = $this->userRepositry->create($data);
         return $this->successResponse($user, 'Account created successfully');
     }
