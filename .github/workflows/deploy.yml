@@ -16,13 +16,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ إعداد مفتاح SSH
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 3️⃣ تنفيذ أوامر النشر على السيرفر
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
@@ -32,7 +30,7 @@ jobs:
             php artisan down || true
             
             # جلب التحديثات
-            git pull origin main
+            git pull origin master
             
             # تثبيت المكتبات (بدون مكتبات التطوير وبأقصى سرعة)
             composer install --no-dev --optimize-autoloader --no-interaction
