@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Deploy Laravel Project
 
 on:
@@ -13,17 +12,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
+      # 1️⃣ جلب الكود من المستودع
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up SSH key
+      # 2️⃣ إعداد مفتاح SSH
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 3️⃣ Sync files to server
+      # 3️⃣ تنفيذ أوامر النشر على السيرفر
       - name: Deploy via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /var/www/LMS && git pull origin main && composer install --no-dev --optimize-autoloader && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && sudo chown -R www-data:www-data /var/www/LMS && sudo chmod -R 775 /var/www/LMS"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+            cd /var/www/LMS
+            
+            # تفعيل وضع الصيانة حتى لا يظهر خطأ للمستخدمين أثناء التحديث
+            php artisan down || true
+            
+            # جلب التحديثات
+            git pull origin main
+            
+            # تثبيت المكتبات (بدون مكتبات التطوير وبأقصى سرعة)
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # تحديث قاعدة البيانات وتجهيز الكاش
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # إلغاء وضع الصيانة
+            php artisan up
+            
+            # تصحيح الصلاحيات (اختياري: تأكد أن المستخدم لديه صلاحية sudo بدون كلمة سر لهذه الأوامر)
+            # sudo chown -R www-data:www-data storage bootstrap/cache
+            # sudo chmod -R 775 storage bootstrap/cache
+          EOF
