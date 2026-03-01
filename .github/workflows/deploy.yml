@@ -37,7 +37,7 @@ jobs:
             composer install --no-dev --optimize-autoloader --no-interaction
             
             # تحديث قاعدة البيانات وتجهيز الكاش
-            php artisan migrate --fresh --force
+            php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
