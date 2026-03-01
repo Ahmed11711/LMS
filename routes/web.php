@@ -11,3 +11,8 @@ Route::get('/', function () {
 Route::get('/kashier/success', [KashierPaymentController::class, 'success'])->name('kashier.success');
 Route::get('/kashier/failure', [KashierPaymentController::class, 'failure'])->name('kashier.failure');
 Route::post('/kashier/webhook', [KashierPaymentController::class, 'handle'])->name('kashier.webhook');
+
+
+Route::get('/test', function () {
+    return 6 * 7;
+});
