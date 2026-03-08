@@ -30,15 +30,13 @@ class TenantService
             ]);
 
             $tenant = DB::connection('LMS_CENTER')->table('tenants')->find($tenantId);
-            Log::info("Step 1: Tenant record created. ID: {$tenantId}");
+
 
             // 2. Create Database and User
             $this->createDatabaseAndUser($tenant);
-            Log::info("Step 2: Database created: {$tenant->db_name}");
 
             // 3. Switch Connection
             $this->switchToTenantDatabase($tenant);
-            Log::info("Step 3: Switched connection to tenant database");
 
             // 4. Run Migrations
             Artisan::call('migrate', [
@@ -46,13 +44,9 @@ class TenantService
                 '--path'     => 'database/migrations',
                 '--force'    => true,
             ]);
-            Log::info("Step 4: Migrations completed successfully");
 
             // 5. Seed Initial Data
             $this->seedTenantData($data);
-            Log::info("Step 5: Admin, Package, and Features seeded successfully");
-
-            Log::info("=== Tenant Creation Success: {$tenant->domain} ===");
             return $tenant;
         } catch (Exception $e) {
             Log::error("!!! Tenant Creation Failed: " . $e->getMessage());
