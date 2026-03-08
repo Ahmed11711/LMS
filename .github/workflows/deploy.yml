@@ -36,17 +36,17 @@ jobs:
             
             composer install --no-dev --optimize-autoloader --no-interaction
             
-            # تحديث قاعدة البيانات وتجهيز الكاش
+            # clear caches and optimize
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
             
             
-            # إلغاء وضع الصيانة
+            # 
             php artisan up
             
-            # تصحيح الصلاحيات (اختياري: تأكد أن المستخدم لديه صلاحية sudo بدون كلمة سر لهذه الأوامر)
+            # Set permissions for storage and cache directories
             # sudo chown -R www-data:www-data storage bootstrap/cache
             # sudo chmod -R 775 storage bootstrap/cache
           EOF
