@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('user_packages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('package_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('package_id');
+            $table->string('package_name');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->boolean('active')->default(true);

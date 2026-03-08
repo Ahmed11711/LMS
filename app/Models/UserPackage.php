@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel\TenantModel;
+use App\Models\FeaturePackage;
 use App\Models\Central\Package;
 use Illuminate\Database\Eloquent\Model;
 
-class UserPackage extends Model
+class UserPackage extends TenantModel
 {
     //
 
@@ -18,5 +20,9 @@ class UserPackage extends Model
     public function package()
     {
         return $this->belongsTo(Package::class, 'package_id');
+    }
+    public function featurePackages()
+    {
+        return $this->hasMany(FeaturePackage::class, 'package_id',);
     }
 }

@@ -16,7 +16,9 @@ class UserController extends BaseController
 
         $this->initService(
             repository: $repository,
-            collectionName: 'User'
+            collectionName: 'User',
+            fileFields: ['profile_image'],
+
         );
 
         $this->storeRequestClass = UserStoreRequest::class;

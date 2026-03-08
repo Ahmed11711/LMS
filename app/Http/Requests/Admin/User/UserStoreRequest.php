@@ -14,7 +14,9 @@ class UserStoreRequest extends BaseRequest
             'email' => 'required|string|email|max:255|unique:tenant.users,email',
             'email_verified_at' => 'nullable|date',
             'password' => 'required|string|min:8|max:255',
-            'remember_token' => 'nullable|string|max:100',
+            'profile_image' => 'nullable|file|max:255',
+            'role' => 'required|string|in:admin,user,instructor',
+            'specialties' => 'nullable|string|max:255',
         ];
     }
 }

@@ -31,7 +31,6 @@ class User extends TenantModel  implements JWTSubject
      * @var list<string>
      */
     protected $hidden = [
-        'password',
         'remember_token',
     ];
     public function getJWTIdentifier()

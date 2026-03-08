@@ -18,7 +18,9 @@ class UserUpdateRequest extends BaseRequest
             'email' => 'sometimes|required|string|max:255|unique:tenant.users,email,' . $this->route('user') . ',id',
             'email_verified_at' => 'nullable|sometimes|date',
             'password' => 'sometimes|required|string|max:255',
-            'remember_token' => 'nullable|sometimes|string|max:100',
+            'profile_image' => 'nullable|file|max:255',
+            'role' => 'nullable|string|in:admin,user,instructor',
+            'specialties' => 'nullable|string|max:255',
         ];
     }
 }

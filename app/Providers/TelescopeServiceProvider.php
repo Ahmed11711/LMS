@@ -22,6 +22,13 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $isLocal = $this->app->environment('local');
 
         Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
+
+            $isCentralConnection = config('database.default') === 'LMS_CENTER' || config('database.default') === 'mysql';
+
+            if (!$isCentralConnection) {
+                return false;
+            }
+
             return $isLocal ||
                 $entry->isReportableException() ||
                 $entry->isFailedRequest() ||

@@ -39,7 +39,7 @@ class KashierPaymentController extends Controller
         }
 
         return redirect()->away(
-            'https://astar.click/auth/login'
+            'http://72.62.27.82/next-site'
         );
     }
 
