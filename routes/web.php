@@ -13,6 +13,6 @@ Route::get('/kashier/failure', [KashierPaymentController::class, 'failure'])->na
 Route::post('/kashier/webhook', [KashierPaymentController::class, 'handle'])->name('kashier.webhook');
 
 
-Route::get('/test', function () {
+Route::get('/test2', function () {
     return 6 * 7;
 });
