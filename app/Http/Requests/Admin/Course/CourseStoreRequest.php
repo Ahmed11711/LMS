@@ -17,7 +17,7 @@ class CourseStoreRequest extends BaseRequest
             'title' => 'required|string|max:255',
             'user_id' => 'required|integer|exists:users,id',
             'type' => 'required|in:recorded,online,physical',
-            'category_id' => 'required|integer|exists:categories,id',
+            'category_id' => 'nullable|integer|exists:categories,id',
             'description' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Corrected to image validation
             'price_type' => 'required|in:free,paid',
