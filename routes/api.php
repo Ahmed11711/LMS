@@ -8,7 +8,9 @@ use App\Http\Controllers\Center\Payment\KashierPaymentController;
 use App\Http\Controllers\Front\Package\PackageController;
 use App\Http\Controllers\Tenant\CreateTenantController;
 use App\Http\Middleware\ResolveTenant;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -30,6 +32,9 @@ Route::prefix('front')->group(function () {
     Route::post('create-link-payment', [KashierPaymentController::class, 'createLink']);
     Route::post('login-account-academy', [LoginAccountController::class, 'login']);
     Route::get('packages', [PackageController::class, 'activePackage']);
+    Route::get('tenant', function () {
+        return Tenant::all();
+    });
 });
 
 
