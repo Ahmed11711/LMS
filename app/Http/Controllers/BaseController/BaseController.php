@@ -22,6 +22,7 @@ abstract class BaseController extends Controller
   protected ?string $collectionName = null;
   protected array $fileFields = [];
   protected string $uploadDisk = 'public';
+  protected array $withRelationships = [];
 
   public function __construct() {}
 
@@ -36,7 +37,7 @@ abstract class BaseController extends Controller
   public function index(Request $request): JsonResponse
   {
     try {
-      $query = $this->repository->query();
+      $query = $this->repository->query()->with($this->withRelationships);
 
       if ($search = $request->input('search')) {
         $query->where(function ($q) use ($search) {
@@ -76,8 +77,7 @@ abstract class BaseController extends Controller
 
   public function show(int $id): JsonResponse
   {
-    $record = $this->repository->find($id);
-
+    $record = $this->repository->query()->with($this->withRelationships)->find($id);
     if (!$record) {
       return $this->errorResponse("Record not found", 404);
     }

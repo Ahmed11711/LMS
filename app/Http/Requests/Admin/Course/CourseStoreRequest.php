@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Course;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
+use App\Http\Resources\Admin\Chapter\ChapterResource;
 
 class CourseStoreRequest extends BaseRequest
 {
@@ -24,6 +25,7 @@ class CourseStoreRequest extends BaseRequest
             'price' => 'required|numeric|min:0',
             'final_price' => 'required|numeric|min:0',
             'status' => 'required|in:published,draft',
+            'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
         ];
     }
 

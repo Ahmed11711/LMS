@@ -18,8 +18,10 @@ class CourseController extends BaseController
             repository: $repository,
             collectionName: 'Course',
             fileFields: ['image']
-        );
 
+
+        );
+        $this->withRelationships = ['chapters'];
         $this->storeRequestClass = CourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass = CourseResource::class;
