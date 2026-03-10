@@ -21,7 +21,7 @@ class CourseController extends BaseController
 
 
         );
-        $this->withRelationships = ['chapters'];
+        $this->withRelationships = ['chapters.lessons'];
         $this->storeRequestClass = CourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass = CourseResource::class;

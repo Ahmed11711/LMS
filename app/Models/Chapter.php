@@ -13,4 +13,8 @@ class Chapter extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class, 'chapter_id');
+    }
 }
