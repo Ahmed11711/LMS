@@ -20,6 +20,7 @@ class CourseResource extends JsonResource
             'price' => $this->price,
             'final_price' => $this->final_price,
             'status' => $this->status,
+            'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
