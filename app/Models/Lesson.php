@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel\TenantModel;
 
-class Lesson extends Model
+
+class Lesson extends TenantModel
 {
-    //
+
 
     public function chapter()
     {

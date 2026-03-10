@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel\TenantModel;
 
-class Chapter extends Model
+
+class Chapter extends TenantModel
 {
     //
 

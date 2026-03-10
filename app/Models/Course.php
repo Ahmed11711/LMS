@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel\TenantModel;
+
 
 class Course extends TenantModel
 {
