@@ -70,7 +70,7 @@ abstract class BaseController extends Controller
       return $this->successResponsePaginate($data, "{$this->collectionName} list retrieved successfully");
     } catch (\Throwable $e) {
       Log::error("Error in {$this->collectionName} index: " . $e->getMessage());
-      return $this->errorResponse("Failed to fetch data", 500);
+      return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
     }
   }
 
