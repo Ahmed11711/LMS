@@ -4,6 +4,8 @@ namespace App\Http\Resources\Admin\Course;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+use App\Http\Resources\Admin\Chapter\ChapterResource;
+
 class CourseResource extends JsonResource
 {
     public function toArray($request): array
