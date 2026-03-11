@@ -4,7 +4,7 @@ namespace App\Repositories\UserPackage;
 
 use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use App\Repositories\BaseRepository\BaseRepository;
-use App\Models\UserPackage;
+use App\Models\Central\UserPackage;
 
 class UserPackageRepository extends BaseRepository implements UserPackageRepositoryInterface
 {
