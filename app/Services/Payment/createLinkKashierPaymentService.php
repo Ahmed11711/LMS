@@ -53,6 +53,7 @@ class CreateLinkKashierPaymentService
                 'start_date'     => null, // activate after webhook
                 'end_date'       => null,
                 'status'         => 'pending',
+                'package_name'   => $package->name,
             ]);
 
             return $paymentLink;
