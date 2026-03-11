@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel\TenantModel;
 
-class OnlineSession extends Model
+
+class OnlineSession extends TenantModel
 {
     //
 
@@ -12,5 +13,4 @@ class OnlineSession extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
-
 }
