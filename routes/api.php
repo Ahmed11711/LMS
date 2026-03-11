@@ -27,7 +27,7 @@ Route::post('create-tenant', [CreateTenantController::class, 'store']);
 // //////////////////////////////////Create Account Academy /////////////////////////////
 Route::prefix('front')->group(function () {
     Route::post('create-account-academy', [CreateAccountAcademyController::class, 'create']);
-    Route::post('create-account-info-academy', [CreateAccountAcademyController::class, 'createInfoAcademy']);
+    Route::post('create-account-info-academy', [CreateAccountAcademyController::class, 'createInfoAcademy'])->middleware(ResolveTenant::class);
     Route::post('send-sms', [CreateAccountAcademyController::class, 'sms']);
     Route::post('create-link-payment', [KashierPaymentController::class, 'createLink']);
     Route::post('login-account-academy', [LoginAccountController::class, 'login']);
