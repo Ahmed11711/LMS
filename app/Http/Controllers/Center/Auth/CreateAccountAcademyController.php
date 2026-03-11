@@ -13,6 +13,7 @@ use App\Services\SmsService\SMSMISR\SmsMisrService;
 use App\Services\TenantService\TenantService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -111,6 +112,7 @@ class CreateAccountAcademyController extends Controller
         $token = JWTAuth::claims([
             'tenant_id' => app('tenant')->id
         ])->fromUser($user);
+        Log::info("User {$user->id} created tenant with ID: " . app('tenant')->id);
 
         return (new LoginResource($user))->additional([
             'message' => 'Academy and Tenant Database created successfully',
