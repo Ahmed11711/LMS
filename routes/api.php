@@ -33,6 +33,7 @@ Route::prefix('front')->group(function () {
     Route::post('login-account-academy', [LoginAccountController::class, 'login']);
     Route::get('packages', [PackageController::class, 'activePackage']);
     Route::get('tenant', function () {
+        return "tenent";
         return Tenant::get();
     });
 });
