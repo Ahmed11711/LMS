@@ -105,7 +105,6 @@ class CreateAccountAcademyController extends Controller
             'user_id'       => $user->id,
         ]);
 
-        // إنشاء الـ Tenant
         $tenant = $this->service->createTenant($tenantData);
 
         $token = JWTAuth::fromUser($user);
