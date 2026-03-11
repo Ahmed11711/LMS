@@ -125,8 +125,8 @@ class CreateAccountAcademyController extends Controller
     public function sms()
     {
         $smsService = new SmsMisrService();
-        $response = $smsService->sendSms(201558858884, 'Hello from Darab Academy!');
-        $response = $smsService->sendSms(201094321637, 'Hello from Darab Academy!');
+        // $response = $smsService->sendSms(201558858884, 'Hello from Darab Academy!');
+        $response = $smsService->sendSms(201017686542, 'Hello from Darab Academy!');
         // Log::info('SMS Response: ', $response);
         return response()->json($response);
     }
