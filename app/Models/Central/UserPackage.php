@@ -12,9 +12,7 @@ class UserPackage extends Model
     {
         parent::boot();
 
-        // قبل عملية الحفظ في الداتابيز مباشرة
         static::creating(function ($userPackage) {
-            // لو الـ package_name فاضي، حط القيمة الافتراضية "test"
             if (empty($userPackage->package_name)) {
                 $userPackage->package_name = 'test';
             }
