@@ -32,7 +32,7 @@ class KashierPaymentService
 
             'allowedMethods' => 'card,wallet',
             'interactionSource' => 'ECOMMERCE',
-            'email' => $customerEmail,
+            // 'email' => $customerEmail,
             'enable3DS' => true,
 
             'customer' => [
