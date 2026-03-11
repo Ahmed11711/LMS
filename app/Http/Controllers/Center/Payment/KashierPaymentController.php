@@ -48,7 +48,7 @@ class KashierPaymentController extends Controller
         $data = $request->all();
         Log::info('Kashier Payment Failure Redirect:', $data);
         return redirect()->away(
-            'https://astar.click/auth/login'
+            'http://darab.academy/'
         );
         return response()->json([
             'message' => 'Payment Failed (Redirect)',
