@@ -29,9 +29,9 @@ class SmsMisrService
             // استخدم الـ Token الخاص بـ TIQNIA اللي ظهر عندك في الجدول
             "sender"      => "9f2f0802ec90da7d1a2c15c1ca6b6eaf008d92adf4e5d248a79435d2b61cbf57",
 
-            "mobile"      => "201094321637",
+            "mobile"      => $mobile,
             "language"    => "2",
-            "message"     => "Hello from TIQNIA!",
+            "message"     => $message,
         ]);
 
         if ($response->successful()) {
