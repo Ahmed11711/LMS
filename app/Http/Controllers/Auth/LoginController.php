@@ -9,6 +9,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
@@ -29,6 +30,7 @@ class LoginController extends Controller
         $token = JWTAuth::claims([
             'tenant_id' => app('tenant')->id
         ])->fromUser($user);
+        Log::info("User {$user->id} logged in with tenant ID: " . app('tenant')->id);
 
         return (new LoginResource($user))->additional([
             'meta' => [
