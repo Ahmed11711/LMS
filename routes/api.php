@@ -24,7 +24,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
 
 
 Route::post('create-tenant', [CreateTenantController::class, 'store']);
-// //////////////////////////////////Create Account Academy /////////////////////////////
+// //////////////////////////////////C reate Account Academy /////////////////////////////
 Route::prefix('front')->group(function () {
     Route::post('create-account-academy', [CreateAccountAcademyController::class, 'create']);
     Route::post('create-account-info-academy', [CreateAccountAcademyController::class, 'createInfoAcademy']);
@@ -33,7 +33,7 @@ Route::prefix('front')->group(function () {
     Route::post('login-account-academy', [LoginAccountController::class, 'login']);
     Route::get('packages', [PackageController::class, 'activePackage']);
     Route::get('tenant', function () {
-        return Tenant::all();
+        return Tenant::get();
     });
 });
 
