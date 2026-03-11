@@ -10,8 +10,7 @@ use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailControll
 use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
 use App\Http\Controllers\Admin\Course\CourseController;
 use App\Http\Controllers\Admin\Category\CategoryController;
-
-
+use App\Http\Controllers\Admin\Me\MeController;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class])->group(function () {
     Route::apiResource('users', UserController::class)->names('user');
@@ -21,6 +20,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
     Route::apiResource('chapters', ChapterController::class)->names('chapter');
     Route::apiResource('lessons', LessonController::class)->names('lesson');
+    Route::get('me', [MeController::class, 'me'])->name('me');
 });
 
 

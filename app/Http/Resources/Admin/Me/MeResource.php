@@ -4,6 +4,7 @@ namespace App\Http\Resources\Admin\Me;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class MeResource extends JsonResource
 {
@@ -21,7 +22,12 @@ class MeResource extends JsonResource
             'phone' => $this->phone,
             'username' => $this->username,
             'role' => $this->role,
-            'email_verified_at' => $this->email_verified_at,
+            'email_verified_at' => boolval($this->email_verified_at),
+            'is_active' => boolval($this->is_active),
+            'statusPayed' => Arr::random(['paid', 'expired', 'free_trial', 'pending']),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+
 
         ];
     }
