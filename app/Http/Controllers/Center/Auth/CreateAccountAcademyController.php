@@ -109,9 +109,9 @@ class CreateAccountAcademyController extends Controller
 
         $token = JWTAuth::fromUser($user);
         $token = JWTAuth::claims([
-            'tenant_id' => app('tenant')->id
+            'tenant_id' => $tenant->id
         ])->fromUser($user);
-        Log::info("User {$user->id} created tenant with ID: " . app('tenant')->id);
+        Log::info("User {$user->id} created tendddddddant with ID: " . $tenant->id);
 
         return (new LoginResource($user))->additional([
             'message' => 'Academy and Tenant Database created successfully',
