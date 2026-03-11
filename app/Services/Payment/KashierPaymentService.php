@@ -26,13 +26,12 @@ class KashierPaymentService
             'currency' => 'EGP',
             'order' => $transactionId,
             'merchantId' => 'MID-41016-213',
-            'merchantRedirect' => config('app.url') . '/auth/setup',
+            'merchantRedirect' => config('app.url') . '/auth/setup?email=' . urlencode($customerEmail),
             'failureRedirect' => true,
             'serverWebhook'    => config('app.url') . '/kashier/webhook',
 
             'allowedMethods' => 'card,wallet',
             'interactionSource' => 'ECOMMERCE',
-            // 'email' => $customerEmail,
             'enable3DS' => true,
 
             'customer' => [
