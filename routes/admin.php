@@ -29,7 +29,6 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
 });
 
-// check tenant middleware
 
 
 
