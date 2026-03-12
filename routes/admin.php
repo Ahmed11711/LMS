@@ -26,6 +26,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('send-otp', [SendOtpController::class, 'sendOtp'])->name('send_otp');
 });
 
+// check tenant middleware
 
 
 
