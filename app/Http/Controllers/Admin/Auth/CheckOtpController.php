@@ -20,9 +20,8 @@ class CheckOtpController extends Controller
     {
         $request->validated();
 
-        // تعديل لجلب القيمة الصحيحة: إذا كانت كلمة 'phone' ابحث عن الرقم في الحقول الأخرى
         $contact = $request->input('contact');
-        if ($contact === 'phone' || $contact === 'email') {
+        if (!$contact || $contact === 'phone' || $contact === 'email') {
             $contact = $request->input('phone') ?? $request->input('email');
         }
 
@@ -32,23 +31,16 @@ class CheckOtpController extends Controller
 
         $storedOtp = Cache::get($cacheKey);
 
-        // Log للتأكد من القيمة بعد التعديل
-        Log::info("Checking Key: " . $cacheKey . " | Stored: " . $storedOtp . " | Entered: " . $userOtp);
+        Log::info("OTP CHECK - Key: {$cacheKey} | Stored: {$storedOtp} | Entered: {$userOtp}");
 
         if (!$storedOtp || (string)$storedOtp !== (string)$userOtp) {
             return $this->errorResponse('code is expired or invalid', 422);
         }
 
-        // البحث عن المستخدم
-        $user = User::where('email', $contact)
-            ->orWhere('phone', $contact)
-            ->first();
+        $user = User::where('email', $contact)->orWhere('phone', $contact)->first();
 
         if ($user) {
-            $user->forceFill([
-                'email_verified_at' => Carbon::now(),
-            ])->save();
-
+            $user->forceFill(['email_verified_at' => Carbon::now()])->save();
             Cache::forget($cacheKey);
 
             return $this->successResponse([
