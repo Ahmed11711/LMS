@@ -24,6 +24,6 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 });
 
 
-// 
+
 
 Route::prefix('v1')->group(function () {});
