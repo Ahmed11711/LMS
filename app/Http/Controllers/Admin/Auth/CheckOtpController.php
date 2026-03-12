@@ -20,10 +20,19 @@ class CheckOtpController extends Controller
     {
         $request->validated();
 
-        // توحيد جلب الـ contact لضمان تطابق الـ Cache Key
-        $contact = $request->input('contact');
-        if ($contact === 'phone' || $contact === 'email' || !$contact) {
+        // محاولة جلب القيمة من كل المفاتيح الممكنة
+        $contact = $request->input('contact')
+            ?? $request->input('phone')
+            ?? $request->input('email');
+
+        // إذا كانت القيمة "phone" أو "email" ككلمة نصية، نتخطاها للجلب الفعلي
+        if ($contact === 'phone' || $contact === 'email') {
             $contact = $request->input('phone') ?? $request->input('email');
+        }
+
+        // تأكد أن $contact ليس فارغاً قبل بناء المفتاح
+        if (!$contact) {
+            return $this->errorResponse('Contact field (email or phone) is required to verify OTP', 422);
         }
 
         $userOtp = $request->input('otp');
@@ -32,25 +41,21 @@ class CheckOtpController extends Controller
 
         $storedOtp = Cache::get($cacheKey);
 
-        // الـ Log ده هيأكد لك إن الـ Key بقى مطابق للي في الـ sendOtp
-        Log::info("OTP CHECK - Key: {$cacheKey} | Stored: {$storedOtp} | Entered: {$userOtp}");
+        // الـ Log الجديد سيظهر لك القيمة التي تم استخراجها فعلياً
+        Log::info("OTP CHECK - Final Contact: [{$contact}] | Key: {$cacheKey} | Stored: {$storedOtp}");
 
         if (!$storedOtp || (string)$storedOtp !== (string)$userOtp) {
             return $this->errorResponse('code is expired or invalid', 422);
         }
 
+        // بقية الكود (البحث عن اليوزر وتحديثه)...
         $user = User::where('email', $contact)->orWhere('phone', $contact)->first();
-
         if ($user) {
             $user->forceFill(['email_verified_at' => now()])->save();
             Cache::forget($cacheKey);
-
-            return $this->successResponse([
-                'message' => 'OTP verified successfully',
-                'user' => $user
-            ]);
+            return $this->successResponse(['message' => 'OTP verified successfully', 'user' => $user]);
         }
 
-        return $this->errorResponse('User not found in this academy', 404);
+        return $this->errorResponse('User not found', 404);
     }
 }
