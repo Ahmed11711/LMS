@@ -22,11 +22,10 @@ class SmsMisrService
         // ]);
 
         $response = Http::asForm()->post($url, [
-            "environment" => "1", // وضع التشغيل الحقيقي
+            "environment" => "1",
             "username"    => "d11beea6-3569-46ba-beed-4ace835e0a1e",
             "password"    => "4b8cd6c8273cc9a911e779e2ea981e9091f77c9c8b2571c5fc347de1579b09ff",
 
-            // استخدم الـ Token الخاص بـ TIQNIA اللي ظهر عندك في الجدول
             "sender"      => "9f2f0802ec90da7d1a2c15c1ca6b6eaf008d92adf4e5d248a79435d2b61cbf57",
 
             "mobile"      => $mobile,
