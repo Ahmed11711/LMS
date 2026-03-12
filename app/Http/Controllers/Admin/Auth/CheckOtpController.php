@@ -9,6 +9,7 @@ use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CheckOtpController extends Controller
 {
@@ -25,11 +26,12 @@ class CheckOtpController extends Controller
         $cacheKey = "otp_tenant_{$tenant->id}_{$contact}";
 
         $storedOtp = Cache::get($cacheKey);
+        Log::info("Cache Key Geneسسسسسrated: " . $cacheKey . " with OTP: " . $storedOtp);
 
-        if (!$storedOtp || $storedOtp != $userOtp) {
+
+        if (!$storedOtp || (string)$storedOtp !== (string)$userOtp) {
             return $this->errorResponse('code is expired or invalid', 422);
         }
-
 
         $user = User::where('email', $contact)
             ->orWhere('phone', $contact)

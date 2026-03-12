@@ -9,6 +9,7 @@ use App\Traits\ApiResponseTrait;
 use App\Traits\SendEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendOtpController extends Controller
 {
@@ -28,6 +29,7 @@ class SendOtpController extends Controller
         $cacheKey = "otp_tenant_{$tenant->id}_{$contact}";
 
         Cache::put($cacheKey, $otp, now()->addMinutes(5));
+        Log::info("Cache Key Generated: " . $cacheKey);
 
         if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
             $this->sendEmail($contact, $otp);
