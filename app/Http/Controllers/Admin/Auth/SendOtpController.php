@@ -50,8 +50,9 @@ class SendOtpController extends Controller
     {
         $request->validated();
 
+        // نضمن جلب القيمة الحقيقية (الرقم أو الإيميل) حتى لو الـ frontend بعت اسم الحقل
         $contact = $request->input('contact');
-        if (!$contact || $contact === 'phone' || $contact === 'email') {
+        if ($contact === 'phone' || $contact === 'email' || !$contact) {
             $contact = $request->input('phone') ?? $request->input('email');
         }
 
@@ -60,6 +61,8 @@ class SendOtpController extends Controller
         $cacheKey = "otp_tenant_{$tenant->id}_{$contact}";
 
         Cache::put($cacheKey, $otp, now()->addMinutes(5));
+
+        // Log للتأكد أن المفتاح اتخزن بالرقم الصح
         Log::info("OTP STORED - Key: {$cacheKey} | OTP: {$otp}");
 
         if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {

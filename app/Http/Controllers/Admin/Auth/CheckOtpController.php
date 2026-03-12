@@ -20,8 +20,9 @@ class CheckOtpController extends Controller
     {
         $request->validated();
 
+        // توحيد جلب الـ contact لضمان تطابق الـ Cache Key
         $contact = $request->input('contact');
-        if (!$contact || $contact === 'phone' || $contact === 'email') {
+        if ($contact === 'phone' || $contact === 'email' || !$contact) {
             $contact = $request->input('phone') ?? $request->input('email');
         }
 
@@ -31,6 +32,7 @@ class CheckOtpController extends Controller
 
         $storedOtp = Cache::get($cacheKey);
 
+        // الـ Log ده هيأكد لك إن الـ Key بقى مطابق للي في الـ sendOtp
         Log::info("OTP CHECK - Key: {$cacheKey} | Stored: {$storedOtp} | Entered: {$userOtp}");
 
         if (!$storedOtp || (string)$storedOtp !== (string)$userOtp) {
@@ -40,7 +42,7 @@ class CheckOtpController extends Controller
         $user = User::where('email', $contact)->orWhere('phone', $contact)->first();
 
         if ($user) {
-            $user->forceFill(['email_verified_at' => Carbon::now()])->save();
+            $user->forceFill(['email_verified_at' => now()])->save();
             Cache::forget($cacheKey);
 
             return $this->successResponse([
