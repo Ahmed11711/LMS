@@ -28,6 +28,7 @@ class SendOtpController extends Controller
 
         $cacheKey = "otp_tenant_{$tenant->id}_{$contact}";
 
+
         Cache::put($cacheKey, $otp, now()->addMinutes(5));
         Log::info("Cache Key Generated: " . $cacheKey);
 
