@@ -21,8 +21,8 @@ trait SendEmail
 
             $payload = [
                 'sender' => [
-                    'name'  => 'zayamrock.com',
-                    'email' => 'dohakhaledeldbes@gmail.com' // يفضل وضعها في ملف .env
+                    'name'  => 'darap.academy',
+                    'email' => 'Nadamohamedsholkamy@gmail.com'
                 ],
                 'to' => [
                     [
@@ -37,7 +37,7 @@ trait SendEmail
             $response = $client->post('https://api.brevo.com/v3/smtp/email', [
                 'headers' => [
                     'accept'       => 'application/json',
-                    'api-key'      => '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',
+                    'api-key'      => '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',
                     'content-type' => 'application/json',
                 ],
                 'json' => $payload,
@@ -55,7 +55,6 @@ trait SendEmail
         }
     }
 
-    // --- الوظائف المساعدة التي تستخدم الوظيفة الرئيسية ---
 
     public function generateOTP()
     {
@@ -64,7 +63,7 @@ trait SendEmail
 
     public function sendEmail($to, $otp)
     {
-        return $this->sendViaBrevo($to, 'zayamrock - OTP Verification', 'otpmail', ['otpData' => $otp]);
+        return $this->sendViaBrevo($to, 'Darap Academy - OTP Verification', 'otpmail', ['otpData' => $otp]);
     }
 
     public function sendEmailToAdmin($formData, $images, $user)
