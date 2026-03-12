@@ -18,6 +18,48 @@ class CreateLinkKashierPaymentService
         private UserPackageRepositoryInterface $userPackageRepository,
     ) {}
 
+    // public function createSession(array $data): string
+    // {
+    //     return DB::transaction(function () use ($data) {
+
+    //         $user = $this->resolveUser($data);
+
+    //         $package = $this->packageRepository->find($data['package_id']);
+
+    //         if (!$package) {
+    //             throw new RuntimeException('Package not found.');
+    //         }
+
+    //         // 3️⃣ Generate Transaction ID
+    //         $transactionId = (string) Str::uuid();
+
+    //         // 4️⃣ Create Kashier Session
+    //         $paymentLink = $this->kashierPaymentService->createSession(
+    //             amount: (string) $package->price,
+    //             customerEmail: $user->email,
+    //             transactionId: $transactionId,
+    //         );
+
+    //         if (!$paymentLink) {
+    //             throw new RuntimeException('Failed to create payment session.');
+    //         }
+
+    //         // 5️⃣ Create Pending Subscription (NO activation yet)
+    //         $this->userPackageRepository->create([
+    //             'user_id'        => $user->id,
+    //             'package_id'     => $package->id,
+    //             'transaction_id' => $transactionId,
+    //             'price'          => $package->price,
+    //             'start_date'     => null, // activate after webhook
+    //             'end_date'       => null,
+    //             'status'         => 'pending',
+    //             'package_name'   => $package->name,
+    //         ]);
+
+    //         return $paymentLink;
+    //     });
+    // }
+
     public function createSession(array $data): string
     {
         return DB::transaction(function () use ($data) {
@@ -30,13 +72,13 @@ class CreateLinkKashierPaymentService
                 throw new RuntimeException('Package not found.');
             }
 
-            // 3️⃣ Generate Transaction ID
             $transactionId = (string) Str::uuid();
 
-            // 4️⃣ Create Kashier Session
+            $contact = $user->email ?? $user->phone;
+
             $paymentLink = $this->kashierPaymentService->createSession(
                 amount: (string) $package->price,
-                customerEmail: $user->email,
+                customerContact: $contact,
                 transactionId: $transactionId,
             );
 
@@ -44,14 +86,11 @@ class CreateLinkKashierPaymentService
                 throw new RuntimeException('Failed to create payment session.');
             }
 
-            // 5️⃣ Create Pending Subscription (NO activation yet)
             $this->userPackageRepository->create([
                 'user_id'        => $user->id,
                 'package_id'     => $package->id,
                 'transaction_id' => $transactionId,
                 'price'          => $package->price,
-                'start_date'     => null, // activate after webhook
-                'end_date'       => null,
                 'status'         => 'pending',
                 'package_name'   => $package->name,
             ]);
