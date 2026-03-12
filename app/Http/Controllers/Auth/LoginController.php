@@ -21,18 +21,20 @@ class LoginController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::where('email', $data['email'])
-            ->orWhere('phone', $data['email'])
+        $contact = $request->input('email') ?? $request->input('phone');
+
+        $user = User::where('email', $contact)
+            ->orWhere('phone', $contact)
             ->first();
+
         if (!$user || !Hash::check($data['password'], $user->password)) {
             return $this->errorResponse('Invalid credentials', 401);
         }
 
-        $token = JWTAuth::fromUser($user);
         $token = JWTAuth::claims([
             'tenant_id' => app('tenant')->id
         ])->fromUser($user);
-        Log::info("User {$user->id} logged in with tenant ID: " . app('tenant')->id);
+
 
         return (new LoginResource($user))->additional([
             'meta' => [
