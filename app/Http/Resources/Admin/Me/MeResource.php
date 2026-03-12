@@ -24,7 +24,7 @@ class MeResource extends JsonResource
             'role' => $this->role,
             'email_verified_at' => boolval($this->email_verified_at),
             'is_active' => boolval($this->is_active),
-            'statusPayed' => Arr::random(['paid', 'expired', 'free_trial', 'pending']),
+            'statusPayed' => $this->status_payment ?? 'free_trial',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 

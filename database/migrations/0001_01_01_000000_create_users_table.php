@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('password');
 
             $table->enum('role', ['super_admin', 'academy', 'admin', 'student'])->index();
+            $table->enum('status_payment', ['paid', 'free_trial', 'pending', 'expired', ''])->index()->default('free_trial');
             $table->boolean('is_active')->default(true)->index();
 
             $table->string('phone_academy')->nullable();
