@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Auth\CheckOtpController;
 use \App\Http\Controllers\Admin\Auth\SendOtpController;
 use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Chapter\ChapterController;
@@ -25,7 +26,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('me', [MeController::class, 'me'])->name('me');
     Route::post('send-otp', [SendOtpController::class, 'sendOtp'])->name('send_otp');
     //check otp route
-    Route::post('check-otp', [SendOtpController::class, 'checkOtp'])->name('check_otp');
+    Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
 });
 
 // check tenant middleware
