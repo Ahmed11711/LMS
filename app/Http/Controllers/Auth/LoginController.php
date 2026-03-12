@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use \App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\Auth\LoginResource;
@@ -20,8 +21,9 @@ class LoginController extends Controller
     {
         $data = $request->validated();
 
-        $user = $this->userRepository->findByKey('email', $data['email']);
-
+        $user = User::where('email', $data['email'])
+            ->orWhere('phone', $data['email'])
+            ->first();
         if (!$user || !Hash::check($data['password'], $user->password)) {
             return $this->errorResponse('Invalid credentials', 401);
         }
