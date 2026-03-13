@@ -64,7 +64,7 @@ class SendOtpController extends Controller
 
         if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
             $this->sendEmail($contact, $otp);
-            return $this->successResponse('OTP sent to your email');
+            return $this->successResponse($otp, 'OTP sent to your email');
         }
 
         $phone = preg_replace('/[^0-9]/', '', $contact);
@@ -81,11 +81,11 @@ class SendOtpController extends Controller
     private function sendEgyptianSms($phone, $otp)
     {
         $this->smsservice->sendSms($phone, "Your OTP code is: $otp");
-        return $this->successResponse('OTP sent via local SMS provider');
+        return $this->successResponse($otp, 'OTP sent via local SMS provider');
     }
 
     private function sendInternationalSms($phone, $otp)
     {
-        return $this->successResponse('OTP sent via international SMS provider');
+        return $this->successResponse($otp, 'OTP sent via international SMS provider');
     }
 }
