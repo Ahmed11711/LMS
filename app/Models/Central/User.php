@@ -2,6 +2,7 @@
 
 namespace App\Models\Central;
 
+use App\Models\Tenant;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -29,5 +30,9 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function tenant()
+    {
+        return $this->hasOne(Tenant::class, 'user_id');
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Center\Payment\KashierPaymentController;
 use App\Http\Controllers\Front\Package\PackageController;
 use App\Http\Controllers\Tenant\CreateTenantController;
 use App\Http\Middleware\ResolveTenant;
+use App\Models\Central\User;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Route;
 
@@ -34,7 +35,7 @@ Route::prefix('front')->group(function () {
     Route::get('packages', [PackageController::class, 'activePackage']);
     Route::get('tenant', function () {
 
-        return Tenant::get();
+        return User::with('tenant')->get();
     });
 });
 
