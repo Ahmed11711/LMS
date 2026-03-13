@@ -33,6 +33,6 @@ class User extends Authenticatable implements JWTSubject
     }
     public function tenant()
     {
-        return $this->hasOne(Tenant::class, 'user_id');
+        return $this->hasOne(Tenant::class, 'username', 'name');
     }
 }
