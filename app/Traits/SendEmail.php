@@ -21,7 +21,7 @@ trait SendEmail
 
             $payload = [
                 'sender' => [
-                    'name'  => 'darap.academy',
+                    'name'  => 'darab.academy',
                     'email' => 'Nadamohamedsholkamy@gmail.com'
                 ],
                 'to' => [
