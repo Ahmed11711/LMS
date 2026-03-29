@@ -32,6 +32,7 @@ class UserController extends BaseController
     {
         $data = parent::beforeStore($data, $request);
 
+        dd($data);
         Log::alert("SSS", [$data]);
 
         return $data;
