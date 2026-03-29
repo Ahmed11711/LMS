@@ -1,0 +1,52 @@
+name: Deploy Laravel Project
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
+            cd /var/www/LMS
+            
+            git config --global --add safe.directory /var/www/LMS
+            
+
+            php artisan down || true
+            
+             
+            git fetch origin master
+            git reset --hard origin/master
+            
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # clear caches and optimize
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            
+            # 
+            php artisan up
+            
+            # Set permissions for storage and cache directories
+            # sudo chown -R www-data:www-data storage bootstrap/cache
+            # sudo chmod -R 775 storage bootstrap/cache
+          EOF
