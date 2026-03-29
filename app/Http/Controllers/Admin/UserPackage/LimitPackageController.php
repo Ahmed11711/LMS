@@ -20,6 +20,6 @@ class LimitPackageController extends Controller
             ->get();
 
 
-        return $this->successResponse($features, 'List Of My Usageing');
+        return $this->successResponse($features, 'List Of My Use');
     }
 }
