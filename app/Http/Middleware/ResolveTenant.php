@@ -42,13 +42,22 @@ class ResolveTenant
         Config::set('database.default', 'tenant');
         DB::reconnect('tenant');
 
+        // 1. تثبيت الـ Tenant في الـ Container
         app()->instance('tenant', $tenant);
 
+        // 2. تحديث الـ Prefix في الـ Config
         $prefix = 'lms_tenant_' . $tenant->id . ':';
         config(['database.redis.options.prefix' => $prefix]);
 
+        // 3. الحل الجذري: إعادة بناء الـ Redis Manager بالكامل
         if (app()->bound('redis')) {
-            app('redis')->forgetConnection();
+            // بنمسح النسخة القديمة من الـ Container تماماً
+            app()->forgetInstance('redis');
+
+            // بنجبر الـ Container إنه يعمل Re-bind للـ RedisManager بالإعدادات الجديدة
+            app()->bind('redis', function ($app) {
+                return new \Illuminate\Redis\RedisManager($app, $app['config']['database.redis.client'], $app['config']['database.redis']);
+            });
         }
 
         return $next($request);
