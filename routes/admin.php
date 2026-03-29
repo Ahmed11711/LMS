@@ -39,8 +39,10 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
-        return $tenant = app('tenant');
+        $tenant = app('tenant');
 
+
+        $cacheKey = "tenant_{$tenant->id}_settings";
 
         return Cache::remember($cacheKey, 3600, function () {
             return User::get();
