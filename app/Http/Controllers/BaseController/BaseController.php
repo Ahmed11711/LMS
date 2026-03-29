@@ -73,7 +73,47 @@ abstract class BaseController extends Controller
       return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
     }
   }
+  // App\Http\Controllers\BaseController\BaseController.php
 
+  // public function index(Request $request): JsonResponse
+  // {
+  //   try {
+  //     $model = $this->repository->getModel();
+  //     $query = $model->query()->with($this->withRelationships);
+
+  //     if ($search = $request->input('search')) {
+  //       $query->where(function ($q) use ($search, $model) {
+  //         $searchable = property_exists($model, 'searchable')
+  //           ? $model->searchable
+  //           : [];
+
+  //         if (empty($searchable)) {
+  //           $table = $model->getTable();
+  //           $searchable = Schema::getColumnListing($table);
+  //           $searchable = array_filter($searchable, function ($col) {
+  //             return !in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at', 'password']);
+  //           });
+  //         }
+
+  //         foreach ($searchable as $column) {
+  //           $q->orWhere($column, 'like', "%{$search}%");
+  //         }
+  //       });
+  //     }
+
+  //     $perPage = $request->input('per_page', 10);
+  //     $data = $query->latest()->paginate($perPage);
+
+  //     if (class_exists($this->resourceClass)) {
+  //       $data = $this->resourceClass::collection($data);
+  //     }
+
+  //     return $this->successResponsePaginate($data, "{$this->collectionName} list retrieved successfully");
+  //   } catch (\Throwable $e) {
+  //     Log::error("Error in {$this->collectionName} index: " . $e->getMessage());
+  //     return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
+  //   }
+  // }
 
   public function show(int $id): JsonResponse
   {
@@ -85,72 +125,7 @@ abstract class BaseController extends Controller
     return $this->successResponse(new $this->resourceClass($record), 'Record retrieved successfully');
   }
 
-  // public function store(Request $request): JsonResponse
-  // {
-  //   $validated = app($this->storeRequestClass)->validated();
 
-  //   try {
-  //     DB::beginTransaction();
-  //     $validated = $this->beforeStore($validated, $request);
-  //     $validated = $this->handleFileUploads($request, $validated);
-  //     $record = $this->repository->create($validated);
-  //     $this->afterStore($record, $request);
-  //     DB::commit();
-  //   } catch (\Throwable $e) {
-  //     DB::rollBack();
-  //     Log::error("Error creating {$this->collectionName}: " . $e->getMessage());
-
-  //     return $this->errorResponse(
-  //       "Failed to create {$this->collectionName}: " . $e->getMessage(),
-  //       500
-  //     );
-  //   }
-
-  //   return $this->successResponse(new $this->resourceClass($record), 'Record created successfully', 201);
-  // }
-
-  // public function update(Request $request, int $id): JsonResponse
-  // {
-  //   $validated = app($this->updateRequestClass)->validated();
-
-  //   $record = $this->repository->find($id);
-  //   if (!$record) {
-  //     return $this->errorResponse("Record not found", 404);
-  //   }
-
-  //   try {
-  //     DB::beginTransaction();
-
-  //     $validated = $this->beforeUpdate($validated, $record, $request);
-  //     $validated = $this->handleFileUploads($request, $validated, $record);
-  //     $updatedRecord = $this->repository->update($id, $validated);
-  //     $this->afterUpdate($updatedRecord, $record, $request);
-  //     DB::commit();
-  //   } catch (\Throwable $e) {
-  //     DB::rollBack();
-  //     Log::error("Error updating {$this->collectionName}: " . $e->getMessage());
-  //     return $this->errorResponse("Failed to update record", 500);
-  //   }
-
-  //   return $this->successResponse(new $this->resourceClass($record), 'Record updated successfully');
-  // }
-
-  // public function destroy($id): JsonResponse
-  // {
-  //   try {
-  //     DB::beginTransaction();
-  //     $this->beforeDestroy($record);
-  //     $deletedCount = $this->repository->delete($id);
-  //     $this->afterDestroy($record);
-  //     DB::commit();
-  //   } catch (\Throwable $e) {
-  //     DB::rollBack();
-  //     Log::error("Error deleting {$this->collectionName}: " . $e->getMessage());
-  //     return $this->errorResponse("Failed to delete record(s)", 500);
-  //   }
-
-  //   return $this->successResponse(null, "$deletedCount record(s) deleted successfully");
-  // }
 
   public function store(Request $request): JsonResponse
   {

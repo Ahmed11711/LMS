@@ -27,27 +27,4 @@ class UserController extends BaseController
         $this->updateRequestClass = UserUpdateRequest::class;
         $this->resourceClass = UserResource::class;
     }
-
-    protected function beforeStore(array $data, Request $request): array
-    {
-        $data = parent::beforeStore($data, $request);
-
-        dd($data);
-        Log::alert("SSS", [$data]);
-
-        return $data;
-    }
-    protected function beforeUpdate(array $data, $existingRecord, Request $request): array
-    {
-        $data = parent::beforeUpdate($data, $existingRecord, $request);
-
-        Log::alert("SSS", [$data]);
-
-        return $data;
-    }
-    protected function beforeDestroy($record): void
-    {
-        parent::beforeDestroy($record);
-        Log::alert("SSS", ["SS"]);
-    }
 }
