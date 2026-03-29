@@ -12,6 +12,7 @@ class UserPackageResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'package_id' => $this->package_id,
+            'package_name' => $this->package_name,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'active' => $this->active,
