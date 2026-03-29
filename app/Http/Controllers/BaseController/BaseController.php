@@ -78,21 +78,19 @@ abstract class BaseController extends Controller
   public function index(Request $request): JsonResponse
   {
     try {
-      // بنبدأ الـ Query من الـ repository
       $query = $this->repository->query()->with($this->withRelationships);
 
-      // بنسحب الـ Model instance من الـ Query builder نفسه (دي تريكة الـ 40 سنة خبرة)
+      $query = $this->applyScoping($query);
+
       $modelInstance = $query->getModel();
 
+      // 3. منطق البحث (Search)
       if ($search = $request->input('search')) {
         $query->where(function ($q) use ($search, $modelInstance) {
-          // 1. بنشوف هل الموديل فيه مصفوفة searchable؟
-          // استخدمنا الـ property_exists على الـ instance
           $searchable = property_exists($modelInstance, 'searchable')
             ? $modelInstance->searchable
             : [];
 
-          // 2. لو مش موجودة، نرجع للـ Logic القديم بتاعك (Fallback)
           if (empty($searchable)) {
             $table = $modelInstance->getTable();
             $searchable = Schema::getColumnListing($table);
@@ -101,14 +99,13 @@ abstract class BaseController extends Controller
             });
           }
 
-          // 3. بناء الـ Search Query
           foreach ($searchable as $column) {
             $q->orWhere($column, 'like', "%{$search}%");
           }
         });
       }
 
-      // الفلترة الديناميكية اللي كانت عندك (شغالة زي الفل)
+      // 4. الفلترة الديناميكية بناءً على الأعمدة
       $excluded = ['search', 'page', 'per_page'];
       foreach ($request->except($excluded) as $key => $value) {
         if ($value === null || $value === '') continue;
@@ -117,6 +114,7 @@ abstract class BaseController extends Controller
         }
       }
 
+      // 5. جلب الداتا والـ Pagination
       $perPage = $request->input('per_page', 10);
       $data = $query->latest()->paginate($perPage);
 
@@ -129,6 +127,12 @@ abstract class BaseController extends Controller
       Log::error("Error in {$this->collectionName} index: " . $e->getMessage());
       return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
     }
+  }
+
+
+  protected function applyScoping($query)
+  {
+    return $query;
   }
 
   public function show(int $id): JsonResponse
@@ -150,13 +154,11 @@ abstract class BaseController extends Controller
     try {
       DB::beginTransaction();
 
-      // 1. استدعاء الهوك قبل الحفظ (هنا السر!)
       $validated = $this->beforeStore($validated, $request);
 
       $validated = $this->handleFileUploads($request, $validated);
       $record = $this->repository->create($validated);
 
-      // 2. استدعاء الهوك بعد الحفظ
       $this->afterStore($record, $request);
 
       DB::commit();
