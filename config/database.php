@@ -173,7 +173,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => 'lms_tenant_' . $currentTenantId . ':',
+            'prefix' => env('REDIS_PREFIX', 'lms_database_'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
