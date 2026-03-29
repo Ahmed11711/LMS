@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
 use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
+use App\Http\Controllers\Admin\UserPackage\UserPackageController;
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
@@ -34,6 +35,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('send-otp', [SendOtpController::class, 'sendOtp'])->name('send_otp');
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
+    Route::get('my-package', [UserPackageController::class, 'index']);
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
