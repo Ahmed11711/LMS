@@ -172,56 +172,109 @@ abstract class BaseController extends Controller
   {
     $validated = app($this->updateRequestClass)->validated();
 
-    $record = $this->repository->find($id);
+    $record = $this->applyScoping($this->repository->query())->find($id);
+
     if (!$record) {
-      return $this->errorResponse("Record not found", 404);
+      return $this->errorResponse("Record not found or unauthorized", 404);
     }
 
     try {
       DB::beginTransaction();
-
       $validated = $this->beforeUpdate($validated, $record, $request);
-
       $validated = $this->handleFileUploads($request, $validated, $record);
-      $updatedRecord = $this->repository->update($id, $validated);
 
-      $this->afterUpdate($updatedRecord, $record, $request);
+      $record->update($validated);
 
+      $this->afterUpdate($record, $record, $request);
       DB::commit();
     } catch (\Throwable $e) {
       DB::rollBack();
-      Log::error("Error updating {$this->collectionName}: " . $e->getMessage());
+      Log::error("Error updating: " . $e->getMessage());
       return $this->errorResponse("Failed to update record", 500);
     }
 
-    return $this->successResponse(new $this->resourceClass($updatedRecord), 'Record updated successfully');
+    return $this->successResponse(new $this->resourceClass($record), 'Record updated successfully');
   }
 
   public function destroy($id): JsonResponse
   {
-    $record = $this->repository->find($id);
+    $record = $this->applyScoping($this->repository->query())->find($id);
+
     if (!$record) {
-      return $this->errorResponse("Record not found", 404);
+      return $this->errorResponse("Record not found or unauthorized", 404);
     }
 
     try {
       DB::beginTransaction();
-
       $this->beforeDestroy($record);
 
-      $deletedCount = $this->repository->delete($id);
+      $record->delete();
 
       $this->afterDestroy($record);
-
       DB::commit();
     } catch (\Throwable $e) {
       DB::rollBack();
-      Log::error("Error deleting {$this->collectionName}: " . $e->getMessage());
-      return $this->errorResponse($e->getMessage() ?: "Failed to delete record", 500);
+      Log::error("Error deleting: " . $e->getMessage());
+      return $this->errorResponse("Failed to delete record", 500);
     }
 
     return $this->successResponse(null, "Record deleted successfully");
   }
+
+  // public function update(Request $request, int $id): JsonResponse
+  // {
+  //   $validated = app($this->updateRequestClass)->validated();
+
+  //   $record = $this->repository->find($id);
+  //   if (!$record) {
+  //     return $this->errorResponse("Record not found", 404);
+  //   }
+
+  //   try {
+  //     DB::beginTransaction();
+
+  //     $validated = $this->beforeUpdate($validated, $record, $request);
+
+  //     $validated = $this->handleFileUploads($request, $validated, $record);
+  //     $updatedRecord = $this->repository->update($id, $validated);
+
+  //     $this->afterUpdate($updatedRecord, $record, $request);
+
+  //     DB::commit();
+  //   } catch (\Throwable $e) {
+  //     DB::rollBack();
+  //     Log::error("Error updating {$this->collectionName}: " . $e->getMessage());
+  //     return $this->errorResponse("Failed to update record", 500);
+  //   }
+
+  //   return $this->successResponse(new $this->resourceClass($updatedRecord), 'Record updated successfully');
+  // }
+
+  // public function destroy($id): JsonResponse
+  // {
+  //   $record = $this->repository->find($id);
+  //   if (!$record) {
+  //     return $this->errorResponse("Record not found", 404);
+  //   }
+
+  //   try {
+  //     DB::beginTransaction();
+
+  //     $this->beforeDestroy($record);
+
+  //     $deletedCount = $this->repository->delete($id);
+
+  //     $this->afterDestroy($record);
+
+  //     DB::commit();
+  //   } catch (\Throwable $e) {
+  //     DB::rollBack();
+  //     Log::error("Error deleting {$this->collectionName}: " . $e->getMessage());
+  //     return $this->errorResponse($e->getMessage() ?: "Failed to delete record", 500);
+  //   }
+
+  //   return $this->successResponse(null, "Record deleted successfully");
+  // }
 
   protected function handleFileUploads(Request $request, array $validated, $existingRecord = null): array
   {

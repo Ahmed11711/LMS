@@ -27,19 +27,4 @@ class UserController extends BaseController
         $this->updateRequestClass = UserUpdateRequest::class;
         $this->resourceClass = UserResource::class;
     }
-    protected function applyScoping($query)
-    {
-        $user = auth('api')->user();
-        Log::alert("d", [$user]);
-
-        if ($user->role === 'user') {
-            return $query->where('id', $user->id);
-        }
-
-        if ($user->role === 'company_admin') {
-            return $query->where('company_id', $user->company_id);
-        }
-
-        return parent::applyScoping($query);
-    }
 }

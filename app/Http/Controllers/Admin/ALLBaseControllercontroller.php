@@ -27,6 +27,23 @@ class ALLBaseControllercontroller extends BaseController
         $this->resourceClass = UserResource::class;
     }
 
+    // get if user get for user 
+
+    protected function applyScoping($query)
+    {
+        $user = auth('api')->user();
+
+        if ($user->role === 'user') {
+            return $query->where('id', $user->id);
+        }
+
+        if ($user->role === 'company_admin') {
+            return $query->where('company_id', $user->company_id);
+        }
+
+        return parent::applyScoping($query);
+    }
+
     protected function beforeStore(array $data, Request $request): array
     {
         $data = parent::beforeStore($data, $request);
