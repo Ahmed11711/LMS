@@ -179,4 +179,17 @@ abstract class BaseController extends Controller
 
     return $validated;
   }
+
+  protected function beforeStore(array $data, Request $request): array
+  {
+    return $data;
+  }
+  protected function afterStore($record, Request $request): void {}
+  protected function beforeUpdate(array $data, $existingRecord, Request $request): array
+  {
+    return $data;
+  }
+  protected function afterUpdate($updatedRecord, $oldRecord, Request $request): void {}
+  protected function beforeDestroy($record): void {}
+  protected function afterDestroy($record): void {}
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Repositories\User\UserRepositoryInterface;
 use App\Http\Controllers\BaseController\BaseController;
@@ -8,9 +8,8 @@ use App\Http\Requests\Admin\User\UserStoreRequest;
 use App\Http\Requests\Admin\User\UserUpdateRequest;
 use App\Http\Resources\Admin\User\UserResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
-class UserController extends BaseController
+class ALLBaseControllercontroller extends BaseController
 {
     public function __construct(UserRepositoryInterface $repository)
     {
@@ -32,7 +31,9 @@ class UserController extends BaseController
     {
         $data = parent::beforeStore($data, $request);
 
-        Log::alert("SSS", [$data]);
+        if (isset($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        }
 
         return $data;
     }
@@ -40,13 +41,20 @@ class UserController extends BaseController
     {
         $data = parent::beforeUpdate($data, $existingRecord, $request);
 
-        Log::alert("SSS", [$data]);
+        if ($existingRecord->is_super_admin && isset($data['email'])) {
+            unset($data['email']);
+        }
+
+        if (!empty($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
+        }
 
         return $data;
     }
     protected function beforeDestroy($record): void
     {
         parent::beforeDestroy($record);
-        Log::alert("SSS", ["SS"]);
     }
 }
