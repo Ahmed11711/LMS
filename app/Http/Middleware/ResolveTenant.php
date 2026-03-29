@@ -20,7 +20,8 @@ class ResolveTenant
     {
         $host = $request->header('X-Tenant-Key') ?? $request->query('tenant') ?? $request->getHost();
 
-        $tenant = Cache::remember("tenant_meta_{$host}", now()->addDay(), function () use ($host) {
+        // بدل السطر القديم، استخدم ده:
+        $tenant = Cache::store('file')->remember("tenant_meta_{$host}", now()->addDay(), function () use ($host) {
             return DB::connection('LMS_CENTER')
                 ->table('tenants')
                 ->where('domain', $host)
