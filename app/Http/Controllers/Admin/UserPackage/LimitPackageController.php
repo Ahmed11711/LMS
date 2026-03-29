@@ -12,7 +12,7 @@ class LimitPackageController extends Controller
     use ApiResponseTrait;
     public function getUsageSummary()
     {
-        return $features = DB::connection('tenant')
+        $features = DB::connection('tenant')
             ->table('tenant_feature_usage')
 
             ->where('is_enabled', true)
