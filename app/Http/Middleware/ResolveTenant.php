@@ -35,6 +35,10 @@ class ResolveTenant
         DB::reconnect('tenant');
 
         app()->instance('tenant', $tenant);
+        config(['database.redis.options.prefix' => 'lms_tenant_' . $tenant->id . ':']);
+        if (app()->bound('redis')) {
+            app('redis')->setDefaultDriver(config('database.redis.client'));
+        }
 
         return $next($request);
     }
