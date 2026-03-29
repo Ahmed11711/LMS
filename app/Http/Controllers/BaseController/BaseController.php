@@ -78,27 +78,43 @@ abstract class BaseController extends Controller
   public function index(Request $request): JsonResponse
   {
     try {
-      $model = $this->repository->getModel();
-      $query = $model->query()->with($this->withRelationships);
+      // بنبدأ الـ Query من الـ repository
+      $query = $this->repository->query()->with($this->withRelationships);
+
+      // بنسحب الـ Model instance من الـ Query builder نفسه (دي تريكة الـ 40 سنة خبرة)
+      $modelInstance = $query->getModel();
 
       if ($search = $request->input('search')) {
-        $query->where(function ($q) use ($search, $model) {
-          $searchable = property_exists($model, 'searchable')
-            ? $model->searchable
+        $query->where(function ($q) use ($search, $modelInstance) {
+          // 1. بنشوف هل الموديل فيه مصفوفة searchable؟
+          // استخدمنا الـ property_exists على الـ instance
+          $searchable = property_exists($modelInstance, 'searchable')
+            ? $modelInstance->searchable
             : [];
 
+          // 2. لو مش موجودة، نرجع للـ Logic القديم بتاعك (Fallback)
           if (empty($searchable)) {
-            $table = $model->getTable();
+            $table = $modelInstance->getTable();
             $searchable = Schema::getColumnListing($table);
             $searchable = array_filter($searchable, function ($col) {
               return !in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at', 'password']);
             });
           }
 
+          // 3. بناء الـ Search Query
           foreach ($searchable as $column) {
             $q->orWhere($column, 'like', "%{$search}%");
           }
         });
+      }
+
+      // الفلترة الديناميكية اللي كانت عندك (شغالة زي الفل)
+      $excluded = ['search', 'page', 'per_page'];
+      foreach ($request->except($excluded) as $key => $value) {
+        if ($value === null || $value === '') continue;
+        if (Schema::hasColumn($modelInstance->getTable(), $key)) {
+          $query->where($key, $value);
+        }
       }
 
       $perPage = $request->input('per_page', 10);
