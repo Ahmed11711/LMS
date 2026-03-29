@@ -84,7 +84,6 @@ abstract class BaseController extends Controller
 
       $modelInstance = $query->getModel();
 
-      // 3. منطق البحث (Search)
       if ($search = $request->input('search')) {
         $query->where(function ($q) use ($search, $modelInstance) {
           $searchable = property_exists($modelInstance, 'searchable')
@@ -105,7 +104,6 @@ abstract class BaseController extends Controller
         });
       }
 
-      // 4. الفلترة الديناميكية بناءً على الأعمدة
       $excluded = ['search', 'page', 'per_page'];
       foreach ($request->except($excluded) as $key => $value) {
         if ($value === null || $value === '') continue;
@@ -114,7 +112,6 @@ abstract class BaseController extends Controller
         }
       }
 
-      // 5. جلب الداتا والـ Pagination
       $perPage = $request->input('per_page', 10);
       $data = $query->latest()->paginate($perPage);
 

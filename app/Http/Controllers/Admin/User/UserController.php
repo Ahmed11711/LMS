@@ -29,7 +29,8 @@ class UserController extends BaseController
     }
     protected function applyScoping($query)
     {
-        return  $user = auth('api')->user();
+        $user = auth('api')->user();
+        Log::alert("d", [$user]);
 
         if ($user->role === 'user') {
             return $query->where('id', $user->id);
@@ -39,7 +40,6 @@ class UserController extends BaseController
             return $query->where('company_id', $user->company_id);
         }
 
-        // لو سوبر أدمن، الميثود في الـ Base هتتنفذ وهيشوف الكل
         return parent::applyScoping($query);
     }
 }
