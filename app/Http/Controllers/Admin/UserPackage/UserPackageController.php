@@ -29,8 +29,8 @@ class UserPackageController extends BaseController
 
     public function test(Request $request)
     {
-        return  $userIds = $request->get('user_id');
-        $tenantPackage = UserPackage::where('user_id', 1)->first();
+        $userId = $request->get('user_id');
+        $tenantPackage = UserPackage::where('user_id', $userId)->first();
 
         if (!$tenantPackage) {
             return response()->json(['message' => 'No active package'], 404);
