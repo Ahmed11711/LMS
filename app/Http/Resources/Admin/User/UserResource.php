@@ -8,19 +8,32 @@ class UserResource extends JsonResource
 {
     public function toArray($request): array
     {
-        return [
+        $attributes = $this->resource->getAttributes();
+
+        $data = [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'email_verified_at' => $this->email_verified_at,
-            'password' => $this->password,
-            'remember_token' => $this->remember_token,
-            'profile_image' => $this->profile_image,
-            'role' => $this->role,
-            'is_active' => $this->is_active,
-            'specialties' => $this->specialties,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
+
+        $fieldsToInclude = [
+            'name',
+            'email',
+            'email_verified_at',
+            'password',
+            'remember_token',
+            'profile_image',
+            'role',
+            'is_active',
+            'specialties',
+            'created_at',
+            'updated_at'
+        ];
+
+        foreach ($fieldsToInclude as $field) {
+            if (array_key_exists($field, $attributes)) {
+                $data[$field] = $this->{$field};
+            }
+        }
+
+        return $data;
     }
 }
