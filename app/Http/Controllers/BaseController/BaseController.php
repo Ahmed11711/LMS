@@ -4,6 +4,8 @@ namespace App\Http\Controllers\BaseController;
 
 use \App\QueryFilters\ColumnFilter;
 use \App\QueryFilters\Search;
+use \App\QueryFilters\SelectFields;
+use \App\QueryFilters\SortBy;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -89,6 +91,8 @@ abstract class BaseController extends Controller
         ->through([
           Search::class,
           ColumnFilter::class,
+          SelectFields::class,
+          SortBy::class,
         ])
         ->thenReturn()
         ->latest()
