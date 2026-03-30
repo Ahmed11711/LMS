@@ -16,6 +16,6 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
     public function MyPackage($userId)
     {
 
-        return $this->model->where('user_id', $userId)->where('active')->first();
+        return $this->model->where('user_id', $userId)->where('active', 1)->first();
     }
 }
