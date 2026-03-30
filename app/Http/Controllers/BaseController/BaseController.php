@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Pipeline\Pipeline;
 
 abstract class BaseController extends Controller
 {
@@ -79,50 +80,26 @@ abstract class BaseController extends Controller
   {
     try {
       $query = $this->repository->query()->with($this->withRelationships);
-
       $query = $this->applyScoping($query);
 
-      $modelInstance = $query->getModel();
-
-      if ($search = $request->input('search')) {
-        $query->where(function ($q) use ($search, $modelInstance) {
-          $searchable = property_exists($modelInstance, 'searchable')
-            ? $modelInstance->searchable
-            : [];
-
-          if (empty($searchable)) {
-            $table = $modelInstance->getTable();
-            $searchable = Schema::getColumnListing($table);
-            $searchable = array_filter($searchable, function ($col) {
-              return !in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at', 'password']);
-            });
-          }
-
-          foreach ($searchable as $column) {
-            $q->orWhere($column, 'like', "%{$search}%");
-          }
-        });
-      }
-
-      $excluded = ['search', 'page', 'per_page'];
-      foreach ($request->except($excluded) as $key => $value) {
-        if ($value === null || $value === '') continue;
-        if (Schema::hasColumn($modelInstance->getTable(), $key)) {
-          $query->where($key, $value);
-        }
-      }
-
-      $perPage = $request->input('per_page', 10);
-      $data = $query->latest()->paginate($perPage);
+      $data = app(Pipeline::class)
+        ->send($query)
+        ->through([
+          \App\QueryFilters\Search::class,
+          \App\QueryFilters\ColumnFilter::class,
+        ])
+        ->thenReturn()
+        ->latest()
+        ->paginate($request->input('per_page', 10));
 
       if (class_exists($this->resourceClass)) {
         $data = $this->resourceClass::collection($data);
       }
 
-      return $this->successResponsePaginate($data, "{$this->collectionName} list retrieved successfully");
+      return $this->successResponsePaginate($data, "Data retrieved via Pipeline");
     } catch (\Throwable $e) {
-      Log::error("Error in {$this->collectionName} index: " . $e->getMessage());
-      return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
+      Log::error("Pipeline Error: " . $e->getMessage());
+      return $this->errorResponse("Failed to fetch data", 500);
     }
   }
 

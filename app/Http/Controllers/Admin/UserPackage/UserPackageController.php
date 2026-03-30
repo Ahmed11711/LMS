@@ -23,4 +23,9 @@ class UserPackageController extends BaseController
         $this->updateRequestClass = UserPackageUpdateRequest::class;
         $this->resourceClass = UserPackageResource::class;
     }
+
+    public function test()
+    {
+        return "hhh";
+    }
 }
