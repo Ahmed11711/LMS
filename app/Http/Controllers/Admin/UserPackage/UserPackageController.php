@@ -36,7 +36,7 @@ class UserPackageController extends BaseController
             return response()->json(['message' => 'No active package'], 404);
         }
 
-        $packageDetails = DB::connection('central')
+        $packageDetails = DB::connection('LMS_CENTER')
             ->table('packages')
             ->where('id', $tenantPackage->package_id)
             ->first();
