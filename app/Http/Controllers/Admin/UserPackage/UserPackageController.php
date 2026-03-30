@@ -42,7 +42,7 @@ class UserPackageController extends BaseController
         }
 
         $packageDetails = DB::connection('LMS_CENTER')
-            ->table('packages.packageFeatures')
+            ->table('package_features')
             ->where('id', $myPackage->package_id)
             ->first();
 
