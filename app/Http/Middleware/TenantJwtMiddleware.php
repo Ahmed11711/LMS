@@ -33,14 +33,11 @@ class TenantJwtMiddleware
             return $this->errorResponse('Token invalid or expired', 401);
         }
 
-        $request->attributes->add(['tenant_user' => $user]);
-        // Log::info('Tenant JWT verified', [
-        //     'tenant_db' => DB::connection()->getDatabaseName(),
-        //     'user_id' => $user->id,
-        //     'user_email' => $user->email,
-        //     'request_url' => $request->fullUrl(),
-        //     'request_method' => $request->method()
-        // ]);
+        $request->attributes->add([
+            'user_id' => $user->id,
+            'user_role' => $user->role ?? null,
+            'tenant_user' => $user
+        ]);
 
         return $next($request);
     }
