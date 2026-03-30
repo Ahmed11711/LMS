@@ -6,18 +6,18 @@ use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\UserPackage\UserPackageStoreRequest;
 use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
 use App\Http\Resources\Admin\UserPackage\UserPackageResource;
-use App\Models\UserPackage;
 use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Http\Request; // تأكد من استخدام Request الخاص بـ Laravel أفضل هنا
 
 class UserPackageController extends BaseController
 {
+    // أزل كلمة public من هنا لمنع تعريف Property جديدة تتعارض مع الأب
     public function __construct(UserPackageRepositoryInterface $repository)
     {
         parent::__construct();
 
-        // Assign it to the property inherited from BaseController
+        // تعيين المستودع للخاصية الموجودة في BaseController
         $this->repository = $repository;
 
         $this->initService(
@@ -29,11 +29,14 @@ class UserPackageController extends BaseController
         $this->updateRequestClass = UserPackageUpdateRequest::class;
         $this->resourceClass = UserPackageResource::class;
     }
-
-    public function test(Request $request)
+    public function myPacake(UserPackageRepositoryInterface $repository, Request $request)
     {
         $userId = $request->get('user_id');
-        $myPackage = $this->repository->MyPackage($userId);
+
+
+
+        $myPackage = $repository->MyPackage($userId);
+
         if (!$myPackage) {
             return response()->json(['message' => 'No active package'], 404);
         }
