@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\BaseController;
 
-use Illuminate\Http\Request;
+use \App\QueryFilters\ColumnFilter;
+use \App\QueryFilters\Search;
+use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Pipeline\Pipeline;
 
 abstract class BaseController extends Controller
 {
@@ -85,8 +87,8 @@ abstract class BaseController extends Controller
       $data = app(Pipeline::class)
         ->send($query)
         ->through([
-          \App\QueryFilters\Search::class,
-          \App\QueryFilters\ColumnFilter::class,
+          Search::class,
+          ColumnFilter::class,
         ])
         ->thenReturn()
         ->latest()
