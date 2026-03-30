@@ -29,7 +29,7 @@ class UserPackageController extends BaseController
 
     public function test(Request $request)
     {
-        return $request;
+        return  $userId = $request->get('user_id');
         $tenantPackage = UserPackage::where('user_id', 1)->first();
 
         if (!$tenantPackage) {
