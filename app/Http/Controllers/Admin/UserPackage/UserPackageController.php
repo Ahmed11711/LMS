@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Admin\UserPackage;
 
-use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\UserPackage\UserPackageStoreRequest;
 use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
 use App\Http\Resources\Admin\UserPackage\UserPackageResource;
+use App\Models\UserPackage;
+use App\Repositories\UserPackage\UserPackageRepositoryInterface;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Request;
 
 class UserPackageController extends BaseController
 {
@@ -24,8 +27,23 @@ class UserPackageController extends BaseController
         $this->resourceClass = UserPackageResource::class;
     }
 
-    public function test()
+    public function indexs(Request $request)
     {
-        return "hhh";
+        return $request;
+        $tenantPackage = UserPackage::where('user_id', 1)->first();
+
+        if (!$tenantPackage) {
+            return response()->json(['message' => 'No active package'], 404);
+        }
+
+        $packageDetails = DB::connection('central')
+            ->table('packages')
+            ->where('id', $tenantPackage->package_id)
+            ->first();
+
+        return response()->json([
+            'package_info' => $tenantPackage,
+            'features' => $packageDetails
+        ]);
     }
 }
