@@ -12,4 +12,10 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
     {
         parent::__construct($model);
     }
+
+    public function MyPackage($userId)
+    {
+
+        return $this->model->where('user_id', $userId)->where('active')->first();
+    }
 }

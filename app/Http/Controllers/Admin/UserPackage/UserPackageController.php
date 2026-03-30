@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class UserPackageController extends BaseController
 {
-    public function __construct(UserPackageRepositoryInterface $repository)
+    public function __construct(public UserPackageRepositoryInterface $repository)
     {
         parent::__construct();
 
@@ -30,19 +30,18 @@ class UserPackageController extends BaseController
     public function test(Request $request)
     {
         $userId = $request->get('user_id');
-        $tenantPackage = UserPackage::where('user_id', $userId)->first();
-
-        if (!$tenantPackage) {
+        $myPackage = $this->repository->MyPackage($userId);
+        if (!$myPackage) {
             return response()->json(['message' => 'No active package'], 404);
         }
 
         $packageDetails = DB::connection('LMS_CENTER')
-            ->table('packages')
-            ->where('id', $tenantPackage->package_id)
+            ->table('packages.packageFeatures')
+            ->where('id', $myPackage->package_id)
             ->first();
 
         return response()->json([
-            'package_info' => $tenantPackage,
+            'package_info' => $myPackage,
             'features' => $packageDetails
         ]);
     }
