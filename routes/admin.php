@@ -35,7 +35,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('send-otp', [SendOtpController::class, 'sendOtp'])->name('send_otp');
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
-    Route::get('my-package', [UserPackageController::class, 'test']);
+    Route::get('my-package', [UserPackageController::class, 'myPacake']);
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
