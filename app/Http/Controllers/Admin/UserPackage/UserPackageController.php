@@ -27,7 +27,7 @@ class UserPackageController extends BaseController
         $this->resourceClass = UserPackageResource::class;
     }
 
-    public function indexs(Request $request)
+    public function test(Request $request)
     {
         return $request;
         $tenantPackage = UserPackage::where('user_id', 1)->first();
