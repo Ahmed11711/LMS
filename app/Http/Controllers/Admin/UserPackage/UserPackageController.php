@@ -13,9 +13,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class UserPackageController extends BaseController
 {
-    public function __construct(public UserPackageRepositoryInterface $repository)
+    public function __construct(UserPackageRepositoryInterface $repository)
     {
         parent::__construct();
+
+        // Assign it to the property inherited from BaseController
+        $this->repository = $repository;
 
         $this->initService(
             repository: $repository,
