@@ -22,5 +22,10 @@ class CategoryController extends BaseController
         $this->storeRequestClass = CategoryStoreRequest::class;
         $this->updateRequestClass = CategoryUpdateRequest::class;
         $this->resourceClass = CategoryResource::class;
+        $this->withRelationships = ['courses'];
+    }
+    protected function applyScoping($query)
+    {
+        return $query->withCount('courses');
     }
 }

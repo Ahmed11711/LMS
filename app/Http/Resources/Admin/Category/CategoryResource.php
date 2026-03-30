@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin\Category;
 
+use App\Http\Resources\Admin\Course\CourseResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryResource extends JsonResource
@@ -12,6 +13,8 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'courses_count' => $this->courses_count,
+            'courses' => CourseResource::collection($this->whenLoaded('courses')),
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
