@@ -14,7 +14,7 @@ class User extends TenantModel  implements JWTSubject
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     public $searchable = ['name'];
-    public $filterable = ['id'];
+    public $filterable = ['id', 'role'];
     /**
      * The attributes that are mass assignable.
      *
