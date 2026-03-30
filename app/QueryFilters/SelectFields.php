@@ -16,7 +16,6 @@ class SelectFields
 
         if ($request->has('fields') && !empty($allowed)) {
             $requestedFields = explode(',', $request->input('fields'));
-
             $safeFields = array_intersect($requestedFields, $allowed);
 
             if (!in_array('id', $safeFields)) {
@@ -24,10 +23,6 @@ class SelectFields
             }
 
             return $builder->select($safeFields);
-        }
-
-        if (!empty($allowed)) {
-            return $builder->select($allowed);
         }
 
         return $builder;
