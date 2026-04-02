@@ -16,6 +16,7 @@ class User extends TenantModel  implements JWTSubject
     public $searchable = ['name'];
     public $filterable = ['id', 'role'];
     public array $allowedFields = ['id', 'name', 'email', 'created_at'];
+
     /**
      * The attributes that are mass assignable.
      *

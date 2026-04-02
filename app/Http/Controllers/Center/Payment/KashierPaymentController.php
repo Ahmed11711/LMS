@@ -55,18 +55,24 @@ class KashierPaymentController extends Controller
             'data' => $data
         ]);
     }
-    // public function updateAllMyPackage($studentPackage)
-    // {
-    //     $studentId = $studentPackage->student_id;
-    //     $packageId = $studentPackage->package_id;
-    //     StudentPackage::where('student_id', $studentId)
-    //         ->where('active', true)
-    //         ->update(['active' => false]);
-    //     UserPackageFeature::where('user_id', $studentId)
-    //         ->update(['active' => false]);
 
-    //     $package = Packages::select('id', 'price', 'duration_days')
-    //         ->find($packageId);
-    //     $this->featureService->createFeaturesForUser($studentId, $package);
-    // }
+    // select from userpackage
+    // from userid select to database tenent 
+    // update old package to active false 
+    // insert new data 
+
+    public function successPayment(Request $request)
+    {
+        $data = $request->all();
+        $transactionId = $data['merchantOrderId'] ?? null;
+
+        if ($data['paymentStatus'] == "FAILED") {
+            return null;
+        }
+
+
+        if ($transactionId) {
+            $this->createLinkKashierPaymentService->updateSubscriptionStatus($transactionId, $data['paymentStatus']);
+        }
+    }
 }

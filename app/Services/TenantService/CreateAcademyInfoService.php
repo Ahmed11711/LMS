@@ -21,11 +21,12 @@ class CreateAcademyInfoService
         // Step 1: Commit Central DB Data first
         $packageData = DB::transaction(function () use ($data) {
             $user = User::where(function ($query) use ($data) {
-                $query->where('email', $data['email']);
-
-                $query->when(!empty($data['phone']), function ($q) use ($data) {
-                    return $q->orWhere('phone', $data['phone']);
-                });
+                if (!empty($data['email'])) {
+                    $query->where('email', $data['email']);
+                }
+                if (!empty($data['phone'])) {
+                    $query->orWhere('phone', $data['phone']);
+                }
             })->firstOrFail();
 
             $user->update([

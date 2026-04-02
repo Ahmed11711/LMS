@@ -18,6 +18,7 @@ class TenantService
             // 1. Create Tenant Record in Central DB
             $tenantId = DB::connection('LMS_CENTER')->table('tenants')->insertGetId([
                 'uuid'       => Str::uuid(),
+                'user_id'    => $data['user_id'],
                 'name'       => $data['name'] ?? $data['username'],
                 'domain'     => $data['domain'],
                 'db_name'    => 'tenant_' . Str::slug($data['name'] ?? $data['username']) . '_' . Str::random(4),
@@ -155,7 +156,8 @@ class TenantService
         // 1. Insert Admin User in Tenant
         $userId = DB::connection('tenant')->table('users')->insertGetId([
             'name'          => $data['name'],
-            'email'         => $data['email'],
+            'email' => $data['email'] ?? ($data['user_email'] ?? null),
+            'phone' => $data['phone'] ?? null,
             'password'      => $data['password'],
             'username'      => $data['user_name'] ?? $data['username'],
             'role'          => 'admin',
