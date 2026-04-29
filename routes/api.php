@@ -47,7 +47,7 @@ Route::post('webhook-test', function (Request $request) {
 
     return response()->json(['status' => 'ok']);
 });
-Route::get('webhook-tes', function (Request $request) {
+Route::get('webhook-test', function (Request $request) {
     
      Log::info('Webhook received', [
         'headers' => $request->headers->all(),
