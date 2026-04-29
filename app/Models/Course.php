@@ -30,4 +30,9 @@ class Course extends TenantModel
     {
         return $this->hasMany(Chapter::class, 'course_id');
     }
+
+     public function infos()
+    {
+        return $this->hasMany(CourseInfo::class);
+    }
 }

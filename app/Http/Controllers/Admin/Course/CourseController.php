@@ -33,17 +33,17 @@ class CourseController extends BaseController
     }
 
         protected function afterStore($record, Request $request): void
-       {
-        if ($request->has('infos')) {
-            $infos = collect($request->input('infos'))->map(fn($info, $index) => [
-                'key'   => $info['key'],
-                'value' => $info['value'],
-                'order' => $info['order'] ?? $index + 1,
-             ]);
+{
+    if ($request->has('infos')) {
+        $infos = collect($request->input('infos'))->map(fn($info, $index) => [
+            'info_key'   => $info['key'],
+            'info_value' => $info['value'],
+            'order'      => $info['order'] ?? $index + 1,
+        ]);
 
-            $record->infos()->createMany($infos);
-        }
+        dd($record->infos()->createMany($infos)); // ← هنا
     }
+}
 
 
     
