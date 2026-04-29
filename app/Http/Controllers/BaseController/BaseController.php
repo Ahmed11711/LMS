@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\BaseController;
 
-use \App\QueryFilters\ColumnFilter;
-use \App\QueryFilters\Search;
-use \App\QueryFilters\SelectFields;
-use \App\QueryFilters\SortBy;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 abstract class BaseController extends Controller
 {
@@ -29,6 +30,9 @@ abstract class BaseController extends Controller
   protected string $uploadDisk = 'public';
   protected array $withRelationships = [];
 
+  protected bool $hasGallery = false;
+  protected bool $isUserBound = false;
+
   public function __construct() {}
 
   protected function initService($repository, string $collectionName, array $fileFields = [], string $uploadDisk = 'public'): void
@@ -39,52 +43,15 @@ abstract class BaseController extends Controller
     $this->uploadDisk = $uploadDisk;
   }
 
-  // public function index(Request $request): JsonResponse
-  // {
-  //   try {
-  //     $query = $this->repository->query()->with($this->withRelationships);
-
-  //     if ($search = $request->input('search')) {
-  //       $query->where(function ($q) use ($search) {
-  //         $table = $q->getModel()->getTable();
-  //         $stringColumns = Schema::getColumnListing($table);
-  //         $stringColumns = array_filter($stringColumns, function ($col) {
-  //           return !in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at']);
-  //         });
-  //         foreach ($stringColumns as $column) {
-  //           $q->orWhere($column, 'like', "%{$search}%");
-  //         }
-  //       });
-  //     }
-
-  //     $excluded = ['search', 'page', 'per_page'];
-  //     foreach ($request->except($excluded) as $key => $value) {
-  //       if ($value === null || $value === '') continue;
-  //       if (Schema::hasColumn($query->getModel()->getTable(), $key)) {
-  //         $query->where($key, $value);
-  //       }
-  //     }
-
-  //     $perPage = $request->input('per_page', 10);
-  //     $data = $query->latest()->paginate($perPage);
-
-  //     if (class_exists($this->resourceClass)) {
-  //       $data = $this->resourceClass::collection($data);
-  //     }
-
-  //     return $this->successResponsePaginate($data, "{$this->collectionName} list retrieved successfully");
-  //   } catch (\Throwable $e) {
-  //     Log::error("Error in {$this->collectionName} index: " . $e->getMessage());
-  //     return $this->errorResponse("Failed to fetch data", 500, $e->getMessage());
-  //   }
-  // }
-  // App\Http\Controllers\BaseController\BaseController.php
-
+  /**
+   * Display a listing of the resource via Pipeline.
+   */
   public function index(Request $request): JsonResponse
   {
     try {
-      $query = $this->repository->query()->with($this->withRelationships);
+      $query = $this->repository->query()->with($this->getIndexRelationships());
       $query = $this->applyScoping($query);
+
 
       $data = app(Pipeline::class)
         ->send($query)
@@ -109,24 +76,40 @@ abstract class BaseController extends Controller
     }
   }
 
-
   protected function applyScoping($query)
   {
+    if ($this->isUserBound) {
+      if (
+        request()->isMethod('post') || request()->isMethod('put') ||
+        request()->isMethod('patch') || request()->isMethod('delete')
+      ) {
+        return $query->where('user_id', auth('api')->id());
+      }
+    }
+
     return $query;
   }
 
-  public function show(int $id): JsonResponse
-  {
-    $record = $this->repository->query()->with($this->withRelationships)->find($id);
+  /**
+   * Display the specified resource.
+   */
+public function show(int $id): JsonResponse
+{
+    $query = $this->repository->query()
+        ->with($this->getShowRelationships());
+
+    $query = $this->applyScoping($query); 
+    $record = $query->find($id);
+
     if (!$record) {
-      return $this->errorResponse("Record not found", 404);
+        return $this->errorResponse("Record not found", 404);
     }
 
     return $this->successResponse(new $this->resourceClass($record), 'Record retrieved successfully');
-  }
-
-
-
+}
+  /**
+   * Store a newly created resource in storage.
+   */
   public function store(Request $request): JsonResponse
   {
     $validated = app($this->storeRequestClass)->validated();
@@ -135,22 +118,31 @@ abstract class BaseController extends Controller
       DB::beginTransaction();
 
       $validated = $this->beforeStore($validated, $request);
-
       $validated = $this->handleFileUploads($request, $validated);
+
       $record = $this->repository->create($validated);
+
+      if ($this->hasGallery) {
+        $this->uploadGalleryFiles($request, $record);
+      }
 
       $this->afterStore($record, $request);
 
       DB::commit();
+
+      $record->load($this->withRelationships);
+
+      return $this->successResponse(new $this->resourceClass($record), 'Record created successfully', 201);
     } catch (\Throwable $e) {
       DB::rollBack();
       Log::error("Error creating {$this->collectionName}: " . $e->getMessage());
       return $this->errorResponse("Failed to create {$this->collectionName}: " . $e->getMessage(), 500);
     }
-
-    return $this->successResponse(new $this->resourceClass($record), 'Record created successfully', 201);
   }
 
+  /**
+   * Update the specified resource in storage.
+   */
   public function update(Request $request, int $id): JsonResponse
   {
     $validated = app($this->updateRequestClass)->validated();
@@ -163,22 +155,33 @@ abstract class BaseController extends Controller
 
     try {
       DB::beginTransaction();
+
       $validated = $this->beforeUpdate($validated, $record, $request);
       $validated = $this->handleFileUploads($request, $validated, $record);
 
       $record->update($validated);
 
+      if ($this->hasGallery) {
+        $this->uploadGalleryFiles($request, $record);
+      }
+
       $this->afterUpdate($record, $record, $request);
+
       DB::commit();
+
+      $record->load($this->withRelationships);
+
+      return $this->successResponse(new $this->resourceClass($record), 'Record updated successfully');
     } catch (\Throwable $e) {
       DB::rollBack();
       Log::error("Error updating: " . $e->getMessage());
       return $this->errorResponse("Failed to update record", 500);
     }
-
-    return $this->successResponse(new $this->resourceClass($record), 'Record updated successfully');
   }
 
+  /**
+   * Remove the specified resource from storage.
+   */
   public function destroy($id): JsonResponse
   {
     $record = $this->applyScoping($this->repository->query())->find($id);
@@ -204,61 +207,18 @@ abstract class BaseController extends Controller
     return $this->successResponse(null, "Record deleted successfully");
   }
 
-  // public function update(Request $request, int $id): JsonResponse
-  // {
-  //   $validated = app($this->updateRequestClass)->validated();
+  protected function getIndexRelationships(): array
+  {
+    return $this->withRelationships;
+  }
 
-  //   $record = $this->repository->find($id);
-  //   if (!$record) {
-  //     return $this->errorResponse("Record not found", 404);
-  //   }
+  protected function getShowRelationships(): array
+  {
+    return $this->withRelationships;
+  }
 
-  //   try {
-  //     DB::beginTransaction();
-
-  //     $validated = $this->beforeUpdate($validated, $record, $request);
-
-  //     $validated = $this->handleFileUploads($request, $validated, $record);
-  //     $updatedRecord = $this->repository->update($id, $validated);
-
-  //     $this->afterUpdate($updatedRecord, $record, $request);
-
-  //     DB::commit();
-  //   } catch (\Throwable $e) {
-  //     DB::rollBack();
-  //     Log::error("Error updating {$this->collectionName}: " . $e->getMessage());
-  //     return $this->errorResponse("Failed to update record", 500);
-  //   }
-
-  //   return $this->successResponse(new $this->resourceClass($updatedRecord), 'Record updated successfully');
-  // }
-
-  // public function destroy($id): JsonResponse
-  // {
-  //   $record = $this->repository->find($id);
-  //   if (!$record) {
-  //     return $this->errorResponse("Record not found", 404);
-  //   }
-
-  //   try {
-  //     DB::beginTransaction();
-
-  //     $this->beforeDestroy($record);
-
-  //     $deletedCount = $this->repository->delete($id);
-
-  //     $this->afterDestroy($record);
-
-  //     DB::commit();
-  //   } catch (\Throwable $e) {
-  //     DB::rollBack();
-  //     Log::error("Error deleting {$this->collectionName}: " . $e->getMessage());
-  //     return $this->errorResponse($e->getMessage() ?: "Failed to delete record", 500);
-  //   }
-
-  //   return $this->successResponse(null, "Record deleted successfully");
-  // }
-
+  /**
+   */
   protected function handleFileUploads(Request $request, array $validated, $existingRecord = null): array
   {
     if (empty($this->fileFields)) return $validated;
@@ -272,13 +232,10 @@ abstract class BaseController extends Controller
 
           if ($existingRecord && !empty($existingRecord->$field)) {
             Storage::disk($this->uploadDisk)
-              ->delete('uploads/' . $this->collectionName . '/' . basename($existingRecord->$field));
+              ->delete(str_replace('/storage/', '', $existingRecord->$field));
           }
 
-          /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-          // $disk = Storage::disk($this->uploadDisk);
-          // $validated[$field] = "https://astar.zayamrock.com/storage/app/public/" . $path;
-          $validated[$field] = config('app.url') . "/storage/app/public/" . $path;
+          $validated[$field] = "/storage/" . $path;
         } catch (\Throwable $e) {
           Log::error("File upload failed for field [{$field}] in {$this->collectionName}: " . $e->getMessage());
         }
@@ -288,6 +245,27 @@ abstract class BaseController extends Controller
     return $validated;
   }
 
+  /**
+    */
+  protected function uploadGalleryFiles(Request $request, $record): void
+  {
+     if ($request->hasFile('gallery') && method_exists($record, 'gallery')) {
+      foreach ($request->file('gallery') as $file) {
+        try {
+          $filename = time() . '_' . Str::random(8) . '_' . $file->getClientOriginalName();
+          $path = $file->storeAs("uploads/{$this->collectionName}/gallery", $filename, $this->uploadDisk);
+
+           $record->gallery()->create([
+            'image' => "/storage/app/public/" . $path
+          ]);
+        } catch (\Throwable $e) {
+          Log::error("Gallery upload failed for {$this->collectionName}: " . $e->getMessage());
+        }
+      }
+    }
+  }
+
+  // Hooks
   protected function beforeStore(array $data, Request $request): array
   {
     return $data;
