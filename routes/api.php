@@ -38,7 +38,7 @@ Route::prefix('front')->group(function () {
     });
 });
 
-Route::post('esraa', function (Request $request) {
+Route::post('webhook-test', function (Request $request) {
     
      Log::info('Webhook received', [
         'headers' => $request->headers->all(),
@@ -47,7 +47,7 @@ Route::post('esraa', function (Request $request) {
 
     return response()->json(['status' => 'ok']);
 });
-Route::get('esraa', function (Request $request) {
+Route::get('webhook-tes', function (Request $request) {
     
      Log::info('Webhook received', [
         'headers' => $request->headers->all(),
