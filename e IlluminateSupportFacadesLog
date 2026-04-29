@@ -1,0 +1,179 @@
+[1mdiff --git a/.env b/.env[m
+[1mindex 4ea8d80..4fc2764 100644[m
+[1m--- a/.env[m
+[1m+++ b/.env[m
+[36m@@ -20,19 +20,19 @@[m [mLOG_STACK=single[m
+ LOG_DEPRECATIONS_CHANNEL=null[m
+ LOG_LEVEL=debug[m
+ [m
+[31m-# DB_CONNECTION=mysql[m
+[31m-# DB_HOST=127.0.0.1[m
+[31m-# DB_PORT=3306[m
+[31m-# DB_DATABASE=LMS_CENTER[m
+[31m-# DB_USERNAME=root[m
+[31m-# DB_PASSWORD=[m
+[31m-[m
+ DB_CONNECTION=mysql[m
+ DB_HOST=127.0.0.1[m
+ DB_PORT=3306[m
+ DB_DATABASE=LMS_CENTER[m
+[31m-DB_USERNAME=lms_user[m
+[31m-DB_PASSWORD=StrongP@ss1234[m
+[32m+[m[32mDB_USERNAME=root[m
+[32m+[m[32mDB_PASSWORD=[m
+[32m+[m
+[32m+[m[32m# DB_CONNECTION=mysql[m
+[32m+[m[32m# DB_HOST=127.0.0.1[m
+[32m+[m[32m# DB_PORT=3306[m
+[32m+[m[32m# DB_DATABASE=LMS_CENTER[m
+[32m+[m[32m# DB_USERNAME=lms_user[m
+[32m+[m[32m# DB_PASSWORD=StrongP@ss1234[m
+ [m
+ SESSION_DRIVER=database[m
+ SESSION_LIFETIME=120[m
+[1mdiff --git a/composer.lock b/composer.lock[m
+[1mindex 154cf2c..36c470f 100644[m
+[1m--- a/composer.lock[m
+[1m+++ b/composer.lock[m
+[36m@@ -137,20 +137,20 @@[m
+         },[m
+         {[m
+             "name": "dedoc/scramble",[m
+[31m-            "version": "v0.13.14",[m
+[32m+[m[32m            "version": "v0.13.21",[m
+             "source": {[m
+                 "type": "git",[m
+                 "url": "https://github.com/dedoc/scramble.git",[m
+[31m-                "reference": "8f0c1bba364e4916f3f2ff23b7f4ca002e586b75"[m
+[32m+[m[32m                "reference": "b286d4a209e3a328b48561fea7a40f36852881a3"[m
+             },[m
+             "dist": {[m
+                 "type": "zip",[m
+[31m-                "url": "https://api.github.com/repos/dedoc/scramble/zipball/8f0c1bba364e4916f3f2ff23b7f4ca002e586b75",[m
+[31m-                "reference": "8f0c1bba364e4916f3f2ff23b7f4ca002e586b75",[m
+[32m+[m[32m                "url": "https://api.github.com/repos/dedoc/scramble/zipball/b286d4a209e3a328b48561fea7a40f36852881a3",[m
+[32m+[m[32m                "reference": "b286d4a209e3a328b48561fea7a40f36852881a3",[m
+                 "shasum": ""[m
+             },[m
+             "require": {[m
+[31m-                "illuminate/contracts": "^10.0|^11.0|^12.0",[m
+[32m+[m[32m                "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",[m
+                 "myclabs/deep-copy": "^1.12",[m
+                 "nikic/php-parser": "^5.0",[m
+                 "php": "^8.1",[m
+[36m@@ -161,14 +161,14 @@[m
+                 "larastan/larastan": "^3.3",[m
+                 "laravel/pint": "^v1.1.0",[m
+                 "nunomaduro/collision": "^7.0|^8.0",[m
+[31m-                "orchestra/testbench": "^8.0|^9.0|^10.0",[m
+[31m-                "pestphp/pest": "^2.34|^3.7",[m
+[31m-                "pestphp/pest-plugin-laravel": "^2.3|^3.1",[m
+[32m+[m[32m                "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",[m
+[32m+[m[32m                "pestphp/pest": "^2.34|^3.7|^4.4",[m
+[32m+[m[32m                "pestphp/pest-plugin-laravel": "^2.3|^3.1|^4.1",[m
+                 "phpstan/extension-installer": "^1.4",[m
+                 "phpstan/phpstan-deprecation-rules": "^2.0",[m
+                 "phpstan/phpstan-phpunit": "^2.0",[m
+[31m-                "phpunit/phpunit": "^10.5|^11.5.3",[m
+[31m-                "spatie/laravel-permission": "^6.10",[m
+[32m+[m[32m                "phpunit/phpunit": "^10.5|^11.5.3|^12.5.12",[m
+[32m+[m[32m                "spatie/laravel-permission": "^6.10|^7.2",[m
+                 "spatie/pest-plugin-snapshots": "^2.1"[m
+             },[m
+             "type": "library",[m
+[36m@@ -205,7 +205,7 @@[m
+             ],[m
+             "support": {[m
+                 "issues": "https://github.com/dedoc/scramble/issues",[m
+[31m-                "source": "https://github.com/dedoc/scramble/tree/v0.13.14"[m
+[32m+[m[32m                "source": "https://github.com/dedoc/scramble/tree/v0.13.21"[m
+             },[m
+             "funding": [[m
+                 {[m
+[36m@@ -213,7 +213,7 @@[m
+                     "type": "github"[m
+                 }[m
+             ],[m
+[31m-            "time": "2026-02-15T13:14:31+00:00"[m
+[32m+[m[32m            "time": "2026-04-26T12:58:54+00:00"[m
+         },[m
+         {[m
+             "name": "dflydev/dot-access-data",[m
+[36m@@ -590,16 +590,16 @@[m
+         },[m
+         {[m
+             "name": "firebase/php-jwt",[m
+[31m-            "version": "v7.0.3",[m
+[32m+[m[32m            "version": "v7.0.5",[m
+             "source": {[m
+                 "type": "git",[m
+[31m-                "url": "https://github.com/firebase/php-jwt.git",[m
+[31m-                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e"[m
+[32m+[m[32m                "url": "https://github.com/googleapis/php-jwt.git",[m
+[32m+[m[32m                "reference": "47ad26bab5e7c70ae8a6f08ed25ff83631121380"[m
+             },[m
+             "dist": {[m
+                 "type": "zip",[m
+[31m-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",[m
+[31m-                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",[m
+[32m+[m[32m                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/47ad26bab5e7c70ae8a6f08ed25ff83631121380",[m
+[32m+[m[32m                "reference": "47ad26bab5e7c70ae8a6f08ed25ff83631121380",[m
+                 "shasum": ""[m
+             },[m
+             "require": {[m
+[36m@@ -607,6 +607,7 @@[m
+             },[m
+             "require-dev": {[m
+                 "guzzlehttp/guzzle": "^7.4",[m
+[32m+[m[32m                "phpfastcache/phpfastcache": "^9.2",[m
+                 "phpspec/prophecy-phpunit": "^2.0",[m
+                 "phpunit/phpunit": "^9.5",[m
+                 "psr/cache": "^2.0||^3.0",[m
+[36m@@ -646,10 +647,10 @@[m
+                 "php"[m
+             ],[m
+             "support": {[m
+[31m-                "issues": "https://github.com/firebase/php-jwt/issues",[m
+[31m-                "source": "https://github.com/firebase/php-jwt/tree/v7.0.3"[m
+[32m+[m[32m                "issues": "https://github.com/googleapis/php-jwt/issues",[m
+[32m+[m[32m                "source": "https://github.com/googleapis/php-jwt/tree/v7.0.5"[m
+             },[m
+[31m-            "time": "2026-02-25T22:16:40+00:00"[m
+[32m+[m[32m            "time": "2026-04-01T20:38:03+00:00"[m
+         },[m
+         {[m
+             "name": "fruitcake/php-cors",[m
+[36m@@ -995,16 +996,16 @@[m
+         },[m
+         {[m
+             "name": "guzzlehttp/psr7",[m
+[31m-            "version": "2.8.0",[m
+[32m+[m[32m            "version": "2.9.0",[m
+             "source": {[m
+                 "type": "git",[m
+                 "url": "https://github.com/guzzle/psr7.git",[m
+[31m-                "reference": "21dc724a0583619cd1652f673303492272778051"[m
+[32m+[m[32m                "reference": "7d0ed42f28e42d61352a7a79de682e5e67fec884"[m
+             },[m
+             "dist": {[m
+                 "type": "zip",[m
+[31m-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/21dc724a0583619cd1652f673303492272778051",[m
+[31m-                "reference": "21dc724a0583619cd1652f673303492272778051",[m
+[32m+[m[32m                "url": "https://api.github.com/repos/guzzle/psr7/zipball/7d0ed42f28e42d61352a7a79de682e5e67fec884",[m
+[32m+[m[32m                "reference": "7d0ed42f28e42d61352a7a79de682e5e67fec884",[m
+                 "shasum": ""[m
+             },[m
+             "require": {[m
+[36m@@ -1020,6 +1021,7 @@[m
+             "require-dev": {[m
+                 "bamarni/composer-bin-plugin": "^1.8.2",[m
+                 "http-interop/http-factory-tests": "0.9.0",[m
+[32m+[m[32m                "jshttp/mime-db": "1.54.0.1",[m
+                 "phpunit/phpunit": "^8.5.44 || ^9.6.25"[m
+             },[m
+             "suggest": {[m
+[36m@@ -1091,7 +1093,7 @@[m
+             ],[m
+             "support": {[m
+                 "issues": "https://github.com/guzzle/psr7/issues",[m
+[31m-                "source": "https://github.com/guzzle/psr7/

@@ -27,4 +27,13 @@ class UserController extends BaseController
         $this->updateRequestClass = UserUpdateRequest::class;
         $this->resourceClass = UserResource::class;
     }
+
+     protected function applyScoping($query)
+{
+     if (request()->filled('user_id')) {
+        $query->where('user_id', request()->user_id);
+    }
+
+    return $query;
+}
 }

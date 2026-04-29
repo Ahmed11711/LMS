@@ -19,7 +19,7 @@ class UserUpdateRequest extends BaseRequest
             'email_verified_at' => 'nullable|sometimes|date',
             'password' => 'sometimes|required|string|max:255',
             'profile_image' => 'nullable|file|max:255',
-            'role' => 'nullable|string|in:admin,user,instructor',
+             'role' => 'required|string|in:admin,user,instructor',
             'specialties' => 'nullable|string|max:255',
         ];
     }
