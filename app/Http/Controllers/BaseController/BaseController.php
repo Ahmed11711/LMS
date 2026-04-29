@@ -25,6 +25,7 @@ abstract class BaseController extends Controller
   protected string $storeRequestClass;
   protected string $updateRequestClass;
   protected string $resourceClass;
+  protected ?string $showResourceClass = null;
   protected ?string $collectionName = null;
   protected array $fileFields = [];
   protected string $uploadDisk = 'public';
@@ -93,23 +94,25 @@ abstract class BaseController extends Controller
   /**
    * Display the specified resource.
    */
-public function show(int $id): JsonResponse
+public function show($id): JsonResponse 
 {
     $query = $this->repository->query()
         ->with($this->getShowRelationships());
 
     $query = $this->applyScoping($query); 
-    $record = $query->find($id);
+    
+     $record = $query->where($this->lookupColumn(), $id)->first();
 
     if (!$record) {
         return $this->errorResponse("Record not found", 404);
     }
 
-    return $this->successResponse(new $this->resourceClass($record), 'Record retrieved successfully');
+    $resourceToShow = $this->showResourceClass ?? $this->resourceClass;
+    return $this->successResponse(new $resourceToShow($record), 'Record retrieved successfully');
 }
-  /**
-   * Store a newly created resource in storage.
-   */
+
+
+
   public function store(Request $request): JsonResponse
   {
     $validated = app($this->storeRequestClass)->validated();
@@ -244,7 +247,10 @@ public function show(int $id): JsonResponse
 
     return $validated;
   }
-
+protected function lookupColumn(): string
+{
+    return 'id';
+}
   /**
     */
   protected function uploadGalleryFiles(Request $request, $record): void

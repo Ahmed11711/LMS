@@ -11,6 +11,7 @@ use App\Models\Central\User;
  use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Http\Controllers\User\Course\CourseController;
 
 
 
@@ -55,6 +56,32 @@ Route::get('webhook-test', function (Request $request) {
     ]);
     return response()->json(['status' => 'ok']);
 });
+
+
+
+Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
+Route::get('courses', [CourseController::class, 'index']);
+Route::get('courses/{slug}', [CourseController::class, 'show']);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 require __DIR__ . '/admin.php';
 require __DIR__ . '/superAdmin.php';
