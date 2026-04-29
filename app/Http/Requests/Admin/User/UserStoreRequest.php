@@ -15,7 +15,7 @@ class UserStoreRequest extends BaseRequest
             'email_verified_at' => 'nullable|date',
             'password' => 'required|string|min:8|max:255',
             'profile_image' => 'nullable|file|max:255',
-            'role' => 'required|string|in:admin,user,instructor',
+            'role' => 'required|string|in:admin,academy,student',
             'specialties' => 'nullable|string|max:255',
         ];
     }

@@ -21,6 +21,7 @@ class LessonStoreRequest extends BaseRequest
             'description' => 'nullable|string',
             'order' => 'required|integer',
             'file_size_mb' => 'required|numeric|min:0',
+            'is_free' => 'required|boolean',
         ];
     }
 }

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('order')->default(0);
             $table->float('file_size_mb')->default(0);
+            $table->boolean('is_free')->default(false);
             $table->timestamps();
         });
     }
