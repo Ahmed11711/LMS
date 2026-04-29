@@ -9,7 +9,7 @@ use App\Traits\TracksFeatureUsage;
 class Course extends TenantModel
 {
     use TracksFeatureUsage;
-    public array $filterable = ['user_id', 'status', 'category_id'];
+    public array $filterable = ['user_id', 'type', 'category_id'];
     public function getFeatureSlug(): string
     {
         return 'max_courses';
