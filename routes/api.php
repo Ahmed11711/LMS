@@ -41,8 +41,8 @@ Route::prefix('front')->group(function () {
 Route::post('webhook-test', function (Request $request) {
     
      Log::info('Webhook received', [
-        'headers' => $request->headers->all(),
-        'body'    => $request->all(),
+        'ahmed_samir_headers' => $request->headers->all(),
+        'ahmed_samir_body'    => $request->all(),
     ]);
 
     return response()->json(['status' => 'ok']);
@@ -50,8 +50,8 @@ Route::post('webhook-test', function (Request $request) {
 Route::get('webhook-test', function (Request $request) {
     
      Log::info('Webhook received', [
-        'headers' => $request->headers->all(),
-        'body'    => $request->all(),
+        'ahmed_samir_headers' => $request->headers->all(),
+        'ahmed_samir_body'    => $request->all(),
     ]);
     return response()->json(['status' => 'ok']);
 });
