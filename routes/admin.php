@@ -38,6 +38,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
+    Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
@@ -57,5 +58,5 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
     });
 
 
-Route::prefix('v1')->group(function () {    Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
+Route::prefix('v1')->group(function () {    
 });
