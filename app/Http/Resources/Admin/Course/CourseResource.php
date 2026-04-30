@@ -17,7 +17,9 @@ class CourseResource extends JsonResource
             'type' => $this->type,
             'category_id' => $this->category_id,
             'description' => $this->description,
-            'image' => $this->image,
+            'image' => $this->image 
+    ? asset(ltrim($this->image, '/')) 
+    : null,      
             'price_type' => $this->price_type,
             'price' => $this->price,
             'final_price' => $this->final_price,
