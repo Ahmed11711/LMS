@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Repositories\UserSubscribe;
+
+use App\Repositories\UserSubscribe\UserSubscribeRepositoryInterface;
+use App\Repositories\BaseRepository\BaseRepository;
+use App\Models\UserSubscribe;
+
+class UserSubscribeRepository extends BaseRepository implements UserSubscribeRepositoryInterface
+{
+    public function __construct(UserSubscribe $model)
+    {
+        parent::__construct($model);
+    }
+        public function mycourses($userId)
+        {
+            
+return $this->model->where('user_id', $userId)->with('course')->get();
+        }
+
+}

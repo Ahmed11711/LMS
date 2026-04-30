@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\UserSubscribe\UserSubscribeRepositoryInterface;
+use App\Repositories\UserSubscribe\UserSubscribeRepository;
+
 use App\Repositories\Lesson\LessonRepositoryInterface;
 use App\Repositories\Lesson\LessonRepository;
 
@@ -62,6 +65,7 @@ $this->app->bind(
         $this->app->bind(PhysicalCourseDetailRepositoryInterface::class, PhysicalCourseDetailRepository::class);
         $this->app->bind(ChapterRepositoryInterface::class, ChapterRepository::class);
         $this->app->bind(LessonRepositoryInterface::class, LessonRepository::class);
+        $this->app->bind(UserSubscribeRepositoryInterface::class, UserSubscribeRepository::class);
 }
 
     /**

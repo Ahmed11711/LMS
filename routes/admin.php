@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailControll
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
+use App\Http\Controllers\Constructor\Course\CourseController as CourseCourseController;
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
@@ -19,6 +20,7 @@ use App\Models\User;
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 
 
 
@@ -40,17 +42,20 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
         $tenant = app('tenant');
-
-
         $cacheKey = "tenant_{$tenant->id}_settings";
-
         return Cache::remember($cacheKey, 3600, function () {
             return User::get();
         });
     });
+
 });
 
+Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
+    ->group(function () {
+        Route::apiResource('courses', CourseCourseController::class)
+            ->names('instructor.course');
+    });
 
 
-
-Route::prefix('v1')->group(function () {});
+Route::prefix('v1')->group(function () {    Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
+});

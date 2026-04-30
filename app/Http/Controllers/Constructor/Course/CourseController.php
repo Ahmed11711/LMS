@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Course;
+namespace App\Http\Controllers\Constructor\Course;
 
-use Illuminate\Support\Str;
-use App\Repositories\Course\CourseRepositoryInterface;
 use App\Http\Controllers\BaseController\BaseController;
-use App\Http\Requests\Admin\Course\CourseStoreRequest;
 use App\Http\Requests\Admin\Course\CourseUpdateRequest;
+use App\Http\Requests\Admin\Course\InstructorCourseStoreRequest;
 use App\Http\Resources\Admin\Course\CourseResource;
+use App\Repositories\Course\CourseRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CourseController extends BaseController
 {
@@ -18,20 +18,25 @@ class CourseController extends BaseController
 
         $this->initService(
             repository: $repository,
-            collectionName: 'Course',
-            fileFields: ['image']
+            collectionName: 'courses',
+            fileFields: ['thumbnail'],
         );
 
-        $this->withRelationships  = ['chapters.lessons'];
-        $this->storeRequestClass  = CourseStoreRequest::class;
+        $this->storeRequestClass  = InstructorCourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass      = CourseResource::class;
+    }
+
+    protected function applyScoping($query)
+    {
+        return $query->where('user_id', auth('api')->id());
     }
 
     protected function beforeStore(array $data, Request $request): array
     {
         unset($data['infos']);
-        $data['slug'] = Str::slug($data['title']) . '-' . Str::random(6);
+        $data['slug']    = Str::slug($data['title']) . '-' . Str::random(6);
+        $data['user_id'] = $request->attributes->get('user_id');
 
         return $data;
     }
@@ -44,10 +49,6 @@ class CourseController extends BaseController
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         unset($data['infos']);
-
-        if (isset($data['title'])) {
-            $data['slug'] = Str::slug($data['title']) . '-' . Str::random(6);
-        }
 
         return $data;
     }
