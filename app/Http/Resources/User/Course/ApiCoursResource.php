@@ -18,8 +18,10 @@ class ApiCoursResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'image' => $this->image,
-            'price' => $this->price,
+'image' => $this->image 
+    ? asset(ltrim($this->image, '/')) 
+    : null,      
+       'price' => $this->price,
             'final_price' => $this->final_price,
             'type' => $this->type,
             'slug'=>$this->slug,
