@@ -29,7 +29,7 @@ class CourseController extends BaseController
             'chapters.lessons',
             'infos',
             'category',
-            'user:id,name,image'
+            'user:id,name,profile_image'
         ];
     }
     protected function lookupColumn(): string
