@@ -48,7 +48,6 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
             return User::get();
         });
     });
-
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -58,5 +57,5 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
     });
 
 
-Route::prefix('v1')->group(function () {    
-});
+
+Route::prefix('v1')->group(function () {});

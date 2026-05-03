@@ -12,10 +12,23 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
     {
         parent::__construct($model);
     }
-        public function mycourses($userId)
-        {
-            
-return $this->model->where('user_id', $userId)->with('course')->get();
-        }
+    public function mycourses($userId)
+    {
 
+        return $this->model->where('user_id', $userId)->with('course')->get();
+    }
+    public function isAlreadySubscribed(int $userId, int $courseId): bool
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->exists();
+    }
+
+    public function findByTransactionId(string $transactionId)
+    {
+        return $this->model
+            ->where('transaction_id', $transactionId)
+            ->first();
+    }
 }

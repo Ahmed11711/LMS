@@ -23,18 +23,20 @@ class ShowCoursResource extends JsonResource
             'type' => $this->type,
             'category_id' => $this->category_id,
             'description' => $this->description,
-            'image' => $this->image 
-            ? asset(ltrim($this->image, '/')) 
-            : null,
+            'image' => $this->image
+                ? asset(ltrim($this->image, '/'))
+                : null,
             'price_type' => $this->price_type,
             'price' => $this->price,
             'final_price' => $this->final_price,
             'status' => $this->status,
-            'slug'=>$this->slug,
-             'created_at' => $this->created_at,
+            'slug' => $this->slug,
+            'rating' => $this->slug,
+            'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'instructor'=>$this->whenLoaded('user'),
-            'infos'=>$this->whenLoaded('infos'),
+            'instructor' => $this->whenLoaded('user'),
+            'infos' => $this->whenLoaded('infos'),
+
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
         ];
     }

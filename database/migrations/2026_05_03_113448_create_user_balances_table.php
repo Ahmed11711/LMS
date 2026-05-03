@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_subscribes', function (Blueprint $table) {
+        Schema::create('user_balances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
-            $table->timestamp('starts_at')->useCurrent();
-            $table->string('transaction_id')->nullable();
-            $table->enum('status', ['active', 'refunded', 'cancelled', 'pending'])->default('pending');
-            $table->unique(['user_id', 'course_id']);
+            $table->string('balance');
+            $table->boolean('is_active');
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_subscribes');
+        Schema::dropIfExists('user_balances');
     }
 };

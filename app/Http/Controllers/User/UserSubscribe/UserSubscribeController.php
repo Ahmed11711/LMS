@@ -4,23 +4,36 @@ namespace App\Http\Controllers\User\UserSubscribe;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
-use App\Repositories\UserSubscribe\UserSubscribeRepository;
+use App\Services\UserSubscribe\CreateLinkForUserSubscribeCourseService;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Http\Request;
+use App\Services\Payment\UserSubscribeService;
 
 class UserSubscribeController extends Controller
 {
-    use ApiResponseTrait;
-    public function __construct(public UserSubscribeRepository $userRepo)
-    {
+  use ApiResponseTrait;
+
+  public function __construct(
+    private UserSubscribeService $service
+  ) {}
+
+  public function store(StoreUserSubscribeRequest $request)
+  {
+    $tenant = app('tenant');
+
+    $result = $this->service->execute(
+      userId: $request->get('user_id'),
+      courseId: $request->validated('course_id'),
+      customerContact: "ahmedsamir@gmail.com",
+      tenantDomain: $tenant->domain,
+
+    );
+
+    if (!$result['success']) {
+      return $this->errorResponse($result['message'], 422);
     }
-    public function store(StoreUserSubscribeRequest $request)
-    {
-        $data = $request->validated();
-        $data = array_merge($request->validated(), [
-                'user_id' => $request->get('user_id') 
-        ]);
-        $subscription = $this->userRepo->create($data);
-        return $this->successResponse($subscription);
-    }
+
+    return $this->successResponse([
+      'payment_url' => $result['payment_url'],
+    ]);
+  }
 }
