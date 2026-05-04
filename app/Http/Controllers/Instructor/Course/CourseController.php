@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Constructor\Course;
+namespace App\Http\Controllers\Instructor\Course;
 
 use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\Course\CourseUpdateRequest;
@@ -26,6 +26,7 @@ class CourseController extends BaseController
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass      = CourseResource::class;
     }
+
 
     protected function applyScoping($query)
     {

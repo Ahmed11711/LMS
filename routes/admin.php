@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Auth\CheckOtpController;
 use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Chapter\ChapterController;
 use App\Http\Controllers\Admin\Course\CourseController;
+use App\Http\Controllers\Admin\CustomDomain\CustomDomainController;
 use App\Http\Controllers\Admin\Lesson\LessonController;
 use App\Http\Controllers\Admin\Me\MeController;
 use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailControll
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
-use App\Http\Controllers\Constructor\Course\CourseController as CourseCourseController;
+use App\Http\Controllers\Instructor\Course\CourseController as CourseCourseController;
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
@@ -21,8 +22,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
-
-
+use App\Http\Controllers\Instructor\InstructorController;
 
 //
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class])->group(function () {
@@ -39,6 +39,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
+    /////////////////Custom Domasin ///////////////////////////////
+    Route::put('custom-domain', [CustomDomainController::class, 'setup']);
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
@@ -54,6 +56,9 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
     ->group(function () {
         Route::apiResource('courses', CourseCourseController::class)
             ->names('instructor.course');
+
+        Route::apiResource('profile', InstructorController::class)->except('post', 'delete', 'put');
+        Route::put('profile', [InstructorController::class, 'update']);
     });
 
 
