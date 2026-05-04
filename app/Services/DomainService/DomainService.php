@@ -152,26 +152,23 @@ class DomainService
 
     private function reloadNginx(): array
     {
-        // Test config before reloading
-        exec("sudo nginx -t 2>&1", $testOutput, $testCode);
+        $testOutput = shell_exec("sudo nginx -t 2>&1");
 
-        if ($testCode !== 0) {
-            $error = implode("\n", $testOutput);
-            Log::error("Nginx config test failed: " . $error);
+        if (str_contains($testOutput, 'failed') || str_contains($testOutput, 'error')) {
+            Log::error("Nginx config test failed: " . $testOutput);
             return [
                 'success' => false,
-                'message' => "Nginx config test failed: " . $error
+                'message' => "Nginx config test failed: " . $testOutput
             ];
         }
 
-        exec("sudo systemctl reload nginx 2>&1", $reloadOutput, $reloadCode);
+        $reloadOutput = shell_exec("sudo systemctl reload nginx 2>&1");
 
-        if ($reloadCode !== 0) {
-            $error = implode("\n", $reloadOutput);
-            Log::error("Nginx reload failed: " . $error);
+        if (str_contains($reloadOutput ?? '', 'failed') || str_contains($reloadOutput ?? '', 'error')) {
+            Log::error("Nginx reload failed: " . $reloadOutput);
             return [
                 'success' => false,
-                'message' => "Nginx reload failed: " . $error
+                'message' => "Nginx reload failed: " . $reloadOutput
             ];
         }
 
