@@ -22,8 +22,13 @@ class DomainService
             $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$domain} --non-interactive --agree-tos -m admin@darab.academy 2>&1");
             Log::info("SSL Output for {$domain}: " . $sslOutput);
 
-            // 3. تأكد إن الـ SSL اتعمل صح
-            if (!file_exists("/etc/letsencrypt/live/{$domain}/fullchain.pem")) {
+            // 3. دور على المسار الصح للشهادة
+            $certPath = "/etc/letsencrypt/live/{$domain}";
+            if (!file_exists("{$certPath}/fullchain.pem")) {
+                $certPath = "/etc/letsencrypt/live/{$domain}-0001";
+            }
+
+            if (!file_exists("{$certPath}/fullchain.pem")) {
                 return [
                     'success'    => false,
                     'message'    => "SSL فشل للدومين {$domain}",
@@ -32,7 +37,7 @@ class DomainService
             }
 
             // 4. كتابة Nginx Config
-            $config = $this->generateNginxConfig($domain);
+            $config = $this->generateNginxConfig($domain, $certPath);
             file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
 
             // 5. Reload Nginx
@@ -64,7 +69,6 @@ class DomainService
         // 2. بياخد الـ IP بتاع الدومين
         $domainIp = gethostbyname($domain);
 
-        // لو gethostbyname فشل بيرجع نفس الـ domain
         if ($domainIp === $domain) {
             return [
                 'valid'   => false,
@@ -89,7 +93,7 @@ class DomainService
         ];
     }
 
-    private function generateNginxConfig(string $domain): string
+    private function generateNginxConfig(string $domain, string $certPath): string
     {
         return "
 server {
@@ -102,8 +106,8 @@ server {
     listen 443 ssl;
     server_name {$domain};
 
-    ssl_certificate /etc/letsencrypt/live/{$domain}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{$domain}/privkey.pem;
+    ssl_certificate {$certPath}/fullchain.pem;
+    ssl_certificate_key {$certPath}/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
