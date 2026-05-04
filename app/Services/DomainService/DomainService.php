@@ -46,6 +46,10 @@ class DomainService
 
             // 3. كتابة Nginx Config
             $config = $this->generateNginxConfig($domain, $certPath);
+            Log::info("certPath: " . $certPath);
+            Log::info("Config content: " . $config);
+            $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
+            Log::info("Write result: " . var_export($writeResult, true));
             file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
 
             // 4. Reload Nginx
