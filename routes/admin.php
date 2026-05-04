@@ -64,3 +64,6 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
 
 
 Route::prefix('v1')->group(function () {});
+Route::get('/whoami', function () {
+    return shell_exec('whoami');
+});
