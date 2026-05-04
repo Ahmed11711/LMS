@@ -65,5 +65,15 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
 
 Route::prefix('v1')->group(function () {});
 Route::get('/whoami', function () {
-    return shell_exec('whoami');
+
+    $domain = "darab.academy";
+    $domain2 = "darrab.app";
+    $domainIp = gethostbyname($domain);
+    $domainIp2 = gethostbyname($domain2);
+
+    return [
+        '1' => $domainIp,
+        '2' => $domainIp2,
+
+    ];
 });

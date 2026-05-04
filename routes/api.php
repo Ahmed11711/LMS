@@ -8,7 +8,7 @@ use App\Http\Controllers\Front\Package\PackageController;
 use App\Http\Controllers\Tenant\CreateTenantController;
 use App\Http\Middleware\ResolveTenant;
 use App\Models\Central\User;
- use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Controllers\User\Course\CourseController;
@@ -41,8 +41,8 @@ Route::prefix('front')->group(function () {
 });
 
 Route::post('webhook-test', function (Request $request) {
-    
-     Log::info('Webhook received', [
+
+    Log::info('Webhook received', [
         'ahmed_samir_headers' => $request->headers->all(),
         'ahmed_samir_body'    => $request->all(),
     ]);
@@ -50,8 +50,8 @@ Route::post('webhook-test', function (Request $request) {
     return response()->json(['status' => 'ok']);
 });
 Route::get('webhook-test', function (Request $request) {
-    
-     Log::info('Webhook received', [
+
+    Log::info('Webhook received', [
         'ahmed_samir_headers' => $request->headers->all(),
         'ahmed_samir_body'    => $request->all(),
     ]);
@@ -61,17 +61,15 @@ Route::get('webhook-test', function (Request $request) {
 
 
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
-Route::get('courses', [CourseController::class, 'index']);
-Route::get('courses/{slug}', [CourseController::class, 'show']);
-Route::post('user-subscribe',[UserSubscribeController::class,'store'])->middleware(TenantJwtMiddleware::class . ':student');
-Route::get('my-courses', [MyCourseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('courses', [CourseController::class, 'index']);
+    Route::get('courses/{slug}', [CourseController::class, 'show']);
+    Route::post('user-subscribe', [UserSubscribeController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('my-courses', [MyCourseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
 
-Route::prefix('auth')->group(function () {
-    Route::post('login', [LoginController::class, 'login']);
-    Route::post('register', [LoginController::class, 'register']);
-
+    Route::prefix('auth')->group(function () {
+        Route::post('login', [LoginController::class, 'login']);
+        Route::post('register', [LoginController::class, 'register']);
     });
-
 });
 
 

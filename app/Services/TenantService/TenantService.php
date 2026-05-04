@@ -184,17 +184,18 @@ class TenantService
 
             // B. Insert Features
             foreach ($features as $f) {
-                DB::connection('tenant')->table('tenant_feature_usage')->insert([
-                    'feature_slug' => $f->key,
-                    'total_limit'  => $f->value,
-                    'used_amount'  => 0,
-                    'type'         => ($f->value == -1 || (int)$f->value > 1) ? 'numeric' : 'boolean',
-                    'is_enabled'   => $f->value != 0,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
+                DB::connection('tenant')->table('tenant_feature_usage')->updateOrInsert(
+                    ['feature_slug' => $f->key],
+                    [
+                        'total_limit'  => $f->value,
+                        'used_amount'  => 0,
+                        'type'         => ($f->value == -1 || (int)$f->value > 1) ? 'numeric' : 'boolean',
+                        'is_enabled'   => $f->value != 0,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ]
+                );
             }
-
             Log::info("Tenant Seeding Successful using Passed Data for User: {$data['user_id']}");
         } else {
             Log::error("Seeding Failed: Passed package data is missing.");
