@@ -18,29 +18,37 @@ class DomainService
                 ];
             }
 
-            // 2. عمل SSL
-            $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$domain} --non-interactive --agree-tos -m admin@darab.academy 2>&1");
-            Log::info("SSL Output for {$domain}: " . $sslOutput);
-
-            // 3. دور على المسار الصح للشهادة
+            // 2. دور على الشهادة الموجودة أو اعمل واحدة جديدة
             $certPath = "/etc/letsencrypt/live/{$domain}";
             if (!file_exists("{$certPath}/fullchain.pem")) {
                 $certPath = "/etc/letsencrypt/live/{$domain}-0001";
             }
 
+            // لو مفيش شهادة خالص، اعمل واحدة جديدة
             if (!file_exists("{$certPath}/fullchain.pem")) {
-                return [
-                    'success'    => false,
-                    'message'    => "SSL فشل للدومين {$domain}",
-                    'ssl_output' => $sslOutput
-                ];
+                $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$domain} --non-interactive --agree-tos -m admin@darab.academy 2>&1");
+                Log::info("SSL Output for {$domain}: " . $sslOutput);
+
+                // دور تاني بعد ما certbot اشتغل
+                $certPath = "/etc/letsencrypt/live/{$domain}";
+                if (!file_exists("{$certPath}/fullchain.pem")) {
+                    $certPath = "/etc/letsencrypt/live/{$domain}-0001";
+                }
+
+                if (!file_exists("{$certPath}/fullchain.pem")) {
+                    return [
+                        'success'    => false,
+                        'message'    => "SSL فشل للدومين {$domain}",
+                        'ssl_output' => $sslOutput ?? ''
+                    ];
+                }
             }
 
-            // 4. كتابة Nginx Config
+            // 3. كتابة Nginx Config
             $config = $this->generateNginxConfig($domain, $certPath);
             file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
 
-            // 5. Reload Nginx
+            // 4. Reload Nginx
             shell_exec("sudo systemctl reload nginx 2>&1");
 
             return [
@@ -55,7 +63,6 @@ class DomainService
             ];
         }
     }
-
     private function isDomainValid(string $domain): array
     {
         // 1. تأكد إن صيغة الدومين صح
