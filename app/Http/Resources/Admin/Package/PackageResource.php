@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin\Package;
 
+use App\Http\Resources\Admin\FeaturePackage\FeaturePackageResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PackageResource extends JsonResource
@@ -18,6 +19,7 @@ class PackageResource extends JsonResource
             'duration_months' => $this->duration_months,
             'order' => $this->order,
             'recomnd' => $this->recomnd,
+            'packageFeatures' => FeaturePackageResource::collection($this->whenLoaded('packageFeatures')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
