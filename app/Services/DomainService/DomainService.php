@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\TenantService;
+namespace App\Services\DomainService;
 
 use Illuminate\Support\Facades\Log;
 
@@ -26,8 +26,6 @@ class DomainService
 
                 ];
             }
-
-
 
             $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$domain} --non-interactive --agree-tos -m admin@darab.academy 2>&1");
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\CustomDomain;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CustomDomain\CustomDomainRequest;
-use App\Services\TenantService\DomainService;
+use App\Services\DomainService\DomainService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 
