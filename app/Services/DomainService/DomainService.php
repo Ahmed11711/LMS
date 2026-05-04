@@ -6,10 +6,13 @@ use Illuminate\Support\Facades\Log;
 
 class DomainService
 {
+    private string $adminEmail = 'admin@darab.academy';
+    private string $webUser    = 'hestiamail';
+
     public function setupDomain(string $domain): array
     {
         try {
-            // 1. تأكد إن الدومين صح
+            // 1. Validate domain
             $validation = $this->isDomainValid($domain);
             if (!$validation['valid']) {
                 return [
@@ -18,90 +21,161 @@ class DomainService
                 ];
             }
 
-            // 2. دور على الشهادة الموجودة أو اعمل واحدة جديدة
-            $certPath = "/etc/letsencrypt/live/{$domain}";
-            if (!file_exists("{$certPath}/fullchain.pem")) {
-                $certPath = "/etc/letsencrypt/live/{$domain}-0001";
+            // 2. Find existing certificate
+            $certPath = $this->findCertPath($domain);
+
+            // 3. Generate new SSL if not found
+            if (!$certPath) {
+                $certResult = $this->generateSSL($domain);
+                if (!$certResult['success']) {
+                    return $certResult;
+                }
+                $certPath = $certResult['certPath'];
             }
 
-            // لو مفيش شهادة خالص، اعمل واحدة جديدة
-            if (!file_exists("{$certPath}/fullchain.pem")) {
-                $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$domain} --non-interactive --agree-tos -m admin@darab.academy 2>&1");
-                Log::info("SSL Output for {$domain}: " . $sslOutput);
-
-                // دور تاني بعد ما certbot اشتغل
-                $certPath = "/etc/letsencrypt/live/{$domain}";
-                if (!file_exists("{$certPath}/fullchain.pem")) {
-                    $certPath = "/etc/letsencrypt/live/{$domain}-0001";
-                }
-
-                if (!file_exists("{$certPath}/fullchain.pem")) {
-                    return [
-                        'success'    => false,
-                        'message'    => "SSL فشل للدومين {$domain}",
-                        'ssl_output' => $sslOutput ?? ''
-                    ];
-                }
-            }
-
-            // 3. كتابة Nginx Config
-            $config = $this->generateNginxConfig($domain, $certPath);
-            Log::info("certPath: " . $certPath);
-            Log::info("Config content: " . $config);
+            // 4. Write Nginx config
+            $config      = $this->generateNginxConfig($domain, $certPath);
             $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
-            Log::info("Write result: " . var_export($writeResult, true));
-            file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
 
-            // 4. Reload Nginx
-            shell_exec("sudo systemctl reload nginx 2>&1");
+            if ($writeResult === false) {
+                Log::error("Failed to write Nginx config for {$domain}");
+                return [
+                    'success' => false,
+                    'message' => "Failed to write Nginx config for {$domain}"
+                ];
+            }
+
+            Log::info("Nginx config written for {$domain} at {$certPath}");
+
+            // 5. Reload Nginx
+            $reloadResult = $this->reloadNginx();
+            if (!$reloadResult['success']) {
+                return $reloadResult;
+            }
 
             return [
                 'success' => true,
-                'message' => "تم إعداد الدومين {$domain} بنجاح 🎉"
+                'message' => "Domain {$domain} configured successfully"
             ];
         } catch (\Exception $e) {
-            Log::error("Domain setup failed: " . $e->getMessage());
+            Log::error("Domain setup failed for {$domain}: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => $e->getMessage()
             ];
         }
     }
+
+    // ============================================================
+    // Private Methods
+    // ============================================================
+
     private function isDomainValid(string $domain): array
     {
-        // 1. تأكد إن صيغة الدومين صح
+        // 1. Validate domain format
         if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
             return [
                 'valid'   => false,
-                'message' => "صيغة الدومين غلط"
+                'message' => "Invalid domain format"
             ];
         }
 
-        // 2. بياخد الـ IP بتاع الدومين
+        // 2. Resolve domain IP
         $domainIp = gethostbyname($domain);
-
         if ($domainIp === $domain) {
             return [
                 'valid'   => false,
-                'message' => "الدومين {$domain} مش موجود أو مش بيشاور على أي سيرفر"
+                'message' => "Domain {$domain} does not resolve to any server"
             ];
         }
 
-        // 3. بياخد الـ IPv4 بتاع السيرفر بتاعنا
+        // 3. Get server public IP
         $serverIp = trim(shell_exec("curl -4 -s ifconfig.me 2>&1"));
 
-        // 4. بيتأكد إنهم نفس الـ IP
+        // 4. Ensure domain points to this server
         if ($domainIp !== $serverIp) {
             return [
                 'valid'   => false,
-                'message' => "الدومين {$domain} مش بيشاور على السيرفر بتاعنا. IP بتاعه: {$domainIp}, IP السيرفر: {$serverIp}"
+                'message' => "Domain {$domain} does not point to this server. Domain IP: {$domainIp}, Server IP: {$serverIp}"
             ];
         }
 
         return [
             'valid'   => true,
-            'message' => "الدومين صح ✅"
+            'message' => "Domain is valid"
         ];
+    }
+
+    private function findCertPath(string $domain): ?string
+    {
+        $suffixes = ['', '-0001', '-0002', '-0003'];
+
+        foreach ($suffixes as $suffix) {
+            $path = "/etc/letsencrypt/live/{$domain}{$suffix}";
+            if (file_exists("{$path}/fullchain.pem")) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    private function generateSSL(string $domain): array
+    {
+        $safeDomain = escapeshellarg($domain);
+        $safeEmail  = escapeshellarg($this->adminEmail);
+
+        $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$safeDomain} --non-interactive --agree-tos -m {$safeEmail} 2>&1");
+        Log::info("SSL output for {$domain}: " . $sslOutput);
+
+        // Fix permissions so web user can read the certificate
+        shell_exec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/live/{$domain}/ 2>&1");
+        shell_exec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/archive/{$domain}/ 2>&1");
+        shell_exec("sudo chmod 750 /etc/letsencrypt/live/{$domain}/ 2>&1");
+        shell_exec("sudo chmod 750 /etc/letsencrypt/archive/{$domain}/ 2>&1");
+
+        $certPath = $this->findCertPath($domain);
+
+        if (!$certPath) {
+            return [
+                'success'    => false,
+                'message'    => "SSL generation failed for {$domain}",
+                'ssl_output' => $sslOutput ?? ''
+            ];
+        }
+
+        return [
+            'success'  => true,
+            'certPath' => $certPath
+        ];
+    }
+
+    private function reloadNginx(): array
+    {
+        // Test config before reloading
+        exec("sudo nginx -t 2>&1", $testOutput, $testCode);
+
+        if ($testCode !== 0) {
+            $error = implode("\n", $testOutput);
+            Log::error("Nginx config test failed: " . $error);
+            return [
+                'success' => false,
+                'message' => "Nginx config test failed: " . $error
+            ];
+        }
+
+        exec("sudo systemctl reload nginx 2>&1", $reloadOutput, $reloadCode);
+
+        if ($reloadCode !== 0) {
+            $error = implode("\n", $reloadOutput);
+            Log::error("Nginx reload failed: " . $error);
+            return [
+                'success' => false,
+                'message' => "Nginx reload failed: " . $error
+            ];
+        }
+
+        return ['success' => true];
     }
 
     private function generateNginxConfig(string $domain, string $certPath): string
