@@ -22,7 +22,7 @@ Route::prefix('superAdmin')->group(function () {
     Route::middleware(SuperAdminMiddleware::class)->group(function () {
         Route::apiResource('packages', PackageController::class)->names('package');
         Route::apiResource('features', FeaturesController::class)->names('features');
-        Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package');
+        Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->except('post');
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
     });
 });

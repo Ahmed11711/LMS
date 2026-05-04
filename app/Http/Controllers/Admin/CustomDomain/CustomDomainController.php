@@ -7,6 +7,8 @@ use App\Http\Requests\Admin\CustomDomain\CustomDomainRequest;
 use App\Services\DomainService\DomainService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CustomDomainController extends Controller
 {
@@ -18,6 +20,7 @@ class CustomDomainController extends Controller
     public function setup(CustomDomainRequest $request)
     {
         $request->validated();
+
         $result = $this->domainService->setupDomain($request->domain);
 
         if (!$result['success']) {
@@ -27,9 +30,28 @@ class CustomDomainController extends Controller
             ], 400);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => $result['message']
-        ], 200);
+        try {
+
+            $tenantId = $request->tenant_id;
+
+            DB::connection('LMS_CENTER')
+                ->table('tenants')
+                ->where('id', $tenantId)
+                ->update([
+                    'domain' => $request->domain,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Domain configured and updated successfully in our records."
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Failed to update tenant domain in DB: " . $e->getMessage());
+            return response()->json([
+                'success' => true,
+                'message' => "Domain setup on server done, but failed to update record. Please contact support."
+            ], 500);
+        }
     }
 }
