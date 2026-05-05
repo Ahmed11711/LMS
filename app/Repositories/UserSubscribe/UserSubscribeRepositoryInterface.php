@@ -9,4 +9,5 @@ interface UserSubscribeRepositoryInterface extends BaseRepositoryInterface
     public function mycourses(int $userId);
     public function isAlreadySubscribed(int $userId, int $courseId);
     public function findByTransactionId(string $transactionId);
+    public function updateOrCreate(array $conditions, array $data);
 }

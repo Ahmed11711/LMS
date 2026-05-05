@@ -34,13 +34,10 @@ class UserSubscribeService
         $transactionReference = 'TXN-' . Str::uuid();
 
         // 4. Save subscription as pending
-        $subscription = $this->userSubscribeRepo->create([
-            'user_id'        => $userId,
-            'course_id'      => $courseId,
-            'status'         => 'pending',
-            'transaction_id' => $transactionReference,
-        ]);
-
+        $subscription = $this->userSubscribeRepo->updateOrCreate(
+            ['user_id' => $userId, 'course_id' => $courseId],
+            ['status' => 'pending', 'transaction_id' => $transactionReference]
+        );
         // 5. Create payment link
         $paymentUrl = $this->kashierService->createSession(
             amount: (string) $course->final_price,

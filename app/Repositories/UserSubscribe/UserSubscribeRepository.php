@@ -22,7 +22,7 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
         return $this->model
             ->where('user_id', $userId)
             ->where('course_id', $courseId)
-            ->exists();
+            ->where('status', 'active')->exists();
     }
 
     public function findByTransactionId(string $transactionId)
@@ -30,5 +30,10 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
         return $this->model
             ->where('transaction_id', $transactionId)
             ->first();
+    }
+
+    public function updateOrCreate(array $conditions, array $data)
+    {
+        return $this->model->updateOrCreate($conditions, $data);
     }
 }

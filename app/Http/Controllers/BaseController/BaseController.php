@@ -94,22 +94,22 @@ abstract class BaseController extends Controller
   /**
    * Display the specified resource.
    */
-public function show($id): JsonResponse 
-{
+  public function show($id): JsonResponse
+  {
     $query = $this->repository->query()
-        ->with($this->getShowRelationships());
+      ->with($this->getShowRelationships());
 
-    $query = $this->applyScoping($query); 
-    
-     $record = $query->where($this->lookupColumn(), $id)->first();
+    $query = $this->applyScoping($query);
+
+    $record = $query->where($this->lookupColumn(), $id)->first();
 
     if (!$record) {
-        return $this->errorResponse("Record not found", 404);
+      return $this->errorResponse("Record not found", 404);
     }
 
     $resourceToShow = $this->showResourceClass ?? $this->resourceClass;
     return $this->successResponse(new $resourceToShow($record), 'Record retrieved successfully');
-}
+  }
 
 
 
@@ -196,11 +196,12 @@ public function show($id): JsonResponse
     try {
       DB::beginTransaction();
       $this->beforeDestroy($record);
-
       $record->delete();
-
       $this->afterDestroy($record);
       DB::commit();
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+      DB::rollBack();
+      return $this->errorResponse($e->getMessage(), $e->getStatusCode());
     } catch (\Throwable $e) {
       DB::rollBack();
       Log::error("Error deleting: " . $e->getMessage());
@@ -247,21 +248,21 @@ public function show($id): JsonResponse
 
     return $validated;
   }
-protected function lookupColumn(): string
-{
+  protected function lookupColumn(): string
+  {
     return 'id';
-}
+  }
   /**
-    */
+   */
   protected function uploadGalleryFiles(Request $request, $record): void
   {
-     if ($request->hasFile('gallery') && method_exists($record, 'gallery')) {
+    if ($request->hasFile('gallery') && method_exists($record, 'gallery')) {
       foreach ($request->file('gallery') as $file) {
         try {
           $filename = time() . '_' . Str::random(8) . '_' . $file->getClientOriginalName();
           $path = $file->storeAs("uploads/{$this->collectionName}/gallery", $filename, $this->uploadDisk);
 
-           $record->gallery()->create([
+          $record->gallery()->create([
             'image' => "/storage/app/public/" . $path
           ]);
         } catch (\Throwable $e) {
