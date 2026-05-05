@@ -85,7 +85,7 @@ class DomainService
         if ($domainIp === $domain) {
             return [
                 'valid'   => false,
-                'message' => "Domain {$domain} does not resolve to any server"
+                'message' => "Please make sure that the domain {$domain} is pointing to our server's IP address. If you have recently updated your DNS settings, please wait up to 24-48 hours for the changes to take effect."
             ];
         }
 
