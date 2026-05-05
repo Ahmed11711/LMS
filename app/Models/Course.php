@@ -10,7 +10,7 @@ class Course extends TenantModel
 {
     use TracksFeatureUsage;
     public array $filterable = ['user_id', 'type', 'category_id'];
-    
+
     public function getFeatureSlug(): string
     {
         return 'max_courses';
@@ -32,8 +32,12 @@ class Course extends TenantModel
         return $this->hasMany(Chapter::class, 'course_id');
     }
 
-     public function infos()
+    public function infos()
     {
         return $this->hasMany(CourseInfo::class);
+    }
+    public function subscribers()
+    {
+        return $this->hasMany(UserSubscribe::class, 'course_id');
     }
 }

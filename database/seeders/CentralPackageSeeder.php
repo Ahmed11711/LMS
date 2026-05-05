@@ -21,6 +21,8 @@ class CentralPackageSeeder extends Seeder
             ['id' => 3, 'title' => 'Storage Space (GB)', 'key' => 'storage_limit'],
             ['id' => 4, 'title' => 'Technical Support 24/7', 'key' => 'support_24_7'],
             ['id' => 5, 'title' => 'Custom Certificates', 'key' => 'custom_certificates'],
+            ['id' => 6, 'title' => 'Custom Domain', 'key' => 'custom_domain'],
+            ['id' => 7, 'title' => 'Custom Subdomin', 'key' => 'custom_subdomin'],
         ];
 
         foreach ($features as $feature) {

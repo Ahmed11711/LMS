@@ -79,4 +79,15 @@ class CourseController extends BaseController
             $record->infos()->createMany($infos);
         }
     }
+    protected function beforeDestroy($record): void
+    {
+        if ($record->subscribers()->exists()) {
+            abort(422, 'Cannot delete course with active enrollments');
+        }
+
+        $record->chapters()->each(function ($chapter) {
+            $chapter->lessons()->delete();
+            $chapter->delete();
+        });
+    }
 }

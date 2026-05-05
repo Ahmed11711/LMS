@@ -18,5 +18,8 @@ class UserSubscribe extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
-
+    public function enrollments()
+    {
+        return $this->hasMany(UserSubscribe::class, 'course_id');
+    }
 }
