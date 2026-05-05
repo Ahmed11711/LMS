@@ -116,16 +116,23 @@ class CustomDomainController extends Controller
 
     private function cleanupOldDomain(string $oldDomain): void
     {
-        if (
-            empty($oldDomain) ||
-            str_ends_with($oldDomain, '.darab.academy') ||
-            $oldDomain === 'darab.academy'
-        ) {
+        if (empty($oldDomain) || $oldDomain === 'darab.academy') {
             Log::info("Skipping cleanup for protected domain: {$oldDomain}");
             return;
         }
 
-        // 1. امسح SSL certificates
+        // ✅ لو subdomain داخلي - امسح Nginx بس بدون SSL
+        if (str_ends_with($oldDomain, '.darab.academy')) {
+            $nginxConfig = "/etc/nginx/sites-enabled/{$oldDomain}";
+            if (file_exists($nginxConfig)) {
+                shell_exec("sudo rm -f " . escapeshellarg($nginxConfig) . " 2>&1");
+                Log::info("Deleted Nginx config for internal subdomain: {$oldDomain}");
+                shell_exec("sudo nginx -t && sudo systemctl reload nginx 2>&1");
+            }
+            return;
+        }
+
+        // ✅ دومين خارجي - امسح SSL و Nginx
         $suffixes = ['', '-0001', '-0002', '-0003'];
         foreach ($suffixes as $suffix) {
             $certName = $oldDomain . $suffix;
@@ -138,14 +145,12 @@ class CustomDomainController extends Controller
             }
         }
 
-        // 2. امسح Nginx config
         $nginxConfig = "/etc/nginx/sites-enabled/{$oldDomain}";
         if (file_exists($nginxConfig)) {
             shell_exec("sudo rm -f " . escapeshellarg($nginxConfig) . " 2>&1");
             Log::info("Deleted Nginx config for: {$oldDomain}");
         }
 
-        // 3. Reload Nginx
         shell_exec("sudo nginx -t && sudo systemctl reload nginx 2>&1");
         Log::info("Nginx reloaded after cleanup of: {$oldDomain}");
     }
