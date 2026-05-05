@@ -27,7 +27,7 @@ use App\Http\Controllers\Instructor\InstructorController;
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class])->group(function () {
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
-    Route::apiResource('courses', CourseController::class)->names('course')->middleware(CheckFeatureLimit::class . ':COURSES_COUNT');
+    Route::apiResource('courses', CourseController::class)->names('course')->middleware(CheckFeatureLimit::class . ':max_courses');
     Route::apiResource('online_sessions', OnlineSessionController::class)->names('online_session');
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
     Route::apiResource('chapters', ChapterController::class)->names('chapter');
@@ -39,7 +39,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ///////////////////////////////
-    Route::put('custom-domain', [CustomDomainController::class, 'setup']);
+    Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
