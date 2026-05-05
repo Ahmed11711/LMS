@@ -21,8 +21,35 @@ class CustomDomainController extends Controller
     {
         $request->validated();
 
-        $result = $this->domainService->setupDomain($request->domain);
+        $domain   = $request->domain;
+        $tenantId = $request->tenant_id;
 
+        // ✅ لو subdomain داخلي اتخطى الـ SSL وروح للـ DB مباشرة
+        if (str_ends_with($domain, '.darab.academy')) {
+            try {
+                DB::connection('LMS_CENTER')
+                    ->table('tenants')
+                    ->where('id', $tenantId)
+                    ->update([
+                        'domain'     => $domain,
+                        'updated_at' => now()
+                    ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Subdomain registered successfully."
+                ], 200);
+            } catch (\Exception $e) {
+                Log::error("Failed to update tenant domain in DB: " . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => "Failed to update record. Please contact support."
+                ], 500);
+            }
+        }
+
+        // ✅ دومين خارجي يكمل الـ SSL والـ Nginx كالعادة
+        $result = $this->domainService->setupDomain($domain);
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
@@ -31,14 +58,11 @@ class CustomDomainController extends Controller
         }
 
         try {
-
-            $tenantId = $request->tenant_id;
-
             DB::connection('LMS_CENTER')
                 ->table('tenants')
                 ->where('id', $tenantId)
                 ->update([
-                    'domain' => $request->domain,
+                    'domain'     => $domain,
                     'updated_at' => now()
                 ]);
 
