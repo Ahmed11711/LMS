@@ -38,6 +38,7 @@ class CustomDomainController extends Controller
                         'domain'     => $domain,
                         'updated_at' => now()
                     ]);
+                cache()->forget("tenant_meta_{$tenant->domain}");
 
                 return response()->json([
                     'success' => true,
@@ -69,6 +70,7 @@ class CustomDomainController extends Controller
                     'domain'     => $domain,
                     'updated_at' => now()
                 ]);
+            cache()->forget("tenant_meta_{$tenant->domain}");
 
             return response()->json([
                 'success' => true,
