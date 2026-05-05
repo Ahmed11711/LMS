@@ -23,8 +23,11 @@ class CustomDomainController extends Controller
 
         $domain   = $request->domain;
         $tenantId = $request->tenant_id;
+        Log::alert("Domain Setup Request", [
+            'domain'    => $domain,
+            'tenant_id' => $tenantId,
+        ]);
 
-        // ✅ لو subdomain داخلي اتخطى الـ SSL وروح للـ DB مباشرة
         if (str_ends_with($domain, '.darab.academy')) {
             try {
                 DB::connection('LMS_CENTER')
