@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 class CustomDomainController extends Controller
 {
     use ApiResponseTrait;
+
     public function __construct(
         public DomainService $domainService
     ) {}
@@ -21,16 +22,22 @@ class CustomDomainController extends Controller
     {
         $request->validated();
 
-        $domain   = $request->domain;
-        $tenant   = app('tenant');
-        $tenantId = $tenant->id;
+        $domain    = $request->domain;
+        $tenant    = app('tenant');
+        $tenantId  = $tenant->id;
+        $oldDomain = $tenant->domain;
+
         Log::alert("Domain Setup Request", [
-            'domain'    => $domain,
-            'tenant_id' => $tenantId,
+            'domain'     => $domain,
+            'tenant_id'  => $tenantId,
+            'old_domain' => $oldDomain,
         ]);
 
         if (str_ends_with($domain, '.darab.academy')) {
             try {
+                // ✅ امسح الدومين القديم لو كان external
+                $this->cleanupOldDomain($oldDomain);
+
                 DB::connection('LMS_CENTER')
                     ->table('tenants')
                     ->where('id', $tenantId)
@@ -38,7 +45,8 @@ class CustomDomainController extends Controller
                         'domain'     => $domain,
                         'updated_at' => now()
                     ]);
-                cache()->forget("tenant_meta_{$tenant->domain}");
+
+                cache()->forget("tenant_meta_{$oldDomain}");
 
                 return response()->json([
                     'success' => true,
@@ -52,6 +60,9 @@ class CustomDomainController extends Controller
                 ], 500);
             }
         }
+
+        // ✅ امسح الدومين القديم قبل ما تحط الجديد
+        $this->cleanupOldDomain($oldDomain);
 
         // ✅ دومين خارجي يكمل الـ SSL والـ Nginx كالعادة
         $result = $this->domainService->setupDomain($domain);
@@ -70,11 +81,12 @@ class CustomDomainController extends Controller
                     'domain'     => $domain,
                     'updated_at' => now()
                 ]);
-            cache()->forget("tenant_meta_{$tenant->domain}");
+
+            cache()->forget("tenant_meta_{$oldDomain}");
 
             return response()->json([
                 'success' => true,
-                'message' => "Domain configured  and  updated successfully in our records."
+                'message' => "Domain configured and updated successfully in our records."
             ], 200);
         } catch (\Exception $e) {
             Log::error("Failed to update tenant domain in DB: " . $e->getMessage());
@@ -83,5 +95,46 @@ class CustomDomainController extends Controller
                 'message' => "Domain setup on server done, but failed to update record. Please contact support."
             ], 500);
         }
+    }
+
+    // ============================================================
+    // Private Helpers
+    // ============================================================
+
+    private function cleanupOldDomain(string $oldDomain): void
+    {
+        // ✅ لا تمسح لو فاضي أو subdomain داخلي أو الدومين الأساسي
+        if (
+            empty($oldDomain) ||
+            str_ends_with($oldDomain, '.darab.academy') ||
+            $oldDomain === 'darab.academy'
+        ) {
+            Log::info("Skipping cleanup for protected domain: {$oldDomain}");
+            return;
+        }
+
+        // 1. امسح SSL certificates
+        $suffixes = ['', '-0001', '-0002', '-0003'];
+        foreach ($suffixes as $suffix) {
+            $certName = $oldDomain . $suffix;
+            $certPath = "/etc/letsencrypt/live/{$certName}";
+
+            if (file_exists($certPath)) {
+                $safeCert = escapeshellarg($certName);
+                shell_exec("sudo certbot delete --cert-name {$safeCert} --non-interactive 2>&1");
+                Log::info("Deleted SSL cert: {$certName}");
+            }
+        }
+
+        // 2. امسح Nginx config
+        $nginxConfig = "/etc/nginx/sites-enabled/{$oldDomain}";
+        if (file_exists($nginxConfig)) {
+            shell_exec("sudo rm -f " . escapeshellarg($nginxConfig) . " 2>&1");
+            Log::info("Deleted Nginx config for: {$oldDomain}");
+        }
+
+        // 3. Reload Nginx
+        shell_exec("sudo nginx -t && sudo systemctl reload nginx 2>&1");
+        Log::info("Nginx reloaded after cleanup of: {$oldDomain}");
     }
 }
