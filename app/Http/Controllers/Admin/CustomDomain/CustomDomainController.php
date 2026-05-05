@@ -33,9 +33,22 @@ class CustomDomainController extends Controller
             'old_domain' => $oldDomain,
         ]);
 
+        // ✅ تحقق إن الدومين مش موجود عند tenant تاني
+        $exists = DB::connection('LMS_CENTER')
+            ->table('tenants')
+            ->where('domain', $domain)
+            ->where('id', '!=', $tenantId)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => "This domain is already taken by another account. Please choose a different one."
+            ], 422);
+        }
+
         if (str_ends_with($domain, '.darab.academy')) {
             try {
-                // ✅ امسح الدومين القديم لو كان external
                 $this->cleanupOldDomain($oldDomain);
 
                 DB::connection('LMS_CENTER')
@@ -103,7 +116,6 @@ class CustomDomainController extends Controller
 
     private function cleanupOldDomain(string $oldDomain): void
     {
-        // ✅ لا تمسح لو فاضي أو subdomain داخلي أو الدومين الأساسي
         if (
             empty($oldDomain) ||
             str_ends_with($oldDomain, '.darab.academy') ||
