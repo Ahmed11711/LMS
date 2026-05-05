@@ -68,7 +68,7 @@ class CustomDomainController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Domain configured and updated successfully in our records."
+                'message' => "Domain configured  and  updated successfully in our records."
             ], 200);
         } catch (\Exception $e) {
             Log::error("Failed to update tenant domain in DB: " . $e->getMessage());
