@@ -6,57 +6,29 @@ use Illuminate\Support\Facades\Log;
 
 class DomainService
 {
-    private string $adminEmail = 'admin@darab.academy';
-    private string $webUser    = 'hestiamail';
+    private string $adminEmail    = 'admin@darab.academy';
+    private string $webUser       = 'hestiamail';
+    private string $wildcardCert  = '/etc/letsencrypt/live/darab.academy-0001';
+    private string $protectedBase = 'darab.academy';
 
     public function setupDomain(string $domain): array
     {
         try {
-            // 1. Validate domain
-            $validation = $this->isDomainValid($domain);
-            if (!$validation['valid']) {
+            // 🛡️ منع الدومين الأساسي
+            if ($this->isProtectedDomain($domain)) {
                 return [
                     'success' => false,
-                    'message' => $validation['message']
+                    'message' => "This domain is protected and cannot be used."
                 ];
             }
 
-            // 2. Find existing certificate
-            $certPath = $this->findCertPath($domain);
-
-            // 3. Generate new SSL if not found
-            if (!$certPath) {
-                $certResult = $this->generateSSL($domain);
-                if (!$certResult['success']) {
-                    return $certResult;
-                }
-                $certPath = $certResult['certPath'];
+            // Subdomain داخلي - استخدم wildcard cert بدون SSL
+            if ($this->isInternalSubdomain($domain)) {
+                return $this->setupSubdomain($domain);
             }
 
-            // 4. Write Nginx config
-            $config      = $this->generateNginxConfig($domain, $certPath);
-            $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
-
-            if ($writeResult === false) {
-                Log::error("Failed to write Nginx config for {$domain}");
-                return [
-                    'success' => false,
-                    'message' => "Failed to write Nginx config for {$domain}"
-                ];
-            }
-
-            Log::info("Nginx config written for {$domain} at {$certPath}");
-
-            // 5. Reload Nginx
-            $reloadResult = $this->reloadNginx();
-            if (!$reloadResult['success']) {
-                return $reloadResult;
-            }
-
-            return [
-                'success' => true,
-                'message' => "Domain {$domain} configured successfully"
-            ];
+            // External domain - validate + SSL + Nginx
+            return $this->setupExternalDomain($domain);
         } catch (\Exception $e) {
             Log::error("Domain setup failed for {$domain}: " . $e->getMessage());
             return [
@@ -70,9 +42,96 @@ class DomainService
     // Private Methods
     // ============================================================
 
+    private function isProtectedDomain(string $domain): bool
+    {
+        $domain = strtolower(trim($domain));
+
+        // منع الدومين الأساسي نفسه
+        if ($domain === $this->protectedBase) {
+            return true;
+        }
+
+        // منع www.darab.academy و api.darab.academy وأي subdomain محمي
+        $protectedSubdomains = [
+            'www.'   . $this->protectedBase,
+            'api.'   . $this->protectedBase,
+            'mail.'  . $this->protectedBase,
+            'admin.' . $this->protectedBase,
+        ];
+
+        if (in_array($domain, $protectedSubdomains)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isInternalSubdomain(string $domain): bool
+    {
+        return str_ends_with($domain, '.' . $this->protectedBase);
+    }
+
+    private function setupSubdomain(string $domain): array
+    {
+        $config      = $this->generateNginxConfig($domain, $this->wildcardCert);
+        $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
+
+        if ($writeResult === false) {
+            Log::error("Failed to write Nginx config for subdomain: {$domain}");
+            return [
+                'success' => false,
+                'message' => "Failed to write Nginx config for {$domain}"
+            ];
+        }
+
+        Log::info("Nginx config written for subdomain: {$domain} using wildcard cert");
+
+        return $this->reloadNginx();
+    }
+
+    private function setupExternalDomain(string $domain): array
+    {
+        // 1. Validate domain
+        $validation = $this->isDomainValid($domain);
+        if (!$validation['valid']) {
+            return [
+                'success' => false,
+                'message' => $validation['message']
+            ];
+        }
+
+        // 2. Find existing certificate
+        $certPath = $this->findCertPath($domain);
+
+        // 3. Generate new SSL if not found
+        if (!$certPath) {
+            $certResult = $this->generateSSL($domain);
+            if (!$certResult['success']) {
+                return $certResult;
+            }
+            $certPath = $certResult['certPath'];
+        }
+
+        // 4. Write Nginx config
+        $config      = $this->generateNginxConfig($domain, $certPath);
+        $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
+
+        if ($writeResult === false) {
+            Log::error("Failed to write Nginx config for {$domain}");
+            return [
+                'success' => false,
+                'message' => "Failed to write Nginx config for {$domain}"
+            ];
+        }
+
+        Log::info("Nginx config written for external domain: {$domain} at {$certPath}");
+
+        // 5. Reload Nginx
+        return $this->reloadNginx();
+    }
+
     private function isDomainValid(string $domain): array
     {
-        // 1. Validate domain format
         if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
             return [
                 'valid'   => false,
@@ -80,7 +139,6 @@ class DomainService
             ];
         }
 
-        // 2. Resolve domain IP
         $domainIp = gethostbyname($domain);
         if ($domainIp === $domain) {
             return [
@@ -89,10 +147,8 @@ class DomainService
             ];
         }
 
-        // 3. Get server public IP
         $serverIp = trim(shell_exec("curl -4 -s ifconfig.me 2>&1"));
 
-        // 4. Ensure domain points to this server
         if ($domainIp !== $serverIp) {
             return [
                 'valid'   => false,
@@ -128,7 +184,6 @@ class DomainService
         $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$safeDomain} --non-interactive --agree-tos -m {$safeEmail} 2>&1");
         Log::info("SSL output for {$domain}: " . $sslOutput);
 
-        // Fix permissions so web user can read the certificate
         shell_exec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/live/{$domain}/ 2>&1");
         shell_exec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/archive/{$domain}/ 2>&1");
         shell_exec("sudo chmod 750 /etc/letsencrypt/live/{$domain}/ 2>&1");
