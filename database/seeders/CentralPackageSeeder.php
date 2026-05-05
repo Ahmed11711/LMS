@@ -50,8 +50,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 3, 'value' => '2', 'lable' => '2 GB Storage'],
                     ['feature_id' => 4, 'value' => '0', 'lable' => 'Not Supported'],
                     ['feature_id' => 5, 'value' => '0', 'lable' => 'Not Supported'],
-                    ['feature_id' => 6, 'value' => '5', 'key' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '5', 'key' => 'custom_subdomin'],
+                    ['feature_id' => 6, 'value' => '5', 'lable' => 'custom_domain'],
+                    ['feature_id' => 7, 'value' => '5', 'lable' => 'custom_subdomin'],
                 ]
             ],
             [
@@ -67,8 +67,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 3, 'value' => '10', 'lable' => '10 GB Storage'],
                     ['feature_id' => 4, 'value' => '0', 'lable' => 'Not Supported'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
-                    ['feature_id' => 6, 'value' => '50', 'key' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '50', 'key' => 'custom_subdomin'],
+                    ['feature_id' => 6, 'value' => '50', 'lable' => 'custom_domain'],
+                    ['feature_id' => 7, 'value' => '50', 'lable' => 'custom_subdomin'],
                 ]
             ],
             [
@@ -84,8 +84,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 3, 'value' => '100', 'lable' => '100 GB Storage'],
                     ['feature_id' => 4, 'value' => '1', 'lable' => 'Live Support'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
-                    ['feature_id' => 6, 'value' => '500', 'key' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '500', 'key' => 'custom_subdomin'],
+                    ['feature_id' => 6, 'value' => '500', 'lable' => 'custom_domain'],
+                    ['feature_id' => 7, 'value' => '500', 'lable' => 'custom_subdomin'],
                 ]
             ],
             [
@@ -101,8 +101,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 3, 'value' => '1024', 'lable' => '1 TB Storage'],
                     ['feature_id' => 4, 'value' => '1', 'lable' => 'VIP Support'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
-                    ['feature_id' => 6, 'value' => '5000', 'key' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '5000', 'key' => 'custom_subdomin'],
+                    ['feature_id' => 6, 'value' => '5000', 'lable' => 'custom domain'],
+                    ['feature_id' => 7, 'value' => '5000', 'lable' => 'custom_subdomin'],
                 ]
             ],
         ];
