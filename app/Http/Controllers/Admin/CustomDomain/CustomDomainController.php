@@ -22,7 +22,8 @@ class CustomDomainController extends Controller
         $request->validated();
 
         $domain   = $request->domain;
-        $tenantId = $request->tenant_id;
+        $tenant   = app('tenant');
+        $tenantId = $tenant->id;
         Log::alert("Domain Setup Request", [
             'domain'    => $domain,
             'tenant_id' => $tenantId,
