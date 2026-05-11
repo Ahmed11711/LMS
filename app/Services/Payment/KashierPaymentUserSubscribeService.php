@@ -35,7 +35,7 @@ class KashierPaymentUserSubscribeService
             'order'              => $transactionId,
             'merchantId'         => 'MID-41016-213',
             // 'merchantRedirect' => rtrim(config('app.url'), '/') . '/auth/setup?' . $queryParam . urlencode($customerContact),
-            'merchantRedirect' => $tenantBaseUrl . '//user/courses/slug?' . $queryParam . urlencode($customerContact),
+            'merchantRedirect' => $tenantBaseUrl . '/user/courses?' . $queryParam . urlencode($customerContact),
 
             'failureRedirect'    => true,
             'serverWebhook'      => $webhookUrl,
