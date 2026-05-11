@@ -17,6 +17,7 @@ return new class extends Migration
 
             $table->string('title');
             $table->string('video_id');
+            $table->string('video_url');
             $table->string('library_id');
             $table->text('description')->nullable();
             $table->integer('order')->default(0);

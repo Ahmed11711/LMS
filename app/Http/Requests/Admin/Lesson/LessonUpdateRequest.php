@@ -17,6 +17,7 @@ class LessonUpdateRequest extends BaseRequest
             'chapter_id' => 'sometimes|required|integer|exists:chapters,id',
             'title' => 'sometimes|required|string|max:255',
             'video_id' => 'sometimes|required|string|max:255',
+            'video_url' => 'sometimes|required|string|max:255',
             'library_id' => 'sometimes|required|string|max:255',
             'description' => 'nullable|sometimes|string',
             'order' => 'sometimes|required|integer',

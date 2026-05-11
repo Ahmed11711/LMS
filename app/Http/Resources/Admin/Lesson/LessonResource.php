@@ -13,6 +13,7 @@ class LessonResource extends JsonResource
             'chapter_id' => $this->chapter_id,
             'title' => $this->title,
             'video_id' =>  $this->video_id,
+            'video_url' =>  $this->video_url,
             'library_id' => $this->library_id,
             'description' => $this->description,
             'order' => $this->order,
