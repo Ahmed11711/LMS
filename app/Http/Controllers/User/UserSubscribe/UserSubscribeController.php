@@ -17,7 +17,7 @@ class UserSubscribeController extends Controller
 
   public function store(StoreUserSubscribeRequest $request)
   {
-    $user =  $request->get('tenant_user');;
+    $user =  $request->get('tenant_user');
     $tenant = app('tenant');
 
     $result = $this->service->execute(
@@ -25,6 +25,7 @@ class UserSubscribeController extends Controller
       courseId: $request->validated('course_id'),
       customerContact: $user->email ?? $user->phone,
       tenantDomain: $tenant->domain,
+
     );
 
     if (!$result['success']) {

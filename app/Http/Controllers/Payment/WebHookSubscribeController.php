@@ -16,7 +16,6 @@ class WebHookSubscribeController extends Controller
 
     public function handle(Request $request, string $id): JsonResponse
     {
-        Log::alert("sssssssssssssss");
         $this->webhookService->handle($request->all(), $id);
 
         return response()->json(['message' => 'ok']);

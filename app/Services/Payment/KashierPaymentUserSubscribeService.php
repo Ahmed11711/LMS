@@ -13,6 +13,7 @@ class KashierPaymentUserSubscribeService
         string $customerContact,
         string $transactionId,
         ?string $tenantId = null,
+
     ): ?string {
 
         $isEmail = filter_var($customerContact, FILTER_VALIDATE_EMAIL);
@@ -25,6 +26,7 @@ class KashierPaymentUserSubscribeService
         $tenantBaseUrl = app()->environment('local')
             ? 'http://' . rtrim($tenantId, '/')
             : 'https://' . rtrim($tenantId, '/');
+        Log::alert("sss", [$tenantId]);
         $payload = [
             'expireAt'           => now()->addMinutes(30)->toISOString(),
             'maxFailureAttempts' => 3,
@@ -33,7 +35,7 @@ class KashierPaymentUserSubscribeService
             'order'              => $transactionId,
             'merchantId'         => 'MID-41016-213',
             // 'merchantRedirect' => rtrim(config('app.url'), '/') . '/auth/setup?' . $queryParam . urlencode($customerContact),
-            'merchantRedirect' => $tenantBaseUrl . '/auth/setup?' . $queryParam . urlencode($customerContact),
+            'merchantRedirect' => $tenantBaseUrl . '//user/courses/slug?' . $queryParam . urlencode($customerContact),
 
             'failureRedirect'    => true,
             'serverWebhook'      => $webhookUrl,
