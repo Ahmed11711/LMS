@@ -4,7 +4,6 @@ namespace App\Http\Controllers\User\UserSubscribe;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
-use App\Services\UserSubscribe\CreateLinkForUserSubscribeCourseService;
 use App\Traits\ApiResponseTrait;
 use App\Services\Payment\UserSubscribeService;
 
@@ -18,14 +17,14 @@ class UserSubscribeController extends Controller
 
   public function store(StoreUserSubscribeRequest $request)
   {
+    $user =  $request->get('tenant_user');;
     $tenant = app('tenant');
 
     $result = $this->service->execute(
       userId: $request->get('user_id'),
       courseId: $request->validated('course_id'),
-      customerContact: "ahmedsamir@gmail.com",
+      customerContact: $user->email ?? $user->phone,
       tenantDomain: $tenant->domain,
-
     );
 
     if (!$result['success']) {

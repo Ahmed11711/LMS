@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Payment\webhook\KashierWebhookUserSubService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class WebHookSubscribeController extends Controller
 {
@@ -15,6 +16,7 @@ class WebHookSubscribeController extends Controller
 
     public function handle(Request $request, string $id): JsonResponse
     {
+        Log::alert("sssssssssssssss");
         $this->webhookService->handle($request->all(), $id);
 
         return response()->json(['message' => 'ok']);

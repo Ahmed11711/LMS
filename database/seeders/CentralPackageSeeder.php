@@ -22,7 +22,8 @@ class CentralPackageSeeder extends Seeder
             ['id' => 4, 'title' => 'Technical Support 24/7', 'key' => 'support_24_7'],
             ['id' => 5, 'title' => 'Custom Certificates', 'key' => 'custom_certificates'],
             ['id' => 6, 'title' => 'Custom Domain', 'key' => 'custom_domain'],
-            ['id' => 7, 'title' => 'Custom Subdomin', 'key' => 'custom_subdomin'],
+            ['id' => 7, 'title' => 'Direct Payment (Darap)', 'key' => 'direct_payment'],
+            ['id' => 8, 'title' => 'Online Payment Gateway', 'key' => 'online_payment']
         ];
 
         foreach ($features as $feature) {
@@ -50,8 +51,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 3, 'value' => '2', 'lable' => '2 GB Storage'],
                     ['feature_id' => 4, 'value' => '0', 'lable' => 'Not Supported'],
                     ['feature_id' => 5, 'value' => '0', 'lable' => 'Not Supported'],
-                    ['feature_id' => 6, 'value' => '5', 'lable' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '5', 'lable' => 'custom_subdomin'],
+                    ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 8, 'value' => false, 'lable' => 'Not Supported'],
                 ]
             ],
             [
@@ -68,7 +69,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 4, 'value' => '0', 'lable' => 'Not Supported'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
                     ['feature_id' => 6, 'value' => '50', 'lable' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '50', 'lable' => 'custom_subdomin'],
+                    ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
                 ]
             ],
             [
@@ -85,7 +87,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 4, 'value' => '1', 'lable' => 'Live Support'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
                     ['feature_id' => 6, 'value' => '500', 'lable' => 'custom_domain'],
-                    ['feature_id' => 7, 'value' => '500', 'lable' => 'custom_subdomin'],
+                    ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
                 ]
             ],
             [
@@ -102,7 +105,8 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 4, 'value' => '1', 'lable' => 'VIP Support'],
                     ['feature_id' => 5, 'value' => '1', 'lable' => 'Available'],
                     ['feature_id' => 6, 'value' => '5000', 'lable' => 'custom domain'],
-                    ['feature_id' => 7, 'value' => '5000', 'lable' => 'custom_subdomin'],
+                    ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
                 ]
             ],
         ];

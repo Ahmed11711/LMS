@@ -12,11 +12,7 @@ class LessonResource extends JsonResource
             'id' => $this->id,
             'chapter_id' => $this->chapter_id,
             'title' => $this->title,
-            'video_url' => collect([
-                'https://www.w3schools.com/html/mov_bbb.mp4',
-                'https://www.w3schools.com/html/movie.mp4',
-                'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
-            ])->random(),
+            'video_url' =>  $this->video_url,
             'library_id' => $this->library_id,
             'description' => $this->description,
             'order' => $this->order,

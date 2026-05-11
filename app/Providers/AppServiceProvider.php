@@ -2,6 +2,23 @@
 
 namespace App\Providers;
 
+use App\Repositories\PaymentMethod\PaymentMethodRepositoryInterface;
+use App\Repositories\PaymentMethod\PaymentMethodRepository;
+
+
+
+use App\Repositories\Country\CountryRepositoryInterface;
+use App\Repositories\Country\CountryRepository;
+
+use App\Repositories\UserWithdraw\UserWithdrawRepositoryInterface;
+use App\Repositories\UserWithdraw\UserWithdrawRepository;
+
+use App\Repositories\UserPaymentInfo\UserPaymentInfoRepositoryInterface;
+use App\Repositories\UserPaymentInfo\UserPaymentInfoRepository;
+
+use App\Repositories\paymentInfo\paymentInfoRepositoryInterface;
+use App\Repositories\paymentInfo\paymentInfoRepository;
+
 use App\Repositories\UserSubscribe\UserSubscribeRepositoryInterface;
 use App\Repositories\UserSubscribe\UserSubscribeRepository;
 
@@ -66,6 +83,11 @@ $this->app->bind(
         $this->app->bind(ChapterRepositoryInterface::class, ChapterRepository::class);
         $this->app->bind(LessonRepositoryInterface::class, LessonRepository::class);
         $this->app->bind(UserSubscribeRepositoryInterface::class, UserSubscribeRepository::class);
+        $this->app->bind(paymentInfoRepositoryInterface::class, paymentInfoRepository::class);
+        $this->app->bind(UserPaymentInfoRepositoryInterface::class, UserPaymentInfoRepository::class);
+        $this->app->bind(UserWithdrawRepositoryInterface::class, UserWithdrawRepository::class);
+        $this->app->bind(CountryRepositoryInterface::class, CountryRepository::class);
+        $this->app->bind(PaymentMethodRepositoryInterface::class, PaymentMethodRepository::class);
 }
 
     /**

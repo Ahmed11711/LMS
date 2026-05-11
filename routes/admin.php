@@ -20,6 +20,13 @@ use App\Http\Middleware\TenantJwtMiddleware;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\PaymentMethod\PaymentMethodController;
+
+
+use App\Http\Controllers\Admin\Country\CountryController;
+use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
+use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
+use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Instructor\InstructorController;
 
@@ -40,7 +47,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ///////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
-
+    Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info');
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
         $tenant = app('tenant');
@@ -58,21 +65,10 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
 
         Route::apiResource('profile', InstructorController::class)->except('post', 'delete', 'put');
         Route::put('profile', [InstructorController::class, 'update']);
+        Route::apiResource('user_payment_infos', UserPaymentInfoController::class)->names('user_payment_info');
+        Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
     });
 
 
 
 Route::prefix('v1')->group(function () {});
-Route::get('/whoami', function () {
-
-    $domain = "darab.academy";
-    $domain2 = "darrab.app";
-    $domainIp = gethostbyname($domain);
-    $domainIp2 = gethostbyname($domain2);
-
-    return [
-        '1' => $domainIp,
-        '2' => $domainIp2,
-
-    ];
-});

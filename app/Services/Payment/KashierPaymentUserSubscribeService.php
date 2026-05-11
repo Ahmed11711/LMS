@@ -4,7 +4,7 @@ namespace App\Services\Payment;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
+
 
 class KashierPaymentUserSubscribeService
 {
@@ -19,7 +19,7 @@ class KashierPaymentUserSubscribeService
         $queryParam = $isEmail ? 'email=' : 'phone=';
 
         $webhookUrl = rtrim(config('app.url'), '/')
-            . '/kashier/webhook/ahmed/'
+            . '/kashier/webhook/academy/'
             . rtrim(strtr(base64_encode($tenantId ?? 'default'), '+/', '-_'), '=');
 
         $tenantBaseUrl = app()->environment('local')

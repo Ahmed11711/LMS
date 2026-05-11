@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'kashier/webhook',
-            'kashier/webhook/ahmed/*',
+            'kashier/webhook/academy/*',
             'bunny/webhook',
         ]);
     })

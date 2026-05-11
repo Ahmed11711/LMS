@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\Country\CountryController;
 use App\Http\Controllers\Admin\FeaturePackage\FeaturePackageController;
 use App\Http\Controllers\Admin\Features\FeaturesController;
 use App\Http\Controllers\Admin\Package\PackageController;
+use App\Http\Controllers\Admin\PaymentMethod\PaymentMethodController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
 use App\Http\Controllers\SuperAdmin\Auth\LoginController;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -24,5 +26,7 @@ Route::prefix('superAdmin')->group(function () {
         Route::apiResource('features', FeaturesController::class)->names('features');
         Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->except('post');
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
+        Route::apiResource('countries', CountryController::class)->names('country');
+        Route::apiResource('payment_methods', PaymentMethodController::class)->names('payment_method');
     });
 });
