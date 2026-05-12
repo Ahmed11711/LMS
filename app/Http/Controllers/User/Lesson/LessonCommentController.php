@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Lesson;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\Lesson\LessonCommentResource;
 use App\Models\LessonComment;
 use App\Models\LessonCommentLike;
 use App\Traits\ApiResponseTrait;
@@ -20,7 +21,7 @@ class LessonCommentController extends Controller
             ->latest()
             ->get();
 
-        return $this->successResponse($comments, 'Comments retrieved');
+        return $this->successResponse(LessonCommentResource::collection($comments), 'Comments retrieved');
     }
 
     public function store($lessonId, Request $request)

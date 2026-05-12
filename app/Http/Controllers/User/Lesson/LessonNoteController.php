@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Lesson;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\Note\NoteStoreRequest;
 use App\Models\LessonNote;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
@@ -23,14 +24,11 @@ class LessonNoteController extends Controller
         return $this->successResponse($notes, 'Notes retrieved');
     }
 
-    public function store($lessonId, Request $request)
+    public function store($lessonId, NoteStoreRequest $request)
     {
         $user = $request->get('tenant_user');
 
-        $request->validate([
-            'body'       => 'required|string',
-            'video_time' => 'nullable|integer',
-        ]);
+        $request->validated();
 
         $note = LessonNote::create([
             'user_id'    => $user->id,
