@@ -24,9 +24,11 @@ class KashierPaymentUserSubscribeService
             . rtrim(strtr(base64_encode($tenantId ?? 'default'), '+/', '-_'), '=');
 
         $tenantBaseUrl = app()->environment('local')
-            ? 'http://' . rtrim($tenantId, '/')
+            ? 'https://' . rtrim($tenantId, '/')
             : 'https://' . rtrim($tenantId, '/');
-        Log::alert("sss", [$tenantId]);
+        Log::alert("sss", [$tenantBaseUrl]);
+        $tenantBaseUrl = "https://darab.academy/";
+
         $payload = [
             'expireAt'           => now()->addMinutes(30)->toISOString(),
             'maxFailureAttempts' => 3,

@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://api.darab.academy/'),
+    'url' => env('APP_URL', 'https://62a1-197-39-236-28.ngrok-free.app/'),
 
     /*
     |--------------------------------------------------------------------------

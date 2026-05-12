@@ -22,6 +22,8 @@ return new class extends Migration
             $table->decimal('balance_before', 12, 2);
             $table->decimal('balance_after', 12, 2);
             $table->string('transaction_id')->nullable();
+            $table->timestamp('available_at')->nullable();
+
 
             $table->timestamps();
         });

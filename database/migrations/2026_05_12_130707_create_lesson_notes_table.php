@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_balances', function (Blueprint $table) {
+        Schema::create('lesson_notes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('balance', 12, 2)->default(0);
-            $table->decimal('available_balance', 12, 2)->default(0);
-            $table->boolean('is_active');
+            $table->foreignId('lesson_id')->constrained()->cascadeOnDelete();
+            $table->text('body');
+            $table->unsignedInteger('video_time')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_balances');
+        Schema::dropIfExists('lesson_notes');
     }
 };

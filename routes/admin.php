@@ -38,7 +38,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('online_sessions', OnlineSessionController::class)->names('online_session');
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
     Route::apiResource('chapters', ChapterController::class)->names('chapter');
-    Route::apiResource('lessons', LessonController::class)->names('lesson')->middleware(CheckFeatureLimit::class . ':storage_limit');
+    Route::apiResource('lessons', LessonController::class)->names('lesson');
     Route::get('me', [MeController::class, 'me'])->name('me');
     Route::post('send-otp', [SendOtpController::class, 'sendOtp'])->name('send_otp');
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');

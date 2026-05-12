@@ -12,4 +12,8 @@ class LessonRepository extends BaseRepository implements LessonRepositoryInterfa
     {
         parent::__construct($model);
     }
+
+    public function myNots($userId, $lesonId) {}
+
+    public function allCommand($lesonId) {}
 }

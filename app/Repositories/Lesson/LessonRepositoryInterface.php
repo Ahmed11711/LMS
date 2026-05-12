@@ -6,5 +6,5 @@ use App\Repositories\BaseRepository\BaseRepositoryInterface;
 
 interface LessonRepositoryInterface extends BaseRepositoryInterface
 {
-    //
+    public function myNots($userId, $lesonId);
 }

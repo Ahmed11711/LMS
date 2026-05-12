@@ -39,7 +39,6 @@ class KashierWebhookUserSubService
 
         $updated = $this->updateSubscription($transactionId, $newStatus);
 
-        // ✅ بس لو الـ update نجح والـ status active
         if ($updated && $newStatus === 'active') {
             $this->handleWallets($transactionId);
         }
@@ -94,13 +93,13 @@ class KashierWebhookUserSubService
             return;
         }
 
-        // ضيف للمدرس
+        //  add amount for instractour
         $this->creditUser($course->user_id, (float) $course->price, $transactionId, 'teacher');
 
         // جيب الـ super_admin
         $superAdmin = DB::connection('tenant')
             ->table('users')
-            ->where('role', 'super_admin')
+            ->where('role', 'admin')
             ->first();
 
         if (!$superAdmin) {
@@ -136,6 +135,7 @@ class KashierWebhookUserSubService
                 ->insert([
                     'user_id'    => $userId,
                     'balance'    => $balanceAfter,
+                    'available_balance' => 0,
                     'is_active'  => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -148,11 +148,12 @@ class KashierWebhookUserSubService
                 'user_id'        => $userId,
                 'type'           => 'deposit',
                 'amount'         => $amount,
-                'status'         => 'completed',
+                'status'         => 'pending',
                 'notes'          => 'Course purchase - ' . $type,
                 'balance_before' => $balanceBefore,
                 'balance_after'  => $balanceAfter,
                 'transaction_id' => $transactionId,
+                'available_at'   => now()->addDays(7),
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);

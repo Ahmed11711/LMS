@@ -14,8 +14,11 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
     }
     public function mycourses($userId)
     {
-
-        return $this->model->where('user_id', $userId)->with('course')->get();
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('status', 'active')
+            ->with('course')
+            ->get();
     }
     public function isAlreadySubscribed(int $userId, int $courseId): bool
     {
@@ -35,5 +38,22 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
     public function updateOrCreate(array $conditions, array $data)
     {
         return $this->model->updateOrCreate($conditions, $data);
+    }
+    public function hasCourse(int $userId, int $courseId): bool
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('status', 'active')
+            ->exists();
+    }
+    public function getCourseById(int $userId, int $courseId)
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('status', 'active')
+            ->with('course.chapters.lessons.progresses')
+            ->first();
     }
 }

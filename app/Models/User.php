@@ -66,6 +66,20 @@ class User extends TenantModel  implements JWTSubject
 
     public function enrollments()
     {
-        return $this->hasMany(UserSubscribe::class);
+        return $this->hasMany(UserSubscribe::class)->where('status', 'active');
+    }
+    public function lessonComments()
+    {
+        return $this->hasMany(LessonComment::class);
+    }
+
+    public function lessonNotes()
+    {
+        return $this->hasMany(LessonNote::class);
+    }
+
+    public function lessonProgresses()
+    {
+        return $this->hasMany(LessonProgress::class);
     }
 }
