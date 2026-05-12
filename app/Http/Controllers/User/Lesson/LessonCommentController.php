@@ -46,9 +46,15 @@ class LessonCommentController extends Controller
     {
         $user = $request->get('tenant_user');
 
-        $comment = LessonComment::where('id', $commentId)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+        $comment = LessonComment::where('id', $commentId)->first();
+
+        if (!$comment) {
+            return $this->errorResponse('Comment not found', 404);
+        }
+
+        if ($comment->user_id !== $user->id) {
+            return $this->errorResponse('You are not authorized to delete this comment', 403);
+        }
 
         $comment->delete();
 

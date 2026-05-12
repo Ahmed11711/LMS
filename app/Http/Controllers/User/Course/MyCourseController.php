@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Course;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\Course\MyCourseShowResource;
 use App\Repositories\UserSubscribe\UserSubscribeRepository;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
@@ -24,11 +25,11 @@ class MyCourseController extends Controller
         $user = $request->get('tenant_user');
 
         if (!$this->userRepo->hasCourse($user->id, $id)) {
-            return $this->errorResponse('You are not subscribed to this course', 403);
+            return $this->errorResponse('You are not enrolled in this course', 403);
         }
 
         $course = $this->userRepo->getCourseById($user->id, $id);
 
-        return $this->successResponse($course, 'Course retrieved successfully');
+        return $this->successResponse(new MyCourseShowResource($course), 'Course retrieved successfully');
     }
 }
