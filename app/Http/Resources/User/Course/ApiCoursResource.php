@@ -17,15 +17,19 @@ class ApiCoursResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'is_enrolled' => $this->when(
+                auth('api')->check(),
+                fn() => (bool) $this->is_enrolled
+            ),
             'description' => $this->description,
-'image' => $this->image 
-    ? asset(ltrim($this->image, '/')) 
-    : null,      
-       'price' => $this->price,
+            'image' => $this->image
+                ? asset(ltrim($this->image, '/'))
+                : null,
+            'price' => $this->price,
             'final_price' => $this->final_price,
             'type' => $this->type,
-            'slug'=>$this->slug,
+            'slug' => $this->slug,
 
-         ];
+        ];
     }
 }

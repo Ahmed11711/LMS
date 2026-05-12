@@ -63,4 +63,9 @@ class User extends TenantModel  implements JWTSubject
             'password' => 'hashed',
         ];
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(UserSubscribe::class);
+    }
 }
