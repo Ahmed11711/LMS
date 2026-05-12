@@ -19,4 +19,10 @@ class Lesson extends TenantModel
     {
         return $this->belongsTo(Chapter::class, 'chapter_id');
     }
+    // app/Models/Lesson.php
+
+    public function setVideoUrlAttribute($value): void
+    {
+        $this->attributes['video_url'] = stripslashes($value);
+    }
 }

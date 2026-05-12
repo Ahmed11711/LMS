@@ -17,15 +17,16 @@ class CourseResource extends JsonResource
             'type' => $this->type,
             'category_id' => $this->category_id,
             'description' => $this->description,
-            'image' => $this->image 
-    ? asset(ltrim($this->image, '/')) 
-    : null,      
+            'image' => $this->image
+                ? asset(ltrim($this->image, '/'))
+                : null,
             'price_type' => $this->price_type,
             'price' => $this->price,
             'final_price' => $this->final_price,
             'status' => $this->status,
-            'slug'=>$this->slug,
+            'slug' => $this->slug,
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
+            'infos'    =>  $this->whenLoaded('infos'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -22,7 +22,7 @@ class CourseController extends BaseController
             fileFields: ['image']
         );
 
-        $this->withRelationships  = ['chapters.lessons'];
+        $this->withRelationships  = ['chapters.lessons', 'infos'];
         $this->storeRequestClass  = CourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass      = CourseResource::class;

@@ -60,14 +60,16 @@ use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\JsonResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
-    public function register(): void {
-$this->app->bind(
+    public function register(): void
+    {
+        $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -88,13 +90,16 @@ $this->app->bind(
         $this->app->bind(UserWithdrawRepositoryInterface::class, UserWithdrawRepository::class);
         $this->app->bind(CountryRepositoryInterface::class, CountryRepository::class);
         $this->app->bind(PaymentMethodRepositoryInterface::class, PaymentMethodRepository::class);
-}
+    }
 
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
+        $this->app->resolving(JsonResponse::class, function (JsonResponse $response) {
+            $response->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        });
         TenantObserver::class;
         Model::unguard();
         Scramble::routes(function (Route $route) {
