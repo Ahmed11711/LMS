@@ -26,8 +26,6 @@ class KashierPaymentUserSubscribeService
         $tenantBaseUrl = app()->environment('local')
             ? 'https://' . rtrim($tenantId, '/')
             : 'https://' . rtrim($tenantId, '/');
-        Log::alert("sss", [$tenantBaseUrl]);
-        $tenantBaseUrl = "https://darab.academy/";
 
         $payload = [
             'expireAt'           => now()->addMinutes(30)->toISOString(),
