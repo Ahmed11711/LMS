@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin\Withdraw;
 
 use App\Http\Controllers\BaseController\BaseController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserWithdraw\UserWithdrawStoreRequest;
-use App\Http\Requests\Admin\UserWithdraw\UserWithdrawUpdateRequest;
+use App\Http\Requests\Admin\Withdraw\WithdrawRequest;
 use App\Http\Resources\Admin\UserWithdraw\UserWithdrawResource;
 use App\Repositories\UserWithdraw\UserWithdrawRepositoryInterface;
-use Illuminate\Http\Request;
+
 
 class WithdrawController  extends BaseController
 {
@@ -18,11 +17,14 @@ class WithdrawController  extends BaseController
 
         $this->initService(
             repository: $repository,
-            collectionName: 'UserWithdraw'
+            collectionName: 'UserWithdraw',
+            fileFields: ['receipt_image'],
+
+
         );
-        $this->isUserBound = true;
+        $this->withRelationships = ['user:id,name,email'];
         $this->storeRequestClass = UserWithdrawStoreRequest::class;
-        $this->updateRequestClass = UserWithdrawUpdateRequest::class;
+        $this->updateRequestClass = WithdrawRequest::class;
         $this->resourceClass = UserWithdrawResource::class;
     }
 }

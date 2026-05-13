@@ -19,6 +19,8 @@ return new class extends Migration
             $table->enum('status', ['pending', 'rejected', 'approved'])->default('pending');
             $table->text('admin_note')->nullable();
             $table->text('admin_id')->nullable();
+            $table->string('receipt_image')->nullable();
+            $table->string('transaction_number')->nullable()->unique();
             $table->string('transaction_id')->nullable();
             $table->timestamps();
         });

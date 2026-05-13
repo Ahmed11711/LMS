@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin\UserWithdraw;
 
+use App\Http\Resources\Admin\User\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserWithdrawResource extends JsonResource
@@ -15,10 +16,13 @@ class UserWithdrawResource extends JsonResource
             'amount' => $this->amount,
             'status' => $this->status,
             'admin_note' => $this->admin_note,
-            'admin_id' => $this->admin_id,
+            'receipt_image' => $this->receipt_image,
+            'transaction_number' => $this->transaction_number,
+            // 'admin_id' => $this->admin_id,
             'transaction_id' => $this->transaction_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }

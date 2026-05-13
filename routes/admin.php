@@ -17,17 +17,12 @@ use App\Http\Controllers\Instructor\Course\CourseController as CourseCourseContr
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\PaymentMethod\PaymentMethodController;
-
-
-use App\Http\Controllers\Admin\Country\CountryController;
 use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
 use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
+use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
 
 //
@@ -47,9 +42,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ///////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
-
     Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
-
+    Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
