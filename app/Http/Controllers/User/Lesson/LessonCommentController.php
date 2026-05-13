@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Lesson;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\Comment\StoreUserCommentRequest;
 use App\Http\Resources\User\Lesson\LessonCommentResource;
 use App\Models\LessonComment;
 use App\Models\LessonCommentLike;
@@ -24,14 +25,11 @@ class LessonCommentController extends Controller
         return $this->successResponse(LessonCommentResource::collection($comments), 'Comments retrieved');
     }
 
-    public function store($lessonId, Request $request)
+    public function store($lessonId, StoreUserCommentRequest $request)
     {
         $user = $request->get('tenant_user');
 
-        $request->validate([
-            'body'      => 'required|string',
-            'parent_id' => 'nullable|exists:lesson_comments,id',
-        ]);
+        $request->validated();
 
         $comment = LessonComment::create([
             'user_id'   => $user->id,
