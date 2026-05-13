@@ -13,7 +13,7 @@ class PaymentMethodResource extends JsonResource
             'country_id' => $this->country_id,
             'type' => $this->type,
             'display_name' => $this->display_name,
-            'credentials' => $this->credentials,
+            'credentials' => json_decode($this->credentials[0], true),
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
