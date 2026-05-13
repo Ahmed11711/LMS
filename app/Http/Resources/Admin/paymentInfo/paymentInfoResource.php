@@ -11,8 +11,7 @@ class paymentInfoResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'credentials' => json_decode($this->credentials[0], true),
-
+            'credentials' => $this->credentials,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

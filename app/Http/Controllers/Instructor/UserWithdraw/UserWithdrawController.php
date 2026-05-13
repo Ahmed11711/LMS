@@ -10,6 +10,7 @@ use App\Http\Resources\Admin\UserWithdraw\UserWithdrawResource;
 use App\Models\UserBalance;
 use App\Models\UserPaymentInfo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserWithdrawController extends BaseController
 {
@@ -30,6 +31,7 @@ class UserWithdrawController extends BaseController
     protected function beforeStore(array $data, Request $request): array
     {
         $data['user_id'] = auth()->id();
+
 
         $paymentInfo = UserPaymentInfo::where('id', $data['user_payment_info_id'])
             ->where('user_id', auth()->id())

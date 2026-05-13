@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'kashier/webhook/academy/*',
             'bunny/webhook',
         ]);
+        $middleware->api(append: [
+            \App\Http\Middleware\EncryptApiResponse::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

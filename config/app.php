@@ -117,7 +117,7 @@ return [
     | Supported drivers: "file", "cache"
     |
     */
-
+    'api_secret' => "ahmed-samir",
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
