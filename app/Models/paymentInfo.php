@@ -8,5 +8,6 @@ class paymentInfo extends Model
 {
     protected $casts = [
         'credentials' => 'array',
+        'is_active' => 'boolean',
     ];
 }

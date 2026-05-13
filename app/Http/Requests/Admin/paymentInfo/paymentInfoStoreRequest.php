@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\paymentInfo;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class paymentInfoStoreRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -14,6 +16,8 @@ class paymentInfoStoreRequest extends BaseRequest
         return [
             'title' => 'required|string|max:255',
             'is_active' => 'required|integer',
+            'credentials'  => 'required|array',
+            'credentials.*' => 'required|string',
         ];
     }
 }

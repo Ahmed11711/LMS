@@ -66,6 +66,14 @@ class LessonCommentController extends Controller
     {
         $user = $request->get('tenant_user');
 
+        $comment = LessonComment::where('id', $commentId)
+            ->where('lesson_id', $lessonId)
+            ->first();
+
+        if (!$comment) {
+            return $this->errorResponse('Comment not found', 404);
+        }
+
         $like = LessonCommentLike::where('user_id', $user->id)
             ->where('lesson_comment_id', $commentId)
             ->first();

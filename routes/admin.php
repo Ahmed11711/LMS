@@ -47,7 +47,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ///////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
-    Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info');
+    Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
     Route::get('uu', function () {
         $cacheKey = 'tenant_settings';
         $tenant = app('tenant');
