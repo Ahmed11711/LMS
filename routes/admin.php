@@ -49,7 +49,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
 
     Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
- 
+
+});
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
     ->group(function () {
