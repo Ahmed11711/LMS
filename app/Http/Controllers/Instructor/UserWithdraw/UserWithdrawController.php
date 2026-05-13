@@ -31,7 +31,7 @@ class UserWithdrawController extends BaseController
     protected function beforeStore(array $data, Request $request): array
     {
         $data['user_id'] = auth()->id();
-
+        Log::alert("ss", [auth()->id()]);
 
         $paymentInfo = UserPaymentInfo::where('id', $data['user_payment_info_id'])
             ->where('user_id', auth()->id())
