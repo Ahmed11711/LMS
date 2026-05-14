@@ -82,4 +82,8 @@ class User extends TenantModel  implements JWTSubject
     {
         return $this->hasMany(LessonProgress::class);
     }
+    public function balance()
+    {
+        return $this->hasOne(UserBalance::class);
+    }
 }

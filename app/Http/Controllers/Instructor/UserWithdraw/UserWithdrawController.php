@@ -10,7 +10,7 @@ use App\Http\Resources\Admin\UserWithdraw\UserWithdrawResource;
 use App\Models\UserBalance;
 use App\Models\UserPaymentInfo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class UserWithdrawController extends BaseController
 {
@@ -31,7 +31,6 @@ class UserWithdrawController extends BaseController
     protected function beforeStore(array $data, Request $request): array
     {
         $data['user_id'] = auth()->id();
-        Log::alert("ss", [auth()->id()]);
 
         $paymentInfo = UserPaymentInfo::where('id', $data['user_payment_info_id'])
             ->where('user_id', auth()->id())
@@ -47,7 +46,7 @@ class UserWithdrawController extends BaseController
         if (!$balance || $balance->available_balance < $data['amount']) {
             abort(422, 'Insufficient balance');
         }
-
+        $data['transaction_id'] = 'WDR-' . date('Ymd') . '-' . strtoupper(Str::random(6));
         return $data;
     }
 

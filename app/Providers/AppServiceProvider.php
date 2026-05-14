@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Plan\PlanRepositoryInterface;
+use App\Repositories\Plan\PlanRepository;
+
 use App\Repositories\PaymentMethod\PaymentMethodRepositoryInterface;
 use App\Repositories\PaymentMethod\PaymentMethodRepository;
 
@@ -67,9 +70,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        $this->app->bind(
+    public function register(): void {
+$this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -90,7 +92,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserWithdrawRepositoryInterface::class, UserWithdrawRepository::class);
         $this->app->bind(CountryRepositoryInterface::class, CountryRepository::class);
         $this->app->bind(PaymentMethodRepositoryInterface::class, PaymentMethodRepository::class);
-    }
+        $this->app->bind(PlanRepositoryInterface::class, PlanRepository::class);
+}
 
     /**
      * Bootstrap any application services.

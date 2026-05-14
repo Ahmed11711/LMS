@@ -13,10 +13,10 @@ class WithdrawRequest extends BaseRequest
     {
         return [
             'amount'                => 'sometimes|numeric|min:1',
-            'status'                => 'sometimes|in:pending,rejected,approved',
+            'status'                => 'required|in:pending,rejected,approved',
             'admin_note'            => 'nullable|string',
-            'receipt_image'         => 'required|image|mimes:jpg,jpeg,png|max:2048',
-            'transaction_number'    => 'required|string|unique:user_withdraws,transaction_number',
+            'receipt_image'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'transaction_number'    => 'required|string|',
         ];
     }
 }

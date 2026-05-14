@@ -175,6 +175,9 @@ abstract class BaseController extends Controller
       $record->load($this->withRelationships);
 
       return $this->successResponse(new $this->resourceClass($record), 'Record updated successfully');
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+      DB::rollBack();
+      return $this->errorResponse($e->getMessage(), $e->getStatusCode());
     } catch (\Throwable $e) {
       DB::rollBack();
       Log::error("Error updating: " . $e->getMessage());

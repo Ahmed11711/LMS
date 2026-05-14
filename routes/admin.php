@@ -18,6 +18,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
 use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
@@ -26,7 +27,7 @@ use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
 
 //
-Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class])->group(function () {
+Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
     Route::apiResource('courses', CourseController::class)->names('course')->middleware(CheckFeatureLimit::class . ':max_courses');
@@ -44,6 +45,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
     Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
     Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
+    Route::apiResource('plans', PlanController::class)->names('plan');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])

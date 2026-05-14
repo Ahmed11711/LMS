@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserWithdraw extends Model
 {
-    //
 
+    public $filterable = ['status'];
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -22,13 +22,6 @@ class UserWithdraw extends Model
 
     public function admin()
     {
-        return $this->belongsTo(Admin::class, 'admin_id');
+        return $this->belongsTo(User::class, 'admin_id');
     }
-
-
-    public function transaction()
-    {
-        return $this->belongsTo(Transaction::class, 'transaction_id');
-    }
-
 }
