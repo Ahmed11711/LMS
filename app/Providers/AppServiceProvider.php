@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\AcademyPaymentMethod\AcademyPaymentMethodRepositoryInterface;
+use App\Repositories\AcademyPaymentMethod\AcademyPaymentMethodRepository;
+
 use App\Repositories\Plan\PlanRepositoryInterface;
 use App\Repositories\Plan\PlanRepository;
 
@@ -93,6 +96,7 @@ $this->app->bind(
         $this->app->bind(CountryRepositoryInterface::class, CountryRepository::class);
         $this->app->bind(PaymentMethodRepositoryInterface::class, PaymentMethodRepository::class);
         $this->app->bind(PlanRepositoryInterface::class, PlanRepository::class);
+        $this->app->bind(AcademyPaymentMethodRepositoryInterface::class, AcademyPaymentMethodRepository::class);
 }
 
     /**

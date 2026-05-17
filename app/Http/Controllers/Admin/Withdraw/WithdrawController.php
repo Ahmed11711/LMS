@@ -24,7 +24,7 @@ class WithdrawController  extends BaseController
 
 
         );
-        $this->withRelationships = ['user:id,name,email'];
+        $this->withRelationships = ['user'];
         $this->storeRequestClass = UserWithdrawStoreRequest::class;
         $this->updateRequestClass = WithdrawRequest::class;
         $this->resourceClass = UserWithdrawResource::class;

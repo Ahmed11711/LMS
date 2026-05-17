@@ -12,6 +12,7 @@ class UserResource extends JsonResource
 
         $data = [
             'id' => $this->id,
+            'name' => $this->name
         ];
 
         $fieldsToInclude = [

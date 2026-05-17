@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
 use App\Http\Controllers\Center\Auth\LoginAccountController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\User\Course\MyCourseController;
 use App\Http\Controllers\User\Lesson\LessonCommentController;
 use App\Http\Controllers\User\Lesson\LessonNoteController;
 use App\Http\Controllers\User\Lesson\LessonProgressController;
+use App\Http\Controllers\User\UserPlan\UserPlanController;
 use App\Http\Controllers\User\UserSubscribe\UserSubscribeController;
 use App\Http\Middleware\EnsureEnrolled;
 use App\Http\Middleware\TenantJwtMiddleware;
@@ -74,6 +76,10 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
         Route::post('login', [LoginController::class, 'login']);
         Route::post('register', [LoginController::class, 'register']);
     });
+
+    Route::get('plans', [PlanController::class, 'index']);
+
+    Route::post('subscribe-plan', [UserPlanController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
 
     Route::prefix('lessons/{lessonId}')->middleware([TenantJwtMiddleware::class . ':student', EnsureEnrolled::class,])
         ->group(function () {

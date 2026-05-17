@@ -23,7 +23,7 @@ class UserPlanController extends Controller
         $result = $this->service->execute(
             userId: $request->get('user_id'),
             planId: $request->validated('plan_id'),
-            customerContact: $user->email ?? $user->phone,
+            customerContact: $user->email ?? "01016158010",
             tenantDomain: $tenant->domain,
         );
 

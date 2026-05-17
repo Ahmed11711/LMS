@@ -29,7 +29,7 @@ class UserPlanService
             ->exists();
 
         if ($hasActive) {
-            return ['success' => false, 'message' => 'لديك اشتراك نشط في هذه الباقة'];
+            return ['success' => false, 'message' => 'You already have an active subscription to this plan.'];
         }
 
         $transactionReference = 'PLAN-TXN-' . Str::uuid();

@@ -18,15 +18,17 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AcademyPaymentMethod\AcademyPaymentMethodController;
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
 use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
+use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
 
-//
+
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
@@ -46,12 +48,15 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
     Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
     Route::apiResource('plans', PlanController::class)->names('plan');
+    Route::get('wallet', [UserBalalnceController::class, 'index']);
+    Route::apiResource('academy_payment_methods', AcademyPaymentMethodController::class)->names('academy_payment_method');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
     ->group(function () {
         Route::apiResource('courses', CourseCourseController::class)
             ->names('instructor.course');
+        Route::get('wallet', [UserBalalnceController::class, 'index']);
 
         Route::apiResource('profile', InstructorController::class)->except('post', 'delete', 'put');
         Route::put('profile', [InstructorController::class, 'update']);
