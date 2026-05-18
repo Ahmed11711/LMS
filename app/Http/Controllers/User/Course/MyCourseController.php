@@ -51,6 +51,7 @@ class MyCourseController extends Controller
             return $this->errorResponse('Course not found', 404);
         }
 
+        // تحقق من الصلاحية — subscribe أو plan
         $hasAccess = $this->userRepo->hasCourse($user->id, $id)
             || $this->planAccessService->canAccess($user, $course);
 

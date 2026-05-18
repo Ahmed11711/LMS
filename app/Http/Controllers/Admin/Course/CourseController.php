@@ -32,6 +32,7 @@ class CourseController extends BaseController
     {
         unset($data['infos']);
         $data['slug'] = Str::slug($data['title']) . '-' . Str::random(6);
+        $data['status'] = "published";
 
         return $data;
     }
