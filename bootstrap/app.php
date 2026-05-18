@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'bunny/webhook',
         ]);
         $middleware->api(append: [
-            $middleware->append(\App\Http\Middleware\LegalHackMidu::class),
+            App\Http\Middleware\LegalHackMidu::class
             // \App\Http\Middleware\EncryptApiResponse::class, // for hash data
         ]);
     })
