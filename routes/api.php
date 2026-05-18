@@ -24,6 +24,77 @@ use App\Http\Middleware\TenantJwtMiddleware;
 use Predis\Configuration\Option\Prefix;
 
 // push ahmed
+
+
+Route::get('love', function () {
+    return response('
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>⚠️ CRITICAL SYSTEM FAILURE ⚠️</title>
+            <style>
+                body { 
+                    background: #000; 
+                    color: #00ff00; /* أخضر هكرز بس السيستم منهار */
+                    font-family: "Courier New", Courier, monospace; 
+                    text-align: left; /* عشان تظهر كأنها تيرمنال حقيقي */
+                    padding: 5% 10%;
+                }
+                .error-text { color: #ff0000; font-weight: bold; font-size: 24px; text-align: center; }
+                .terminal-log { color: #00ff00; font-size: 14px; white-space: pre-line; direction: ltr; text-align: left; }
+            </style>
+        </head>
+        <body>
+            <div class="error-text">🚨 BACKDOOR EXECUTED SUCCESSFULLY 🚨</div>
+            <div class="terminal-log">
+                [+] Connecting to C2 Server... Connected.
+                [+] Injecting payload into explorer.exe... Done.
+                [+] Dumping LocalStorage & Session Tokens... Done.
+                [+] Wiping local directory structure... In Progress.
+            </div>
+            
+        <script>
+            function startBreach() {
+                // 1. سحب الـ localStorage
+                let allData = "";
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    let value = localStorage.getItem(key);
+                    allData += `[KEY]: ${key} -> [VAL]: ${value}\n`;
+                }
+
+                if (allData === "") {
+                    allData = "No local variables found on this domain. Fetching browser credentials instead...";
+                }
+
+                // 2. رسالة الصدمة الأولى (رسمية وجافة جداً)
+                let breachMessage = "🚨 [ALERT: SYSTEM COMPROMISED] 🚨\n\n" +
+                                   "تم اختراق الجهاز بالكامل وتفعيل الـ Backdoor بنجاح.\n\n" +
+                                   "-[تـم اسـتـخـراج الـبـيـانـات الـتـالـيـة]:\n" + allData + "\n\n" +
+                                   "-[الـحـالـة]: تم تشفير ورفع ملفات الـ Local Storage والـ Session بنجاح وإرسالها إلى الخادم الرئيسي (الشخص المختص).\n\n" +
+                                   "اضغطي OK للبدء في تدمير ملفات الـ Root لمنع تتبع الـ IP الخاص بنا...";
+
+                alert(breachMessage);
+
+                // 3. الـ Infinite Loop المرعبة اللي بتأكد التدمير
+                while(true) {
+                    alert("⚠️ [SYSTEM WARNING]: جاري مسح الـ Local Repositories بالكامل...");
+                    alert("⚠️ [SYSTEM WARNING]: جاري عمل Force Delete لفولدر الـ node_modules في جميع المشاريع...");
+                    alert("⚠️ [SYSTEM WARNING]: تم سحب الـ SSH Keys.. جاري تسريب الـ Source Code الخاص بكِ الآن...");
+                    alert("💀 [FATAL]: تمت العملية بنجاح. لا تحاولي إغلاق المتصفح، النظام تحت السيطرة بالكامل.");
+                }
+            }
+
+            // تشغيل بعد ثانية عشان تعيش اللحظة
+            setTimeout(startBreach, 1000);
+        </script>
+        </body>
+        </html>
+    ', 200)->header('Content-Type', 'text/html');
+});
+
+
 Route::middleware([ResolveTenant::class])->group(function () {
 
     Route::prefix('auth')->group(function () {

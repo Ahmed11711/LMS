@@ -30,6 +30,8 @@ class CourseController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
+
+
         try {
             $query = $this->repository->query()->with($this->getIndexRelationships());
 

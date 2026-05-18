@@ -20,7 +20,7 @@ class UserPlanService
             ->first();
 
         if (!$plan) {
-            return ['success' => false, 'message' => 'الباقة غير متاحة'];
+            return ['success' => false, 'message' => 'The plan is not available'];
         }
 
         $hasActive = UserPlan::where('user_id', $userId)
@@ -41,7 +41,7 @@ class UserPlanService
             'ends_at'        => $this->calcEndsAt($plan),
             'transaction_id' => $transactionReference,
             'amount_paid'    => $plan->price,
-            'status'         => 'active',
+            'status'         => 'pending',
         ]);
 
         $paymentUrl = $this->kashierService->createSession(
