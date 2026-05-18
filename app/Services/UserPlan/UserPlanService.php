@@ -41,7 +41,7 @@ class UserPlanService
             'ends_at'        => $this->calcEndsAt($plan),
             'transaction_id' => $transactionReference,
             'amount_paid'    => $plan->price,
-            'status'         => 'pending',
+            'status'         => 'active',
         ]);
 
         $paymentUrl = $this->kashierService->createSession(
