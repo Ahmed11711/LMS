@@ -78,9 +78,7 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
     });
 
     Route::get('plans', [PlanController::class, 'index']);
-
     Route::post('subscribe-plan', [UserPlanController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
-
     Route::prefix('lessons/{lessonId}')->middleware([TenantJwtMiddleware::class . ':student', EnsureEnrolled::class,])
         ->group(function () {
 

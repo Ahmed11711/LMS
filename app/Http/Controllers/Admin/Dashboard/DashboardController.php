@@ -9,7 +9,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->id();
+        $userId = auth()->id();
         return  $userBanlnce = UserBalance::where('user_id', $userId)->first();
     }
 }

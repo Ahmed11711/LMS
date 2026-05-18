@@ -17,11 +17,11 @@ class MyCourseShowResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'          => $this->course->id,
-            'title'       => $this->course->title,
-            'image'       => $this->course->image,
-            'description' => $this->course->description,
-            'chapters'    => MyChapterResource::collection($this->course->chapters),
+            'id'          => $this->id,
+            'title'       => $this->title,
+            'image'       => $this->image,
+            'description' => $this->description,
+            'chapters'    => MyChapterResource::collection($this->chapters),
         ];
     }
 }

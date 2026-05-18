@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\BaseModel\TenantModel;
 use App\Traits\TracksFeatureUsage;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Course extends TenantModel
 {
@@ -39,5 +39,15 @@ class Course extends TenantModel
     public function subscribers()
     {
         return $this->hasMany(UserSubscribe::class, 'course_id');
+    }
+    // Course.php
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
+    }
+    // Course.php
+    public function subscribes(): HasMany
+    {
+        return $this->hasMany(UserSubscribe::class);
     }
 }

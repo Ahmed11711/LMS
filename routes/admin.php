@@ -19,6 +19,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AcademyPaymentMethod\AcademyPaymentMethodController;
+use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\Instructor\InstructorController;
 
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
     Route::apiResource('courses', CourseController::class)->names('course')->middleware(CheckFeatureLimit::class . ':max_courses');

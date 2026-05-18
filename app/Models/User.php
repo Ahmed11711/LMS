@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\BaseModel\TenantModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -85,5 +86,25 @@ class User extends TenantModel  implements JWTSubject
     public function balance()
     {
         return $this->hasOne(UserBalance::class);
+    }
+    // User.php
+    public function subscribes(): HasMany
+    {
+        return $this->hasMany(UserSubscribe::class);
+    }
+
+    public function plans(): HasMany
+    {
+        return $this->hasMany(UserPlan::class);
+    }
+
+    public function activePlan(): ?UserPlan
+    {
+        return $this->plans()
+            ->where('status', 'active')
+            ->where(fn($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()))
+            ->with('plan.rules')
+            ->latest()
+            ->first();
     }
 }
