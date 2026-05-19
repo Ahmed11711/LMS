@@ -23,12 +23,16 @@ class CourseUpdateRequest extends BaseRequest
             'price'           => 'sometimes|required|numeric|min:0',
             'final_price'     => 'sometimes|required|numeric|min:0',
             'status'          => 'sometimes|required|in:published,draft',
+            'currency'      => 'sometimes|string|max:50',
+
 
             'infos'           => 'nullable|array',
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
-         ];
+            'receiver_accounts'    => 'required|array',
+            'receiver_accounts.*' => 'required_with:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
+        ];
     }
 
     public function messages(): array
@@ -75,6 +79,6 @@ class CourseUpdateRequest extends BaseRequest
             'infos.*.value.max'           => 'The info value must not exceed 255 characters.',
             'infos.*.order.integer'       => 'The info order must be a valid integer.',
             'infos.*.order.min'           => 'The info order must be at least 1.',
-         ];
+        ];
     }
 }

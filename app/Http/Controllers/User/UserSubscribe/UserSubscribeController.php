@@ -21,19 +21,22 @@ class UserSubscribeController extends Controller
     $tenant = app('tenant');
 
     $result = $this->service->execute(
+      payment: false,
       userId: $request->get('user_id'),
       courseId: $request->validated('course_id'),
       customerContact: $user->email ?? $user->phone,
       tenantDomain: $tenant->domain,
-
+      receipt: $request->file('receipt'),
     );
 
     if (!$result['success']) {
       return $this->errorResponse($result['message'], 422);
     }
 
+
     return $this->successResponse([
-      'payment_url' => $result['payment_url'],
+      'payment_url' => $result['payment_url'] ?? null,
+      'message'     => $result['message'] ?? null,
     ]);
   }
 }

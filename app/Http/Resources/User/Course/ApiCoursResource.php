@@ -29,6 +29,7 @@ class ApiCoursResource extends JsonResource
             'final_price' => $this->final_price,
             'type' => $this->type,
             'slug' => $this->slug,
+            'currency' => $this->currency,
 
         ];
     }

@@ -111,7 +111,9 @@ class CourseController extends BaseController
             'chapters.lessons',
             'infos',
             'category',
-            'user:id,name,profile_image'
+            'user:id,name,profile_image',
+            'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
+
         ];
     }
 

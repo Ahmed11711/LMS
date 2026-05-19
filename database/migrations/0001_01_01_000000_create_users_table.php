@@ -32,6 +32,7 @@ return new class extends Migration
 
             $table->string('specialties')->nullable();
             $table->string('profile_image')->nullable();
+            $table->string('created_by')->nullable();
 
             $table->rememberToken();
             $table->timestamps();

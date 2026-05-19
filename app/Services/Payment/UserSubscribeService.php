@@ -15,8 +15,16 @@ class UserSubscribeService
         private KashierPaymentUserSubscribeService $kashierService,
     ) {}
 
-    public function execute(int $userId, int $courseId, string $customerContact, ?string $tenantDomain  = null)
-    {
+    public function execute(
+        int $userId,
+        int $courseId,
+        string $customerContact,
+        bool $payment,
+        ?string $tenantDomain = null,
+        $receipt = null,
+        string $createdBy = 'self',
+        string $status = "penidng",
+    ) {
         // 1. Check if already subscribed
         $alreadySubscribed = $this->userSubscribeRepo->isAlreadySubscribed($userId, $courseId);
 
@@ -34,11 +42,41 @@ class UserSubscribeService
         $transactionReference = 'TXN-' . Str::uuid();
 
         // 4. Save subscription as pending
-        $subscription = $this->userSubscribeRepo->updateOrCreate(
+        if ($receipt) {
+            $receiptPath = $receipt->store('uploads/receipts', 'public');
+        }
+        $this->userSubscribeRepo->updateOrCreate(
             ['user_id' => $userId, 'course_id' => $courseId],
-            ['status' => 'pending', 'transaction_id' => $transactionReference]
+            [
+                'status'         => $status,
+                'transaction_id' => 'TXN-' . Str::uuid(),
+                'receipt'        => $receiptPath ?? null,
+                'created_by'     => $createdBy,
+            ]
         );
+
         // 5. Create payment link
+        if ($payment) {
+            $result = $this->createPaymentUrl(
+                course: $course,
+                customerContact: $customerContact,
+                transactionReference: $transactionReference,
+                tenantDomain: $tenantDomain,
+            );
+
+            if (!$result['success']) {
+                return $result;
+            }
+        } else {
+            return [
+                'success' => true,
+                'message' => 'Your subscription is being processed and will be activated shortly.',
+            ];
+        }
+    }
+
+    protected function createPaymentUrl($course, string $customerContact, string $transactionReference, ?string $tenantDomain): array
+    {
         $paymentUrl = $this->kashierService->createSession(
             amount: (string) $course->final_price,
             customerContact: $customerContact,
@@ -47,9 +85,6 @@ class UserSubscribeService
         );
 
         if (!$paymentUrl) {
-            // rollback the subscription
-            $subscription->delete();
-
             return [
                 'success' => false,
                 'message' => 'Failed to create payment link',

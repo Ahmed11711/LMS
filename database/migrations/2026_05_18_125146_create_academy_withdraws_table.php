@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('academy_withdraws', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('academy_id');
+            $table->decimal('amount', 15, 2);
+            $table->enum('status', ['pending', 'rejected', 'approved'])->default('pending');
+            $table->text('admin_note')->nullable();
+            $table->unsignedBigInteger('approved_by')->nullable(); // super admin ID
+            $table->string('payment_method'); // bank / vodafone_cash / instapay etc
+            $table->json('payment_details')->nullable();
+            $table->string('receipt_image')->nullable();
+            $table->string('transaction_number')->nullable()->unique();
+            $table->string('transaction_id')->nullable();
 
             $table->timestamps();
         });

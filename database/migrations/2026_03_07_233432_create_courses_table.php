@@ -25,6 +25,7 @@ return new class extends Migration
             $table->decimal('final_price', 10, 2)->default(0);
             $table->enum('status', ['published', 'draft'])->default('draft');
             $table->string('slug')->nullable();
+            $table->string('currency')->nullable();
             $table->timestamps();
         });
     }

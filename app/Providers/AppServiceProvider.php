@@ -2,6 +2,15 @@
 
 namespace App\Providers;
 
+use App\Repositories\InstructorReceiverAccount\InstructorReceiverAccountRepositoryInterface;
+use App\Repositories\InstructorReceiverAccount\InstructorReceiverAccountRepository;
+
+use App\Repositories\ReceiverAccount\ReceiverAccountRepositoryInterface;
+use App\Repositories\ReceiverAccount\ReceiverAccountRepository;
+
+use App\Repositories\AcademyWithdraw\AcademyWithdrawRepositoryInterface;
+use App\Repositories\AcademyWithdraw\AcademyWithdrawRepository;
+
 use App\Repositories\AcademyPaymentMethod\AcademyPaymentMethodRepositoryInterface;
 use App\Repositories\AcademyPaymentMethod\AcademyPaymentMethodRepository;
 
@@ -97,6 +106,9 @@ $this->app->bind(
         $this->app->bind(PaymentMethodRepositoryInterface::class, PaymentMethodRepository::class);
         $this->app->bind(PlanRepositoryInterface::class, PlanRepository::class);
         $this->app->bind(AcademyPaymentMethodRepositoryInterface::class, AcademyPaymentMethodRepository::class);
+        $this->app->bind(AcademyWithdrawRepositoryInterface::class, AcademyWithdrawRepository::class);
+        $this->app->bind(ReceiverAccountRepositoryInterface::class, ReceiverAccountRepository::class);
+        $this->app->bind(InstructorReceiverAccountRepositoryInterface::class, InstructorReceiverAccountRepository::class);
 }
 
     /**

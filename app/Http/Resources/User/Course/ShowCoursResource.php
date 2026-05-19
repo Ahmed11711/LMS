@@ -35,6 +35,7 @@ class ShowCoursResource extends JsonResource
             'final_price' => $this->final_price,
             'status' => $this->status,
             'slug' => $this->slug,
+            'currency' => $this->currency,
             'rating' => $this->slug,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -42,6 +43,17 @@ class ShowCoursResource extends JsonResource
             'infos' => $this->whenLoaded('infos'),
 
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
+            'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
+                return $this->courseReceiverAccounts->map(fn($item) => [
+                    'id'            => $item->id,
+                    'account_value' => $item->instructorReceiverAccount->account_value,
+                    'name'          => $item->instructorReceiverAccount->receiverAccount->name,
+                    'logo'          => asset($item->instructorReceiverAccount->receiverAccount->logo),
+                    'country_code'  => $item->instructorReceiverAccount->receiverAccount->country_code,
+                    'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
+                ]);
+            }),
+
         ];
     }
 }

@@ -17,11 +17,11 @@ use App\Http\Controllers\User\Course\MyCourseController;
 use App\Http\Controllers\User\Lesson\LessonCommentController;
 use App\Http\Controllers\User\Lesson\LessonNoteController;
 use App\Http\Controllers\User\Lesson\LessonProgressController;
+use App\Http\Controllers\User\Profile\ProfileController;
 use App\Http\Controllers\User\UserPlan\UserPlanController;
 use App\Http\Controllers\User\UserSubscribe\UserSubscribeController;
 use App\Http\Middleware\EnsureEnrolled;
 use App\Http\Middleware\TenantJwtMiddleware;
-use Predis\Configuration\Option\Prefix;
 
 // push ahmed
 
@@ -70,6 +70,9 @@ Route::get('webhook-test', function (Request $request) {
 
 
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
+    Route::get('profile', [ProfileController::class, 'show'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::post('profile', [ProfileController::class, 'update'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::post('profile/change-password', [ProfileController::class, 'changePassword']);
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{slug}', [CourseController::class, 'show']);
     Route::post('user-subscribe', [UserSubscribeController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');

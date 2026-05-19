@@ -21,6 +21,8 @@ class UserUpdateRequest extends BaseRequest
             'profile_image' => 'nullable|file|max:255',
             'role' => 'nullable|string|in:admin,academy,student',
             'specialties' => 'nullable|string|max:255',
+            'course_id' => 'sometimes|integer|exists:courses,id',
+
         ];
     }
 }

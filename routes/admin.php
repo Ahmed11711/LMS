@@ -18,6 +18,9 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\InstructorReceiverAccount\InstructorReceiverAccountController;
+use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
+use App\Http\Controllers\Admin\AcademyWithdraw\AcademyWithdrawController;
 use App\Http\Controllers\Admin\AcademyPaymentMethod\AcademyPaymentMethodController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\Plan\PlanController;
@@ -34,7 +37,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
-    Route::apiResource('courses', CourseController::class)->names('course')->middleware(CheckFeatureLimit::class . ':max_courses');
+    Route::apiResource('courses', CourseController::class)->names('course');
     Route::apiResource('online_sessions', OnlineSessionController::class)->names('online_session');
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
     Route::apiResource('chapters', ChapterController::class)->names('chapter');
@@ -47,11 +50,16 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ///////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
-    Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
-    Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
+    // Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
+    // Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
     Route::apiResource('plans', PlanController::class)->names('plan');
     Route::get('wallet', [UserBalalnceController::class, 'index']);
-    Route::apiResource('academy_payment_methods', AcademyPaymentMethodController::class)->names('academy_payment_method');
+    Route::apiResource('receiver_accounts', ReceiverAccountController::class)->names('receiver_account');
+    Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_account');
+
+
+    // Route::apiResource('academy_payment_methods', AcademyPaymentMethodController::class)->names('academy_payment_method');
+    // Route::apiResource('academy_withdraws', AcademyWithdrawController::class)->names('academy_withdraw');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -63,7 +71,9 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::apiResource('profile', InstructorController::class)->except('post', 'delete', 'put');
         Route::put('profile', [InstructorController::class, 'update']);
         Route::apiResource('user_payment_infos', UserPaymentInfoController::class)->names('user_payment_info');
-        Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
+        Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_accounts');
+
+        // Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
     });
 
 

@@ -17,7 +17,9 @@ return new class extends Migration
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->timestamp('starts_at')->useCurrent();
             $table->string('transaction_id')->nullable();
+            $table->string('receipt');
             $table->enum('status', ['active', 'refunded', 'cancelled', 'pending'])->default('pending');
+            $table->enum('created_by', ['self', 'admin'])->default('self');
             $table->unique(['user_id', 'course_id']);
             $table->timestamps();
         });

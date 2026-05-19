@@ -50,4 +50,8 @@ class Course extends TenantModel
     {
         return $this->hasMany(UserSubscribe::class);
     }
+    public function courseReceiverAccounts()
+    {
+        return $this->hasMany(CourseReceiverAccount::class);
+    }
 }

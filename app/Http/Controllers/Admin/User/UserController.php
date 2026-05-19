@@ -7,13 +7,17 @@ use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\User\UserStoreRequest;
 use App\Http\Requests\Admin\User\UserUpdateRequest;
 use App\Http\Resources\Admin\User\UserResource;
+use App\Services\Payment\UserSubscribeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+
+use Override;
 
 class UserController extends BaseController
 {
-    public function __construct(UserRepositoryInterface $repository)
-    {
+    public function __construct(
+        UserRepositoryInterface $repository,
+        private UserSubscribeService $subscribeService,
+    ) {
         parent::__construct();
 
         $this->initService(
@@ -28,12 +32,39 @@ class UserController extends BaseController
         $this->resourceClass = UserResource::class;
     }
 
-     protected function applyScoping($query)
-{
-     if (request()->filled('user_id')) {
-        $query->where('user_id', request()->user_id);
+    protected function applyScoping($query)
+    {
+        $user = auth('api')->user();
+
+        if ($user->role === 'admin') {
+            return $query;
+        }
+
+        return $query->where('created_by', $user->id);
     }
 
-    return $query;
-}
+    #[Override]
+    protected function beforeStore(array $data, Request $request): array
+    {
+        unset($data['course_id']);
+        $data['created_by'] = auth()->id();
+        return $data;
+    }
+    #[Override]
+    protected function afterStore($record, Request $request): void
+    {
+        if (!$request->filled('course_id')) {
+            return;
+        }
+
+        $this->subscribeService->execute(
+            userId: $record->id,
+            courseId: $request->input('course_id'),
+            customerContact: $record->email ?? $record->phone,
+            payment: false,
+            createdBy: auth()->id(),
+            status: "active",
+
+        );
+    }
 }

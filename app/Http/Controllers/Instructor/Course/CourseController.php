@@ -27,6 +27,15 @@ class CourseController extends BaseController
         $this->resourceClass      = CourseResource::class;
     }
 
+    protected function getShowRelationships(): array
+    {
+        return  [
+            'chapters.lessons',
+            'infos',
+            'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
+        ];
+    }
+
 
     protected function applyScoping($query)
     {
@@ -36,6 +45,7 @@ class CourseController extends BaseController
     protected function beforeStore(array $data, Request $request): array
     {
         unset($data['infos']);
+        unset($data['receiver_accounts']);
         $data['slug']    = Str::slug($data['title']) . '-' . Str::random(6);
         $data['user_id'] = $request->attributes->get('user_id');
 
@@ -45,11 +55,12 @@ class CourseController extends BaseController
     protected function afterStore($record, Request $request): void
     {
         $this->syncInfos($record, $request);
+        $this->syncReceiverAccounts($record, $request);
     }
-
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         unset($data['infos']);
+        unset($data['receiver_accounts']);
 
         return $data;
     }
@@ -57,7 +68,9 @@ class CourseController extends BaseController
     protected function afterUpdate($updatedRecord, $oldRecord, Request $request): void
     {
         $this->syncInfos($updatedRecord, $request);
+        $this->syncReceiverAccounts($updatedRecord, $request);
     }
+
 
     // ----------------------------------------
     // Private Helpers
@@ -79,6 +92,22 @@ class CourseController extends BaseController
             ]);
 
             $record->infos()->createMany($infos);
+        }
+    }
+    private function syncReceiverAccounts($record, Request $request): void
+    {
+        if (!$request->has('receiver_accounts')) {
+            return;
+        }
+
+        $record->courseReceiverAccounts()->delete();
+
+        if (!empty($request->input('receiver_accounts'))) {
+            $accounts = collect($request->input('receiver_accounts'))->map(fn($id) => [
+                'instructor_receiver_account_id' => $id,
+            ]);
+
+            $record->courseReceiverAccounts()->createMany($accounts);
         }
     }
 }
