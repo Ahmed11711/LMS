@@ -94,4 +94,9 @@ class BaseRepository implements BaseRepositoryInterface
 
         return count($records);
     }
+
+    public function updateOrCreate(array $conditions, array $data)
+    {
+        return $this->model->updateOrCreate($conditions, $data);
+    }
 }

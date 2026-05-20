@@ -21,10 +21,12 @@ class UserPlanController extends Controller
         $tenant = app('tenant');
 
         $result = $this->service->execute(
+            payment: false,
             userId: $request->get('user_id'),
             planId: $request->validated('plan_id'),
-            customerContact: $user->email ??  $user->phone,
+            customerContact: $user->email ?? $user->phone,
             tenantDomain: $tenant->domain,
+            receipt: $request->file('receipt'),
         );
 
         if (!$result['success']) {
@@ -32,7 +34,8 @@ class UserPlanController extends Controller
         }
 
         return $this->successResponse([
-            'payment_url' => $result['payment_url'],
+            'payment_url' => $result['payment_url'] ?? null,
+            'message'     => $result['message'] ?? null,
         ]);
     }
 }

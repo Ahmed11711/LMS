@@ -6,5 +6,5 @@ use App\Repositories\BaseRepository\BaseRepositoryInterface;
 
 interface PlanRepositoryInterface extends BaseRepositoryInterface
 {
-    //
+    public function findActive(int $planId);
 }

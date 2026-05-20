@@ -13,6 +13,7 @@ class StoreUserPlanRequest extends BaseRequest
     {
         return [
             'plan_id' => 'required|integer|exists:plans,id',
+            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf,webp,doc,docx,xls,xlsx|max:2048',
 
         ];
     }

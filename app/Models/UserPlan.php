@@ -22,4 +22,8 @@ class UserPlan extends Model
         return $this->status === 'active'
             && ($this->ends_at === null || $this->ends_at->isFuture());
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

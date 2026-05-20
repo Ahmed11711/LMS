@@ -28,10 +28,10 @@ use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
 use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
 use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
+use App\Http\Controllers\Admin\UserPlan\UserPlanController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
-use Illuminate\Support\Facades\Artisan;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
@@ -49,15 +49,15 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
-    /////////////////Custom Domasin ///////////////////////////////
+    /////////////////Custom Domasin ////////////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
     // Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
     // Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
     Route::apiResource('plans', PlanController::class)->names('plan');
+    Route::apiResource('user_plan', UserPlanController::class)->except('post');
     Route::get('wallet', [UserBalalnceController::class, 'index']);
     Route::apiResource('receiver_accounts', ReceiverAccountController::class)->names('receiver_account');
     Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_account');
-
 
     // Route::apiResource('academy_payment_methods', AcademyPaymentMethodController::class)->names('academy_payment_method');
     // Route::apiResource('academy_withdraws', AcademyWithdrawController::class)->names('academy_withdraw');

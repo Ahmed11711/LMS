@@ -25,12 +25,13 @@ class PlanStoreRequest extends BaseRequest
             'rules'              => 'required|array',
             'rules.*.type'       => 'required_with:rules|in:all,instructor,category,course',
             'rules.*.reference_id' => 'nullable|integer',
+            'status' => 'required|in:active,draft',
+
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        // لو اختار all → يضيف rule تلقائي من غير ما الـ frontend يبعته
         if ($this->input('scope') === 'all') {
             $this->merge([
                 'rules' => [['type' => 'all', 'reference_id' => null]]

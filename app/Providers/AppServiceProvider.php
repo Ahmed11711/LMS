@@ -72,6 +72,8 @@ use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\UserPackage\UserPackageRepository;
 use App\Repositories\UserPackage\UserPackageRepositoryInterface;
+use App\Repositories\UserPlan\UserPlanRepository;
+use App\Repositories\UserPlan\UserPlanRepositoryInterface;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
@@ -82,8 +84,9 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {
-$this->app->bind(
+    public function register(): void
+    {
+        $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -109,7 +112,8 @@ $this->app->bind(
         $this->app->bind(AcademyWithdrawRepositoryInterface::class, AcademyWithdrawRepository::class);
         $this->app->bind(ReceiverAccountRepositoryInterface::class, ReceiverAccountRepository::class);
         $this->app->bind(InstructorReceiverAccountRepositoryInterface::class, InstructorReceiverAccountRepository::class);
-}
+        $this->app->bind(UserPlanRepositoryInterface::class, UserPlanRepository::class);
+    }
 
     /**
      * Bootstrap any application services.

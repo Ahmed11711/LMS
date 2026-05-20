@@ -12,4 +12,12 @@ class PlanRepository extends BaseRepository implements PlanRepositoryInterface
     {
         parent::__construct($model);
     }
+
+    public function findActive(int $planId): mixed
+    {
+        return $this->model
+            ->where('id', $planId)
+            ->where('status', 'active')
+            ->first();
+    }
 }

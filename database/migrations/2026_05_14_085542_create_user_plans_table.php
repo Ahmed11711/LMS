@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('transaction_id')->nullable()->unique();
             $table->decimal('amount_paid', 10, 2)->default(0);
             $table->string('status')->default('pending');
+            $table->string('receipt')->nullable();
+            $table->string('created_by')->default('self');
             $table->timestamps();
 
             $table->index(['user_id', 'plan_id']);
