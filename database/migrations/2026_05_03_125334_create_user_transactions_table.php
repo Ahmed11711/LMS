@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('user_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['deposit', 'withdraw']);
             $table->decimal('amount', 12, 2);
-            $table->enum('status', ['pending', 'completed', 'failed', 'refunded'])
-                ->default('pending');
+            $table->string('type');
+            $table->string('status')->default('pending');
+
             $table->string('notes')->nullable();
             $table->decimal('balance_before', 12, 2);
             $table->decimal('balance_after', 12, 2);

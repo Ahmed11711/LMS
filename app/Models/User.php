@@ -29,6 +29,7 @@ class User extends TenantModel  implements JWTSubject
         'password',
     ];
 
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -62,6 +63,8 @@ class User extends TenantModel  implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+
         ];
     }
 

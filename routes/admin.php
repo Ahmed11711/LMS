@@ -31,9 +31,10 @@ use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
-
+use Illuminate\Support\Facades\Artisan;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
+
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');

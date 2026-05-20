@@ -18,8 +18,8 @@ return new class extends Migration
             $table->timestamp('starts_at')->useCurrent();
             $table->string('transaction_id')->nullable();
             $table->string('receipt');
-            $table->enum('status', ['active', 'refunded', 'cancelled', 'pending'])->default('pending');
-            $table->enum('created_by', ['self', 'admin'])->default('self');
+            $table->string('status')->default('pending');
+            $table->string('created_by')->default('self');
             $table->unique(['user_id', 'course_id']);
             $table->timestamps();
         });

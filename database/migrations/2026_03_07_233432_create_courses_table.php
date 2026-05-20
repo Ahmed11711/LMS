@@ -15,15 +15,16 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->foreignId('user_id')->constrained('users');
-            $table->enum('type', ['recorded', 'online', 'physical']);
             $table->foreignId('category_id')->nullable()->constrained();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
 
-            $table->enum('price_type', ['free', 'paid'])->default('paid');
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('final_price', 10, 2)->default(0);
-            $table->enum('status', ['published', 'draft'])->default('draft');
+
+            $table->string('type');
+            $table->string('price_type')->default('paid');
+            $table->string('status')->default('published');
             $table->string('slug')->nullable();
             $table->string('currency')->nullable();
             $table->timestamps();

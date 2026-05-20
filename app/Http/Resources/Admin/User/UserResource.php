@@ -31,7 +31,9 @@ class UserResource extends JsonResource
 
         foreach ($fieldsToInclude as $field) {
             if (array_key_exists($field, $attributes)) {
-                $data[$field] = $this->{$field};
+                $data[$field] = $field === 'profile_image' && $this->{$field}
+                    ? asset($this->{$field})
+                    : $this->{$field};
             }
         }
 

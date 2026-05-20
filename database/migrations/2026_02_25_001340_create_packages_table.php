@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->decimal('discount', 10, 2)->default(0);
             $table->boolean('is_active')->default(true);
-            $table->integer('duration_months')->default(1);
+            $table->decimal('duration_months', 8, 2)->default(1);
             $table->integer('order')->default(0);
             $table->boolean('recomnd')->default(false);
             $table->timestamps();

@@ -25,10 +25,14 @@ class ResolveTenant
             abort(403, 'Tenant not found or inactive.');
         }
 
+        Config::set('database.connections.tenant.driver', 'pgsql');
         Config::set('database.connections.tenant.host', $tenant->db_host);
+        Config::set('database.connections.tenant.port', 5432);
         Config::set('database.connections.tenant.database', $tenant->db_name);
         Config::set('database.connections.tenant.username', $tenant->db_user);
         Config::set('database.connections.tenant.password', $tenant->db_pass);
+        Config::set('database.connections.tenant.search_path', 'public');
+        Config::set('database.connections.tenant.sslmode', 'prefer');
 
         DB::purge('tenant');
         Config::set('database.default', 'tenant');

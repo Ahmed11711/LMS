@@ -20,7 +20,8 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->boolean('active')->default(true);
             $table->string('transaction_id')->nullable();
-            $table->enum('status', ['pending', 'active', 'expired', 'cancelled', 'failed'])->default('pending');
+            $table->string('status')->default('pending');
+            // $table->enum('status', ['pending', 'active', 'expired', 'cancelled', 'failed'])->default('pending'); // m SQL
             $table->decimal('price', 8, 2);
             $table->timestamps();
         });

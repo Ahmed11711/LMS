@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('plan_rules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('plan_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['all', 'instructor', 'category', 'course']);
+            $table->string('type');
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->timestamps();
             $table->index(['plan_id', 'type', 'reference_id']);

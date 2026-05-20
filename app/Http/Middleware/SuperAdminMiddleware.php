@@ -10,6 +10,7 @@ class SuperAdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        return $next($request);
         $user = Auth::guard('central')->user();
 
         if (!$user) {

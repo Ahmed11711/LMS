@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_payment_info_id')->constrained('user_payment_infos');
             $table->decimal('amount', 15, 2);
-            $table->enum('status', ['pending', 'rejected', 'approved'])->default('pending');
+            $table->string('status')->default('pending');
             $table->text('admin_note')->nullable();
             $table->text('admin_id')->nullable();
             $table->string('receipt_image')->nullable();

@@ -48,6 +48,11 @@ class TenantService
 
             // 5. Seed Initial Data
             $this->seedTenantData($data);
+            Artisan::call('db:seed', [
+                '--class' => 'Database\\Seeders\\TenantSeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
             return $tenant;
         } catch (Exception $e) {
             Log::error("!!! Tenant Creation Failed: " . $e->getMessage());
@@ -56,27 +61,53 @@ class TenantService
         }
     }
 
+    // m SQL
+    // protected function createDatabaseAndUser($tenant)
+    // {
+    //     DB::statement("CREATE DATABASE `{$tenant->db_name}`");
+    //     DB::statement("CREATE USER '{$tenant->db_user}'@'%' IDENTIFIED BY '{$tenant->db_pass}'");
+    //     DB::statement("GRANT ALL PRIVILEGES ON `{$tenant->db_name}`.* TO '{$tenant->db_user}'@'%'");
+    //     DB::statement("FLUSH PRIVILEGES");
+    // }
+
     protected function createDatabaseAndUser($tenant)
     {
-        DB::statement("CREATE DATABASE `{$tenant->db_name}`");
-        DB::statement("CREATE USER '{$tenant->db_user}'@'%' IDENTIFIED BY '{$tenant->db_pass}'");
-        DB::statement("GRANT ALL PRIVILEGES ON `{$tenant->db_name}`.* TO '{$tenant->db_user}'@'%'");
-        DB::statement("FLUSH PRIVILEGES");
+        // ✅ PostgreSQL syntax
+        DB::statement("CREATE DATABASE \"{$tenant->db_name}\"");
+        DB::statement("CREATE USER \"{$tenant->db_user}\" WITH PASSWORD '{$tenant->db_pass}'");
+        DB::statement("GRANT ALL PRIVILEGES ON DATABASE \"{$tenant->db_name}\" TO \"{$tenant->db_user}\"");
+        DB::statement("ALTER DATABASE \"{$tenant->db_name}\" OWNER TO \"{$tenant->db_user}\"");
+        DB::statement("GRANT CREATE ON SCHEMA public TO \"{$tenant->db_user}\"");
     }
+
+    /// SQL
+    // protected function switchToTenantDatabase($tenant)
+    // {
+    //     config([
+    //         'database.connections.tenant.host'     => $tenant->db_host,
+    //         'database.connections.tenant.database' => $tenant->db_name,
+    //         'database.connections.tenant.username' => $tenant->db_user,
+    //         'database.connections.tenant.password' => $tenant->db_pass,
+    //     ]);
+
+    //     DB::purge('tenant');
+    //     DB::reconnect('tenant');
+    // }
 
     protected function switchToTenantDatabase($tenant)
     {
         config([
+            'database.connections.tenant.driver'   => 'pgsql', // ✅ زود السطر ده
             'database.connections.tenant.host'     => $tenant->db_host,
             'database.connections.tenant.database' => $tenant->db_name,
             'database.connections.tenant.username' => $tenant->db_user,
             'database.connections.tenant.password' => $tenant->db_pass,
+            'database.connections.tenant.port'     => 5432, // ✅ زود ده برضو
         ]);
 
         DB::purge('tenant');
         DB::reconnect('tenant');
     }
-
     // protected function seedTenantData(array $data)
     // {
     //     // 1. Insert Admin User

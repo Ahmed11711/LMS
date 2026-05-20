@@ -11,7 +11,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
-    protected $connection = 'mysql'; // Central DB
+    protected $connection = 'LMS_CENTER'; // Central DB
     protected $table = 'users';
 
     // protected $fillable = ['name', 'email', 'password', 'role', 'phone'];

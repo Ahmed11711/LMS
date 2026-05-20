@@ -17,8 +17,8 @@ return new class extends Migration
             $table->decimal('total_limit')->default(0);
             $table->decimal('used_amount')->default(0);
             $table->boolean('is_enabled')->default(true);
-            $table->enum('type', ['numeric', 'boolean'])->default('numeric');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('type')->default('numeric');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }

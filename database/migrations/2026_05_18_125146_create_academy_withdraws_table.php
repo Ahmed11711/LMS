@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('academy_id');
             $table->decimal('amount', 15, 2);
-            $table->enum('status', ['pending', 'rejected', 'approved'])->default('pending');
+            $table->string('status')->default('pending');
             $table->text('admin_note')->nullable();
             $table->unsignedBigInteger('approved_by')->nullable(); // super admin ID
             $table->string('payment_method'); // bank / vodafone_cash / instapay etc

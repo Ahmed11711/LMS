@@ -8,16 +8,14 @@ use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
 use App\Http\Resources\Admin\UserPackage\UserPackageResource;
 use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request; // تأكد من استخدام Request الخاص بـ Laravel أفضل هنا
+use Illuminate\Http\Request;
 
 class UserPackageController extends BaseController
 {
-    // أزل كلمة public من هنا لمنع تعريف Property جديدة تتعارض مع الأب
     public function __construct(UserPackageRepositoryInterface $repository)
     {
         parent::__construct();
 
-        // تعيين المستودع للخاصية الموجودة في BaseController
         $this->repository = $repository;
 
         $this->initService(

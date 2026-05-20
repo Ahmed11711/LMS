@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('ends_at')->nullable();
             $table->string('transaction_id')->nullable()->unique();
             $table->decimal('amount_paid', 10, 2)->default(0);
-            $table->enum('status', ['active', 'expired', 'cancelled', 'pending'])->default('pending');
+            $table->string('status')->default('pending');
             $table->timestamps();
 
             $table->index(['user_id', 'plan_id']);

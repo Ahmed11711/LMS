@@ -18,8 +18,8 @@ return new class extends Migration
             $table->text('desc');
             $table->decimal('price', 10, 2)->default(0);
             $table->unsignedInteger('duration_value');
-            $table->enum('duration_unit', ['days', 'months', 'years']);
-            $table->enum('status', ['active', 'draft'])->default('draft');
+            $table->string('duration_unit');
+            $table->string('status')->default('draft');
             $table->timestamps();
         });
     }

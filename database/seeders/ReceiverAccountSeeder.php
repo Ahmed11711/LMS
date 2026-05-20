@@ -11,7 +11,6 @@ class ReceiverAccountSeeder extends Seeder
     {
         $accounts = [
 
-            // ===== مصر =====
             [
                 'name'         => 'Vodafone Cash',
                 'key'          => 'vodafone_cash',

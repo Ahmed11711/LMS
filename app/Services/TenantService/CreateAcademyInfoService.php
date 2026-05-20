@@ -92,7 +92,7 @@ class CreateAcademyInfoService
             'package_name'   => $freePackage->title,
             'active'         => true,
             'start_date'     => now(),
-            'end_date'       => now()->addMonths($freePackage->duration_months ?? 1),
+            'end_date' => now()->addDays((float)($freePackage->duration_months ?? 1) * 30),
             'price'          => 0,
             'transaction_id' => 'free-package-' . $user->id . '-' . time(),
         ]);

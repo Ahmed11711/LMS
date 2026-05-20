@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('course_receiver_accounts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
-            $table->foreignId('instructor_receiver_account')->constrained('instructor_receiver_accounts')->cascadeOnDelete();
+            $table->foreignId('instructor_receiver_account_id')->constrained('instructor_receiver_accounts')->cascadeOnDelete();
 
             $table->unique(['course_id', 'instructor_receiver_account_id']);
             $table->timestamps();
