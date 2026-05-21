@@ -99,6 +99,14 @@ class CourseController extends BaseController
         ];
     }
 
+    protected function getIndexRelationships(): array
+    {
+        return [
+            'userSubscribes' => function ($query) {
+                $query->where('user_id', auth('api')->id());
+            }
+        ];
+    }
     protected function lookupColumn(): string
     {
         return 'slug';
