@@ -20,6 +20,7 @@ class InstructorReceiverAccountController extends BaseController
             repository: $repository,
             collectionName: 'InstructorReceiverAccount'
         );
+        $this->withRelationships = ['receiverAccount'];
 
         $this->storeRequestClass = InstructorReceiverAccountStoreRequest::class;
         $this->updateRequestClass = InstructorReceiverAccountUpdateRequest::class;
