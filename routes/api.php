@@ -76,6 +76,8 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{slug}', [CourseController::class, 'show']);
     Route::post('user-subscribe', [UserSubscribeController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('user-subscribe', [UserSubscribeController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
+
     Route::get('my-courses', [MyCourseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::get('my-courses/{id}', [MyCourseController::class, 'show'])->middleware(TenantJwtMiddleware::class . ':student');
 

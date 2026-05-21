@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
 use App\Traits\ApiResponseTrait;
 use App\Services\Payment\UserSubscribeService;
+use GuzzleHttp\Psr7\Request;
 
 class UserSubscribeController extends Controller
 {
@@ -15,6 +16,14 @@ class UserSubscribeController extends Controller
     private UserSubscribeService $service
   ) {}
 
+  public function index(Request $request)
+  {
+    $user =  $request->get('tenant_user');
+
+    $subscribes = $this->service->getUserSubscribes($user->id);
+
+    return $this->successResponse($subscribes);
+  }
   public function store(StoreUserSubscribeRequest $request)
   {
     $user =  $request->get('tenant_user');

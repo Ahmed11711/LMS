@@ -96,4 +96,9 @@ class UserSubscribeService
             'payment_url' => $paymentUrl,
         ];
     }
+
+    public function getUserSubscribes(int $userId)
+    {
+        return $this->userSubscribeRepo->getUserSubscribes($userId);
+    }
 }
