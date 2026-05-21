@@ -37,7 +37,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
 
 
 Route::post('create-tenant', [CreateTenantController::class, 'store']);
-// //////////////////////////////////C reate Account Academy /////////////////////////////
+// ////////////////////////////////// create Account Academy /////////////////////////////
 Route::prefix('front')->group(function () {
     Route::post('create-account-academy', [CreateAccountAcademyController::class, 'create']);
     Route::post('create-account-info-academy', [CreateAccountAcademyController::class, 'createInfoAcademy']);
