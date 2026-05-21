@@ -20,7 +20,7 @@ class ShowCoursResource extends JsonResource
             'id' => $this->id,
             'is_enrolled' => $this->when(
                 auth('api')->check(),
-                fn() => (bool) $this->is_enrolled
+                fn() => $this->enrollment_status
             ),
             'title' => $this->title,
             'user_id' => $this->user_id,
