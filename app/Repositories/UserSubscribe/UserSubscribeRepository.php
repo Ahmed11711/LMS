@@ -56,4 +56,11 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
             ->with('course.chapters.lessons.progresses')
             ->first();
     }
+    public function getUserSubscribes(int $userId)
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->with('course')
+            ->get();
+    }
 }
