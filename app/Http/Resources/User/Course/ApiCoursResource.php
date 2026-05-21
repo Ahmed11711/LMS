@@ -19,9 +19,8 @@ class ApiCoursResource extends JsonResource
             'title' => $this->title,
             'is_enrolled' => $this->when(
                 auth('api')->check(),
-                fn() => $this->enrollment_status
+                fn() => (bool) $this->is_enrolled
             ),
-
             'description' => $this->description,
             'image' => $this->image
                 ? asset(ltrim($this->image, '/'))

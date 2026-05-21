@@ -30,6 +30,8 @@ class CourseController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
+
+
         try {
             $query = $this->repository->query()->with($this->getIndexRelationships());
 
@@ -45,7 +47,16 @@ class CourseController extends BaseController
                 ->latest()
                 ->paginate($request->input('per_page', 10));
 
-            $this->applyEnrollment($data);
+            $user = auth('api')->user();
+
+            if ($user) {
+                $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
+
+                $data->getCollection()->transform(function ($course) use ($enrolledIds) {
+                    $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
+                    return $course;
+                });
+            }
 
             $data = $this->resourceClass::collection($data);
 
@@ -71,22 +82,29 @@ class CourseController extends BaseController
         return $this->successResponse(new $this->showResourceClass($record), 'Record retrieved successfully');
     }
 
+    // ✅ method مشتركة بين index و show
     private function applyEnrollment($target): void
     {
         $user = auth('api')->user();
+
         if (!$user) return;
 
-        $enrolledData = $user->enrollments()->pluck('status', 'course_id');
+        $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
 
+        // لو collection (index)
         if ($target instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-            $target->getCollection()->transform(function ($course) use ($enrolledData) {
-                $course->setAttribute('enrollment_status', $enrolledData->get($course->id));
+            $target->getCollection()->transform(function ($course) use ($enrolledIds) {
+                $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
                 return $course;
             });
-        } else {
-            $target->setAttribute('enrollment_status', $enrolledData->get($target->id));
+        }
+
+        // لو single record (show)
+        else {
+            $target->setAttribute('is_enrolled', in_array($target->id, $enrolledIds));
         }
     }
+
     protected function getShowRelationships(): array
     {
         return [
@@ -99,14 +117,6 @@ class CourseController extends BaseController
         ];
     }
 
-    protected function getIndexRelationships(): array
-    {
-        return [
-            'userSubscribes' => function ($query) {
-                $query->where('user_id', auth('api')->id());
-            }
-        ];
-    }
     protected function lookupColumn(): string
     {
         return 'slug';
