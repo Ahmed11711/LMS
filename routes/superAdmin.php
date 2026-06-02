@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Package\PackageController;
 use App\Http\Controllers\Admin\PaymentMethod\PaymentMethodController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
 use App\Http\Controllers\SuperAdmin\Auth\LoginController;
+use App\Http\Controllers\Tenant\TenantMigrationController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('superAdmin')->group(function () {
 
     Route::post('login', [LoginController::class, 'login']);
+    Route::post('tenants/migrate', [TenantMigrationController::class, 'migrateAll']);
+    Route::post('tenants/{domain}/migrate', [TenantMigrationController::class, 'migrateSingle']);
 
 
     Route::middleware(SuperAdminMiddleware::class)->group(function () {

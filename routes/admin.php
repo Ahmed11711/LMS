@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
 use App\Http\Controllers\Admin\AcademyWithdraw\AcademyWithdrawController;
 use App\Http\Controllers\Admin\AcademyPaymentMethod\AcademyPaymentMethodController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController;
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
@@ -32,8 +33,14 @@ use App\Http\Controllers\Admin\UserPlan\UserPlanController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
+use App\Http\Controllers\Tenant\TenantMigrationController;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
+
+    // handel migrate new model for this tenant
+    Route::post('migrate', [TenantMigrationController::class, 'migrateCurrentTenant']);
+
+
 
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');
@@ -61,6 +68,9 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     // Route::apiResource('academy_payment_methods', AcademyPaymentMethodController::class)->names('academy_payment_method');
     // Route::apiResource('academy_withdraws', AcademyWithdrawController::class)->names('academy_withdraw');
+
+    // for orginization profile
+    Route::apiResource('organization_profiles', OrganizationProfileController::class)->names('organization_profile');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
