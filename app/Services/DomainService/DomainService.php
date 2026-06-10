@@ -74,18 +74,16 @@ class DomainService
     private function setupSubdomain(string $domain): array
     {
         $config      = $this->generateNginxConfig($domain, $this->wildcardCert);
-        $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
+        $tmpFile = tempnam(sys_get_temp_dir(), 'nginx_');
+        file_put_contents($tmpFile, $config);
+        $dest = escapeshellarg("/etc/nginx/sites-enabled/{$domain}");
+        shell_exec("sudo cp {$tmpFile} {$dest} 2>&1");
+        unlink($tmpFile);
 
-        if ($writeResult === false) {
+        if (!file_exists("/etc/nginx/sites-enabled/{$domain}")) {
             Log::error("Failed to write Nginx config for subdomain: {$domain}");
-            return [
-                'success' => false,
-                'message' => "Failed to write Nginx config for {$domain}"
-            ];
+            return ['success' => false, 'message' => "Failed to write Nginx config for {$domain}"];
         }
-
-        Log::info("Nginx config written for subdomain: {$domain} using wildcard cert");
-
         return $this->reloadNginx();
     }
 
@@ -114,16 +112,16 @@ class DomainService
 
         // 4. Write Nginx config
         $config      = $this->generateNginxConfig($domain, $certPath);
-        $writeResult = file_put_contents("/etc/nginx/sites-enabled/{$domain}", $config);
+        $tmpFile = tempnam(sys_get_temp_dir(), 'nginx_');
+        file_put_contents($tmpFile, $config);
+        $dest = escapeshellarg("/etc/nginx/sites-enabled/{$domain}");
+        shell_exec("sudo cp {$tmpFile} {$dest} 2>&1");
+        unlink($tmpFile);
 
-        if ($writeResult === false) {
+        if (!file_exists("/etc/nginx/sites-enabled/{$domain}")) {
             Log::error("Failed to write Nginx config for {$domain}");
-            return [
-                'success' => false,
-                'message' => "Failed to write Nginx config for {$domain}"
-            ];
+            return ['success' => false, 'message' => "Failed to write Nginx config for {$domain}"];
         }
-
         Log::info("Nginx config written for external domain: {$domain} at {$certPath}");
 
         // 5. Reload Nginx
