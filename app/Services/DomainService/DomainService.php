@@ -89,6 +89,10 @@ class DomainService
 
     private function setupExternalDomain(string $domain): array
     {
+        // ✅ تأكد إن الـ filesystem writable
+        shell_exec("sudo mount -o remount,rw / 2>&1");
+        shell_exec("sudo mount -o remount,rw /etc/letsencrypt 2>&1");
+
         // 1. Validate domain
         $validation = $this->isDomainValid($domain);
         if (!$validation['valid']) {
@@ -111,7 +115,7 @@ class DomainService
         }
 
         // 4. Write Nginx config
-        $config      = $this->generateNginxConfig($domain, $certPath);
+        $config  = $this->generateNginxConfig($domain, $certPath);
         $tmpFile = tempnam(sys_get_temp_dir(), 'nginx_');
         file_put_contents($tmpFile, $config);
         $dest = escapeshellarg("/etc/nginx/sites-enabled/{$domain}");
@@ -122,12 +126,12 @@ class DomainService
             Log::error("Failed to write Nginx config for {$domain}");
             return ['success' => false, 'message' => "Failed to write Nginx config for {$domain}"];
         }
+
         Log::info("Nginx config written for external domain: {$domain} at {$certPath}");
 
         // 5. Reload Nginx
         return $this->reloadNginx();
     }
-
     private function isDomainValid(string $domain): array
     {
         if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
@@ -177,6 +181,7 @@ class DomainService
     private function generateSSL(string $domain): array
     {
         shell_exec("sudo mount -o remount,rw / 2>&1");
+        shell_exec("sudo mount -o remount,rw /etc/letsencrypt 2>&1");
 
         $safeDomain = escapeshellarg($domain);
         $safeEmail  = escapeshellarg($this->adminEmail);
