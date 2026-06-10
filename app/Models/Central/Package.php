@@ -12,4 +12,8 @@ class Package extends Model
     {
         return $this->hasMany(FeaturePackage::class, 'package_id');
     }
+    public function featurePackages()
+    {
+        return $this->hasMany(FeaturePackage::class, 'package_id');
+    }
 }

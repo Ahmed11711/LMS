@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\SyncFeaturePackageAfterResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,9 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'kashier/webhook/academy/*',
             'bunny/webhook',
         ]);
-        $middleware->api(append: [
-            // App\Http\Middleware\LegalHackMidu::class
-            // \App\Http\Middleware\EncryptApiResponse::class, // for hash data
+        $middleware->alias([
+            'sync.feature.package' =>
+            SyncFeaturePackageAfterResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

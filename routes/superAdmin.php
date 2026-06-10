@@ -27,7 +27,7 @@ Route::prefix('superAdmin')->group(function () {
     Route::middleware(SuperAdminMiddleware::class)->group(function () {
         Route::apiResource('packages', PackageController::class)->names('package');
         Route::apiResource('features', FeaturesController::class)->names('features');
-        Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->except('post');
+        Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->middleware('sync.feature.package');
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
         Route::apiResource('countries', CountryController::class)->names('country');
         Route::apiResource('payment_methods', PaymentMethodController::class)->names('payment_method');
