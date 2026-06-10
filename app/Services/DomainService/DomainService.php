@@ -176,6 +176,8 @@ class DomainService
 
     private function generateSSL(string $domain): array
     {
+        shell_exec("sudo mount -o remount,rw / 2>&1");
+
         $safeDomain = escapeshellarg($domain);
         $safeEmail  = escapeshellarg($this->adminEmail);
 
