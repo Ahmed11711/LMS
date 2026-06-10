@@ -186,7 +186,7 @@ class DomainService
         $safeDomain = escapeshellarg($domain);
         $safeEmail  = escapeshellarg($this->adminEmail);
 
-        $sslOutput = shell_exec("sudo certbot certonly --nginx -d {$safeDomain} --non-interactive --agree-tos -m {$safeEmail} 2>&1");
+        $sslOutput = shell_exec("sudo certbot certonly --webroot -w /var/www/LMS/public -d {$safeDomain} --non-interactive --agree-tos -m {$safeEmail} 2>&1");
         Log::info("SSL output for {$domain}: " . $sslOutput);
 
         shell_exec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/live/{$domain}/ 2>&1");
@@ -209,7 +209,6 @@ class DomainService
             'certPath' => $certPath
         ];
     }
-
     private function reloadNginx(): array
     {
         $testOutput = shell_exec("sudo nginx -t 2>&1");
