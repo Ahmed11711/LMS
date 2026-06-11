@@ -47,6 +47,8 @@ class CustomSubdomainController extends Controller
                     'domain'     => $domain,
                     'updated_at' => now(),
                 ]);
+            cache()->forget("tenant_meta_{$oldDomain}");
+            cache()->forget("tenant_meta_{$domain}");
 
             return response()->json([
                 'success' => true,
