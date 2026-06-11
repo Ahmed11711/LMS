@@ -10,9 +10,7 @@ class CheckFeatureLimit
 {
     public function handle(Request $request, Closure $next, $featureSlug, $fileInputName = null)
     {
-        if (!$request->isMethod('post')) {
-            return $next($request);
-        }
+
         $feature = DB::connection('tenant')
             ->table('tenant_feature_usage')
             ->where('feature_slug', $featureSlug)
