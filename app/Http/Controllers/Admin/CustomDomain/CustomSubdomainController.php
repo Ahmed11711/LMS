@@ -65,4 +65,18 @@ class CustomSubdomainController extends Controller
             ], 500);
         }
     }
+
+    protected function isProtectedDomain(string $domain): bool
+    {
+        $protectedDomains = [
+            'darab.academy',
+            'www.darab.academy',
+            'api.darab.academy',
+            'admin.darab.academy',
+            'app.darab.academy',
+            'localhost',
+        ];
+
+        return in_array($domain, $protectedDomains, true);
+    }
 }
