@@ -21,10 +21,7 @@ class CustomDomainController extends Controller
     {
         $request->validated();
 
-        return response()->json([
-            'success' => true,
-            'message' => "Domain configured successfully."
-        ], 200);
+
         $domain   = strtolower(trim($request->domain));
         $tenant   = app('tenant');
         $tenantId = $tenant->id;
@@ -36,7 +33,6 @@ class CustomDomainController extends Controller
             'old_domain' => $oldDomain,
         ]);
 
-        // 🛡️ منع الدومين الأساسي وأي protected subdomain
         if ($this->isProtectedDomain($domain)) {
             return response()->json([
                 'success' => false,
@@ -44,7 +40,6 @@ class CustomDomainController extends Controller
             ], 422);
         }
 
-        // ✅ تحقق إن الدومين مش موجود عند tenant تاني
         $exists = DB::connection('LMS_CENTER')
             ->table('tenants')
             ->where('domain', $domain)

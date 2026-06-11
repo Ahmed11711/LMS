@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Chapter\ChapterController;
 use App\Http\Controllers\Admin\Course\CourseController;
 use App\Http\Controllers\Admin\CustomDomain\CustomDomainController;
+use App\Http\Controllers\Admin\CustomDomain\CustomSubdomainController;
 use App\Http\Controllers\Admin\Lesson\LessonController;
 use App\Http\Controllers\Admin\Me\MeController;
 use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
@@ -65,7 +66,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
     /////////////////Custom Domasin ////////////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
-    Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_supdomin');
+    Route::put('custom-subdomain', [CustomSubdomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_subdomains');
     // Route::apiResource('payment_infos', paymentInfoController::class)->names('payment_info'); // for instacjtore choose it 
     // Route::apiResource('withdraw', WithdrawController::class)->names('withdraw');
     Route::apiResource('plans', PlanController::class)->names('plan');
