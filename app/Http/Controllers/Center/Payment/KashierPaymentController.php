@@ -20,10 +20,23 @@ class KashierPaymentController extends Controller
     public function createLink(CreatePaymentRequest $request)
     {
         $data = $request->validated();
-        $link = $this->createLinkKashierPaymentService->createSession($data);
-        return $this->successResponse($link, 'Payment link created successfully');
-    }
 
+        try {
+            $link = $this->createLinkKashierPaymentService->createSession($data);
+
+            return $this->successResponse($link, 'Payment link created successfully');
+        } catch (\RuntimeException $e) {
+
+            return $this->errorResponse($e->getMessage(), 422);
+        } catch (\Throwable $e) {
+
+            Log::error('Payment link creation failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return $this->errorResponse('Something went wrong while creating the payment link.', 500);
+        }
+    }
 
     public function success(Request $request)
     {
