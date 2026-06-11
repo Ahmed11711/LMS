@@ -232,17 +232,10 @@ class DomainService
 
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'nginx_');
-
-        if ($tmpFile === false) {
-            Log::error("Could not create temp file for Nginx config: {$domain}");
-            return false;
-        }
-
-        file_put_contents($tmpFile, $config);
         $dest = escapeshellarg("/etc/nginx/sites-enabled/{$domain}");
-        $this->safeExec("sudo cp {$tmpFile} {$dest}");
-        unlink($tmpFile);
+        $escapedConfig = escapeshellarg($config);
+
+        $this->safeExec("echo {$escapedConfig} | sudo tee {$dest}");
 
         return file_exists("/etc/nginx/sites-enabled/{$domain}");
     }
