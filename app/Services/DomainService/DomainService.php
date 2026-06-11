@@ -133,7 +133,6 @@ class DomainService
         if (!$reload['success']) {
             // Rollback: remove bad config
             $this->deleteNginxConfig($domain);
-            $this->deleteCert($domain);
         }
 
         return $reload;
