@@ -14,17 +14,14 @@ class CustomDomainController extends Controller
     use ApiResponseTrait;
 
     public function __construct(
-        public DomainService $domainService
+        private DomainService $domainService
     ) {}
 
-    public function setup(CustomDomainRequest $request)
+    public function setup(CustomDomainRequest $request): \Illuminate\Http\JsonResponse
     {
-        $request->validated();
-
-
-        $domain   = strtolower(trim($request->domain));
-        $tenant   = app('tenant');
-        $tenantId = $tenant->id;
+        $domain    = strtolower(trim($request->validated()['domain']));
+        $tenant    = app('tenant');
+        $tenantId  = $tenant->id;
         $oldDomain = $tenant->domain;
 
         Log::alert("Domain Setup Request", [
@@ -33,13 +30,15 @@ class CustomDomainController extends Controller
             'old_domain' => $oldDomain,
         ]);
 
-        if ($this->isProtectedDomain($domain)) {
+        // 1. Protected domain check
+        if ($this->domainService->isProtectedDomain($domain)) {
             return response()->json([
                 'success' => false,
                 'message' => "This domain is protected and cannot be used."
             ], 422);
         }
 
+        // 2. Uniqueness check
         $exists = DB::connection('LMS_CENTER')
             ->table('tenants')
             ->where('domain', $domain)
@@ -49,15 +48,18 @@ class CustomDomainController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => "This domain is already taken by another account. Please choose a different one."
+                'message' => "This domain is already taken. Please choose a different one."
             ], 422);
         }
 
-        // ✅ امسح الدومين القديم
-        $this->cleanupOldDomain($oldDomain);
+        // 3. Cleanup old domain
+        if ($oldDomain && $oldDomain !== $domain) {
+            $this->domainService->cleanupDomain($oldDomain);
+        }
 
-        // ✅ Setup الدومين الجديد (subdomain أو external)
+        // 4. Setup new domain
         $result = $this->domainService->setupDomain($domain);
+
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
@@ -65,85 +67,31 @@ class CustomDomainController extends Controller
             ], 400);
         }
 
+        // 5. Persist to DB
         try {
             DB::connection('LMS_CENTER')
                 ->table('tenants')
                 ->where('id', $tenantId)
-                ->update([
-                    'domain'     => $domain,
-                    'updated_at' => now()
-                ]);
+                ->update(['domain' => $domain, 'updated_at' => now()]);
 
             cache()->forget("tenant_meta_{$oldDomain}");
 
             return response()->json([
                 'success' => true,
                 'message' => "Domain configured successfully."
-            ], 200);
+            ]);
         } catch (\Exception $e) {
-            Log::error("Failed to update tenant domain in DB: " . $e->getMessage());
+            Log::error("Failed to update tenant domain: " . $e->getMessage());
+
+            // Rollback: restore old domain config
+            if ($oldDomain) {
+                $this->domainService->setupDomain($oldDomain);
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => "Domain setup done, but failed to update record. Please contact support."
+                'message' => "Domain setup done, but failed to save. Please contact support."
             ], 500);
         }
-    }
-
-    // ============================================================
-    // Private Helpers
-    // ============================================================
-
-    private function isProtectedDomain(string $domain): bool
-    {
-        $protectedDomains = [
-            'darab.academy',
-            'www.darab.academy',
-            'api.darab.academy',
-            'mail.darab.academy',
-            'admin.darab.academy',
-        ];
-
-        return in_array(strtolower($domain), $protectedDomains);
-    }
-
-    private function cleanupOldDomain(string $oldDomain): void
-    {
-        if (empty($oldDomain) || $this->isProtectedDomain($oldDomain)) {
-            Log::info("Skipping cleanup for protected or empty domain: {$oldDomain}");
-            return;
-        }
-
-        // Subdomain داخلي - امسح Nginx بس
-        if (str_ends_with($oldDomain, '.darab.academy')) {
-            $nginxConfig = "/etc/nginx/sites-enabled/{$oldDomain}";
-            if (file_exists($nginxConfig)) {
-                shell_exec("sudo rm -f " . escapeshellarg($nginxConfig) . " 2>&1");
-                Log::info("Deleted Nginx config for internal subdomain: {$oldDomain}");
-                shell_exec("sudo nginx -t && sudo systemctl reload nginx 2>&1");
-            }
-            return;
-        }
-
-        // External domain - امسح SSL + Nginx
-        $suffixes = ['', '-0001', '-0002', '-0003'];
-        foreach ($suffixes as $suffix) {
-            $certName = $oldDomain . $suffix;
-            $certPath = "/etc/letsencrypt/live/{$certName}";
-
-            if (file_exists($certPath)) {
-                $safeCert = escapeshellarg($certName);
-                shell_exec("sudo certbot delete --cert-name {$safeCert} --non-interactive 2>&1");
-                Log::info("Deleted SSL cert: {$certName}");
-            }
-        }
-
-        $nginxConfig = "/etc/nginx/sites-enabled/{$oldDomain}";
-        if (file_exists($nginxConfig)) {
-            shell_exec("sudo rm -f " . escapeshellarg($nginxConfig) . " 2>&1");
-            Log::info("Deleted Nginx config for: {$oldDomain}");
-        }
-
-        shell_exec("sudo nginx -t && sudo systemctl reload nginx 2>&1");
-        Log::info("Nginx reloaded after cleanup of: {$oldDomain}");
     }
 }
