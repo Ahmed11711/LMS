@@ -232,14 +232,16 @@ class DomainService
 
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $dest = escapeshellarg("/etc/nginx/sites-enabled/{$domain}");
-        $escapedConfig = escapeshellarg($config);
+        $dest   = "/etc/nginx/sites-enabled/{$domain}";
+        $result = file_put_contents($dest, $config);
 
-        $this->safeExec("echo {$escapedConfig} | sudo tee {$dest}");
+        if ($result === false) {
+            Log::error("file_put_contents failed for: {$dest}");
+            return false;
+        }
 
-        return file_exists("/etc/nginx/sites-enabled/{$domain}");
+        return true;
     }
-
     private function reloadNginx(): array
     {
         $testOutput = $this->safeExec("sudo nginx -t");
