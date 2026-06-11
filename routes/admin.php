@@ -45,7 +45,14 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');
     Route::apiResource('categories', CategoryController::class)->names('category');
-    Route::apiResource('courses', CourseController::class)->names('course');
+    Route::apiResource('courses', CourseController::class)
+        ->except(['store'])
+        ->names('course');
+
+    Route::post('courses', [CourseController::class, 'store'])
+        ->middleware(CheckFeatureLimit::class . ':max_courses')
+        ->name('course.store');
+
     Route::apiResource('online_sessions', OnlineSessionController::class)->names('online_session');
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
     Route::apiResource('chapters', ChapterController::class)->names('chapter');

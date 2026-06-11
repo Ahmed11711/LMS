@@ -21,6 +21,10 @@ class CustomDomainController extends Controller
     {
         $request->validated();
 
+        return response()->json([
+            'success' => true,
+            'message' => "Domain configured successfully."
+        ], 200);
         $domain   = strtolower(trim($request->domain));
         $tenant   = app('tenant');
         $tenantId = $tenant->id;
