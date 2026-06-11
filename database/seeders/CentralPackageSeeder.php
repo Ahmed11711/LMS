@@ -23,7 +23,8 @@ class CentralPackageSeeder extends Seeder
             ['id' => 5, 'title' => 'Custom Certificates', 'key' => 'custom_certificates'],
             ['id' => 6, 'title' => 'Custom Domain', 'key' => 'custom_domain'],
             ['id' => 7, 'title' => 'Direct Payment (Darap)', 'key' => 'direct_payment'],
-            ['id' => 8, 'title' => 'Online Payment Gateway', 'key' => 'online_payment']
+            ['id' => 8, 'title' => 'Online Payment Gateway', 'key' => 'online_payment'],
+            ['id' => 9, 'title' => 'Custom Subdomains Count', 'key' => 'custom_subdomain'],
         ];
 
         foreach ($features as $feature) {
@@ -53,6 +54,7 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 5, 'value' => '0', 'lable' => 'Not Supported'],
                     ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
                     ['feature_id' => 8, 'value' => false, 'lable' => 'Not Supported'],
+                    ['feature_id' => 9, 'value' => '1', 'lable' => '1 Subdomain'],
                 ]
             ],
             [
@@ -71,6 +73,7 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 6, 'value' => '50', 'lable' => 'custom_domain'],
                     ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
                     ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 9, 'value' => '1', 'lable' => '1 Subdomain'],
                 ]
             ],
             [
@@ -89,6 +92,7 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 6, 'value' => '500', 'lable' => 'custom_domain'],
                     ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
                     ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 9, 'value' => '5', 'lable' => '5 Subdomains'],
                 ]
             ],
             [
@@ -107,6 +111,7 @@ class CentralPackageSeeder extends Seeder
                     ['feature_id' => 6, 'value' => '5000', 'lable' => 'custom domain'],
                     ['feature_id' => 7, 'value' => true, 'lable' => 'Supported'],
                     ['feature_id' => 8, 'value' => true, 'lable' => 'Supported'],
+                    ['feature_id' => 9, 'value' => '-1', 'lable' => 'Unlimited Subdomains'],
                 ]
             ],
         ];
