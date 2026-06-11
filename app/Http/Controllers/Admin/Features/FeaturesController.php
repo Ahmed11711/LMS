@@ -48,7 +48,6 @@ class FeaturesController extends BaseController
         $baseKey = Str::of($title)
             ->trim()
             ->snake()
-            ->upper()
             ->toString();
 
         $key = $baseKey;
