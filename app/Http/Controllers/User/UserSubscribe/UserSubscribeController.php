@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User\UserSubscribe;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
+use App\Http\Resources\User\UserSubscribe\UserSubscribeResource;
 use App\Traits\ApiResponseTrait;
 use App\Services\Payment\UserSubscribeService;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class UserSubscribeController extends Controller
     $subscribes = $this->service->getUserSubscribes($user->id);
 
 
-    return $this->successResponse(userSubscribeResource::collection($subscribes));
+    return $this->successResponse(UserSubscribeResource::collection($subscribes));
   }
   public function store(StoreUserSubscribeRequest $request)
   {
