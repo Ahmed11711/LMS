@@ -36,7 +36,7 @@ use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
 use App\Http\Controllers\Tenant\TenantMigrationController;
 
-Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
+Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy'])->group(function () {
 
     // handel migrate new model for this tenant
     Route::post('migrate', [TenantMigrationController::class, 'migrateCurrentTenant']);
