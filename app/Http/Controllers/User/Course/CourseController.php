@@ -30,8 +30,6 @@ class CourseController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-
-
         try {
             $query = $this->repository->query()->with($this->getIndexRelationships());
 
@@ -47,16 +45,7 @@ class CourseController extends BaseController
                 ->latest()
                 ->paginate($request->input('per_page', 10));
 
-            $user = auth('api')->user();
-
-            if ($user) {
-                $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
-
-                $data->getCollection()->transform(function ($course) use ($enrolledIds) {
-                    $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
-                    return $course;
-                });
-            }
+            $this->applyEnrollment($data);
 
             $data = $this->resourceClass::collection($data);
 
@@ -122,7 +111,7 @@ class CourseController extends BaseController
 
             $target->getCollection()->transform(function ($course) use ($enrollments) {
                 $status = $enrollments->get($course->id);
-                $course->setAttribute('is_enrolled', !is_null($status));
+                $course->setAttribute('is_enrolled', $status === 'approved');
                 $course->setAttribute('enrollment_status', $status);
                 return $course;
             });
@@ -134,11 +123,10 @@ class CourseController extends BaseController
             }
 
             $enrollment = $user->enrollments()->where('course_id', $target->id)->first();
-            $target->setAttribute('is_enrolled', !is_null($enrollment));
+            $target->setAttribute('is_enrolled', $enrollment?->status === 'approved');
             $target->setAttribute('enrollment_status', $enrollment?->status);
         }
     }
-
     protected function getShowRelationships(): array
     {
         return [
