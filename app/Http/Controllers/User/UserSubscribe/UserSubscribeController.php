@@ -22,7 +22,8 @@ class UserSubscribeController extends Controller
 
     $subscribes = $this->service->getUserSubscribes($user->id);
 
-    return $this->successResponse($subscribes);
+
+    return $this->successResponse(userSubscribeResource::collection($subscribes));
   }
   public function store(StoreUserSubscribeRequest $request)
   {
