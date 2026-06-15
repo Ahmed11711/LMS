@@ -77,31 +77,65 @@ class CourseController extends BaseController
             return $this->errorResponse("Record not found", 404);
         }
 
-        $this->applyEnrollment($record); // ✅
+        $this->applyEnrollment($record);
 
         return $this->successResponse(new $this->showResourceClass($record), 'Record retrieved successfully');
     }
 
-    // ✅ method مشتركة بين index و show
+    // private function applyEnrollment($target): void
+    // {
+    //     $user = auth('api')->user();
+
+    //     if (!$user) return;
+
+    //     $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
+
+    //     // لو collection (index)
+    //     if ($target instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+    //         $target->getCollection()->transform(function ($course) use ($enrolledIds) {
+    //             $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
+    //             return $course;
+    //         });
+    //     }
+
+    //     // لو single record (show)
+    //     else {
+    //         $target->setAttribute('is_enrolled', in_array($target->id, $enrolledIds));
+    //     }
+    // }
+
     private function applyEnrollment($target): void
     {
         $user = auth('api')->user();
 
-        if (!$user) return;
-
-        $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
-
-        // لو collection (index)
         if ($target instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-            $target->getCollection()->transform(function ($course) use ($enrolledIds) {
-                $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
+            if (!$user) {
+                $target->getCollection()->transform(function ($course) {
+                    $course->setAttribute('is_enrolled', false);
+                    $course->setAttribute('enrollment_status', null);
+                    return $course;
+                });
+                return;
+            }
+
+            $enrollments = $user->enrollments()->pluck('status', 'course_id');
+
+            $target->getCollection()->transform(function ($course) use ($enrollments) {
+                $status = $enrollments->get($course->id);
+                $course->setAttribute('is_enrolled', !is_null($status));
+                $course->setAttribute('enrollment_status', $status);
                 return $course;
             });
-        }
+        } else {
+            if (!$user) {
+                $target->setAttribute('is_enrolled', false);
+                $target->setAttribute('enrollment_status', null);
+                return;
+            }
 
-        // لو single record (show)
-        else {
-            $target->setAttribute('is_enrolled', in_array($target->id, $enrolledIds));
+            $enrollment = $user->enrollments()->where('course_id', $target->id)->first();
+            $target->setAttribute('is_enrolled', !is_null($enrollment));
+            $target->setAttribute('enrollment_status', $enrollment?->status);
         }
     }
 
