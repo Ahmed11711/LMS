@@ -226,29 +226,58 @@ abstract class BaseController extends Controller
 
   /**
    */
+  // protected function handleFileUploads(Request $request, array $validated, $existingRecord = null): array
+  // {
+  //   if (empty($this->fileFields)) return $validated;
+
+  //   foreach ($this->fileFields as $field) {
+  //     if ($request->hasFile($field)) {
+  //       try {
+  //         $file = $request->file($field);
+  //         $filename = time() . '_' . $file->getClientOriginalName();
+  //         $path = $file->storeAs("uploads/{$this->collectionName}", $filename, $this->uploadDisk);
+
+  //         if ($existingRecord && !empty($existingRecord->$field)) {
+  //           Storage::disk($this->uploadDisk)
+  //             ->delete(str_replace('/storage/', '', $existingRecord->$field));
+  //         }
+
+  //         $validated[$field] = "/storage/" . $path;
+  //       } catch (\Throwable $e) {
+  //         Log::error("File upload failed for field [{$field}] in {$this->collectionName}: " . $e->getMessage());
+  //       }
+  //     }
+  //   }
+
+  //   return $validated;
+  // }
+
   protected function handleFileUploads(Request $request, array $validated, $existingRecord = null): array
   {
     if (empty($this->fileFields)) return $validated;
-
     foreach ($this->fileFields as $field) {
       if ($request->hasFile($field)) {
         try {
           $file = $request->file($field);
-          $filename = time() . '_' . $file->getClientOriginalName();
-          $path = $file->storeAs("uploads/{$this->collectionName}", $filename, $this->uploadDisk);
+
+          // Decode URL-encoded characters and clean up spaces
+          $originalName = $file->getClientOriginalName();
+          $decodedName  = urldecode($originalName);
+          $cleanName    = preg_replace('/\s+/', '_', trim($decodedName));
+
+          $filename = time() . '_' . $cleanName;
+          $path     = $file->storeAs("uploads/{$this->collectionName}", $filename, $this->uploadDisk);
 
           if ($existingRecord && !empty($existingRecord->$field)) {
             Storage::disk($this->uploadDisk)
               ->delete(str_replace('/storage/', '', $existingRecord->$field));
           }
-
           $validated[$field] = "/storage/" . $path;
         } catch (\Throwable $e) {
           Log::error("File upload failed for field [{$field}] in {$this->collectionName}: " . $e->getMessage());
         }
       }
     }
-
     return $validated;
   }
   protected function lookupColumn(): string

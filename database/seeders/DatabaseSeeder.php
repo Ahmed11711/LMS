@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
 
-            Homepageseeder::class,
-            // SuperAdminSeeder::class,
-            // CentralPackageSeeder::class,
-            // // PaymentInfoSeeder::class
-            // ReceiverAccountSeeder::class
+            // Homepageseeder::class,
+            SuperAdminSeeder::class,
+            CentralPackageSeeder::class,
+            // PaymentInfoSeeder::class,
+            ReceiverAccountSeeder::class
         ]);
     }
 }
