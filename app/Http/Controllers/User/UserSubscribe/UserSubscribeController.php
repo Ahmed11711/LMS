@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
 use App\Traits\ApiResponseTrait;
 use App\Services\Payment\UserSubscribeService;
-use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Request;
 
 class UserSubscribeController extends Controller
 {
