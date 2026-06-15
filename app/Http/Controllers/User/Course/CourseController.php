@@ -13,6 +13,7 @@ use App\QueryFilters\ColumnFilter;
 use App\QueryFilters\Search;
 use App\QueryFilters\SelectFields;
 use App\QueryFilters\SortBy;
+use Illuminate\Support\Facades\Log;
 
 class CourseController extends BaseController
 {
@@ -97,6 +98,12 @@ class CourseController extends BaseController
     {
         $user = auth('api')->user();
 
+        Log::channel('single')->info('=== applyEnrollment START ===', [
+            'auth_user_id' => $user?->id,
+            'auth_guard'   => 'api',
+            'target_type'  => get_class($target),
+        ]);
+
         if ($target instanceof \Illuminate\Pagination\LengthAwarePaginator) {
             if (!$user) {
                 $target->getCollection()->transform(function ($course) {
@@ -104,28 +111,61 @@ class CourseController extends BaseController
                     $course->setAttribute('enrollment_status', null);
                     return $course;
                 });
+                Log::channel('single')->info('No auth user — paginator set to false/null');
                 return;
             }
 
             $enrollments = $user->enrollments()->pluck('status', 'course_id');
 
+            Log::channel('single')->info('Paginator enrollments', [
+                'user_id'     => $user->id,
+                'enrollments' => $enrollments->toArray(),
+            ]);
+
             $target->getCollection()->transform(function ($course) use ($enrollments) {
                 $status = $enrollments->get($course->id);
                 $course->setAttribute('is_enrolled', $status === 'approved');
                 $course->setAttribute('enrollment_status', $status);
+
+                Log::channel('single')->info("Course #{$course->id}", [
+                    'status'      => $status,
+                    'is_enrolled' => $status === 'approved',
+                ]);
+
                 return $course;
             });
         } else {
             if (!$user) {
                 $target->setAttribute('is_enrolled', false);
                 $target->setAttribute('enrollment_status', null);
+                Log::channel('single')->info('No auth user — single record set to false/null');
                 return;
             }
 
+            $allEnrollments = $user->enrollments()->get(['course_id', 'status', 'user_id']);
+
+            Log::channel('single')->info('Single record — all user enrollments', [
+                'user_id'          => $user->id,
+                'target_course_id' => $target->id,
+                'all_enrollments'  => $allEnrollments->toArray(),
+            ]);
+
             $enrollment = $user->enrollments()->where('course_id', $target->id)->first();
+
+            Log::channel('single')->info('Single record — matched enrollment', [
+                'enrollment' => $enrollment?->toArray(),
+            ]);
+
             $target->setAttribute('is_enrolled', $enrollment?->status === 'approved');
             $target->setAttribute('enrollment_status', $enrollment?->status);
+
+            Log::channel('single')->info('Single record — result', [
+                'is_enrolled'       => $enrollment?->status === 'approved',
+                'enrollment_status' => $enrollment?->status,
+            ]);
         }
+
+        Log::channel('single')->info('=== applyEnrollment END ===');
     }
     protected function getShowRelationships(): array
     {
