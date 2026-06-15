@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrlCast;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSubscribe extends Model
 {
-    //
+    protected $casts = [
+        'receipt' => StorageUrlCast::class,
+    ];
 
     public function user()
     {
