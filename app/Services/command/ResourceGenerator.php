@@ -38,15 +38,15 @@ class ResourceGenerator
 
         // ✅ تعديل الموديل للعلاقات والحقول JSON
         self::updateModelRelations($model, $table);
-// ✅ إنشاء ملف fields للفرونت
-$jsFolder = resource_path("js/forms");
-if (!File::exists($jsFolder)) {
-    File::makeDirectory($jsFolder, 0755, true);
-}
+        // ✅ إنشاء ملف fields للفرونت
+        $jsFolder = resource_path("js/forms");
+        if (!File::exists($jsFolder)) {
+            File::makeDirectory($jsFolder, 0755, true);
+        }
 
-$fieldsPath = "{$jsFolder}/{$model}Fields.js";
-$fieldsStub = self::generateFieldsStub($model, $table);
-File::put($fieldsPath, $fieldsStub);
+        $fieldsPath = "{$jsFolder}/{$model}Fields.js";
+        $fieldsStub = self::generateFieldsStub($model, $table);
+        File::put($fieldsPath, $fieldsStub);
 
         // ✅ إنشاء ResourceEnums إذا مش موجود
         // if (!File::exists($enumsPath)) {
@@ -131,59 +131,61 @@ class {$className} extends JsonResource
 ";
     }
 
- private static function generateFieldsStub($model, $table)
-{
-    $columns = Schema::getColumnListing($table);
-    $fieldsArray = [];
+    private static function generateFieldsStub($model, $table)
+    {
+        $columns = Schema::getColumnListing($table);
+        $fieldsArray = [];
 
-    foreach ($columns as $col) {
-        if (in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
-            continue;
-        }
-
-        $type = Schema::getColumnType($table, $col);
-        $label = Str::title(str_replace('_', ' ', $col));
-        $placeholder = "Enter {$label}";
-        $isRequired = true; // ممكن نطوره لاحقًا من FormRequest
-
-        // 🧩 تحديد النوع
-        $inputType = match (true) {
-            Str::contains($col, ['image', 'img', 'file', 'logo', 'avatar']) => 'image',
-            in_array($type, ['boolean', 'tinyint']) => 'boolean',
-            in_array($type, ['text', 'longtext']) => 'textarea',
-            in_array($type, ['enum']) => 'select',
-            in_array($type, ['integer', 'bigint', 'float', 'double', 'decimal']) => 'number',
-            Str::contains($col, 'password') => 'password',
-            default => 'text'
-        };
-
-        // 🧩 لو العمود Enum من قاعدة البيانات
-        $optionsCode = '';
-        $enumType = DB::select("SHOW COLUMNS FROM {$table} WHERE Field = '{$col}'")[0]->Type ?? '';
-
-        if (Str::startsWith($enumType, 'enum(')) {
-            preg_match("/enum\((.*)\)/", $enumType, $matches);
-            if (!empty($matches[1])) {
-                $values = str_getcsv(str_replace("'", "", $matches[1]));
-                $options = collect($values)
-                    ->map(fn($v) => ['value' => $v, 'label' => ucfirst($v)])
-                    ->values()
-                    ->toArray();
-                $optionsJson = json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-                $optionsCode = ",\n      options: " . $optionsJson;
+        foreach ($columns as $col) {
+            if (in_array($col, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
             }
+
+            $type = Schema::getColumnType($table, $col);
+            $label = Str::title(str_replace('_', ' ', $col));
+            $placeholder = "Enter {$label}";
+            $isRequired = true; // ممكن نطوره لاحقًا من FormRequest
+
+            // 🧩 تحديد النوع
+            $inputType = match (true) {
+                Str::contains($col, ['image', 'img', 'file', 'logo', 'avatar']) => 'image',
+                in_array($type, ['boolean', 'tinyint']) => 'boolean',
+                in_array($type, ['text', 'longtext']) => 'textarea',
+                in_array($type, ['enum']) => 'select',
+                in_array($type, ['integer', 'bigint', 'float', 'double', 'decimal']) => 'number',
+                Str::contains($col, 'password') => 'password',
+                default => 'text'
+            };
+
+            $optionsCode = '';
+            $enumType = DB::selectOne("
+    SELECT data_type as Type 
+    FROM information_schema.columns 
+    WHERE table_name = ? AND column_name = ?
+", [$table, $col])->type ?? '';
+            if (Str::startsWith($enumType, 'enum(')) {
+                preg_match("/enum\((.*)\)/", $enumType, $matches);
+                if (!empty($matches[1])) {
+                    $values = str_getcsv(str_replace("'", "", $matches[1]));
+                    $options = collect($values)
+                        ->map(fn($v) => ['value' => $v, 'label' => ucfirst($v)])
+                        ->values()
+                        ->toArray();
+                    $optionsJson = json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                    $optionsCode = ",\n      options: " . $optionsJson;
+                }
+            }
+
+            // 🧩 الصورة تكون دايمًا string
+            $isString = $inputType === 'image' ? 'true' : 'false';
+
+            $fieldsArray[] = "  { key: \"{$col}\", label: \"{$label}\", required: {$isRequired}, placeholder: \"{$placeholder}\", type: \"{$inputType}\", isString: {$isString}{$optionsCode} }";
         }
 
-        // 🧩 الصورة تكون دايمًا string
-        $isString = $inputType === 'image' ? 'true' : 'false';
+        $fieldsString = implode(",\n", $fieldsArray);
 
-        $fieldsArray[] = "  { key: \"{$col}\", label: \"{$label}\", required: {$isRequired}, placeholder: \"{$placeholder}\", type: \"{$inputType}\", isString: {$isString}{$optionsCode} }";
-    }
-
-    $fieldsString = implode(",\n", $fieldsArray);
-
-    return "export const fields = [
+        return "export const fields = [
 {$fieldsString}
 ];";
-}
+    }
 }

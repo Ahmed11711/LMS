@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin\CustomDomain;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CustomDomain\CustomDomainRequest;
+use App\Http\Requests\Admin\CustomDomain\CustomSubDomain;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CustomSubdomainController extends Controller
 {
-    public function setup(CustomDomainRequest $request)
+    public function setup(CustomSubDomain $request)
     {
         $request->validated();
 

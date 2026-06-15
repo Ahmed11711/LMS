@@ -2,6 +2,14 @@
 
 namespace App\Providers;
 
+use App\Repositories\Section\SectionRepositoryInterface;
+use App\Repositories\Section\SectionRepository;
+
+use App\Repositories\Pages\PagesRepositoryInterface;
+use App\Repositories\Pages\PagesRepository;
+
+
+
 use App\Repositories\InstructorReceiverAccount\InstructorReceiverAccountRepositoryInterface;
 use App\Repositories\InstructorReceiverAccount\InstructorReceiverAccountRepository;
 
@@ -84,9 +92,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        $this->app->bind(
+    public function register(): void {
+$this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -113,7 +120,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ReceiverAccountRepositoryInterface::class, ReceiverAccountRepository::class);
         $this->app->bind(InstructorReceiverAccountRepositoryInterface::class, InstructorReceiverAccountRepository::class);
         $this->app->bind(UserPlanRepositoryInterface::class, UserPlanRepository::class);
-    }
+        $this->app->bind(PagesRepositoryInterface::class, PagesRepository::class);
+        $this->app->bind(SectionRepositoryInterface::class, SectionRepository::class);
+}
 
     /**
      * Bootstrap any application services.

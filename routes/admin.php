@@ -19,29 +19,30 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Section\SectionController;
+use App\Http\Controllers\Admin\Pages\PagesController;
+
+
 use App\Http\Controllers\Admin\InstructorReceiverAccount\InstructorReceiverAccountController;
 use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
-use App\Http\Controllers\Admin\AcademyWithdraw\AcademyWithdrawController;
-use App\Http\Controllers\Admin\AcademyPaymentMethod\AcademyPaymentMethodController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController;
 use App\Http\Controllers\Admin\Plan\PlanController;
-use App\Http\Controllers\Instructor\UserWithdraw\UserWithdrawController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
-use App\Http\Controllers\Admin\paymentInfo\paymentInfoController;
 use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
 use App\Http\Controllers\Admin\UserPlan\UserPlanController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
-use App\Http\Controllers\Admin\Withdraw\WithdrawController;
 use App\Http\Controllers\Instructor\InstructorController;
 use App\Http\Controllers\Tenant\TenantMigrationController;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
+    Route::apiResource('pages', PagesController::class)->names('pages');
+    Route::apiResource('sections', SectionController::class)->names('section');
+
+
     // handel migrate new model for this tenant
     Route::post('migrate', [TenantMigrationController::class, 'migrateCurrentTenant']);
-
-
 
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::apiResource('users', UserController::class)->names('user');

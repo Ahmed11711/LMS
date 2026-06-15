@@ -45,29 +45,37 @@ class RequestGenerator
                 foreach ($columns as $col) {
                     if (in_array($col, $skip)) continue;
 
+                    // ✅ PostgreSQL syntax بدل MySQL
                     $info = DB::selectOne("
-                        SELECT COLUMN_TYPE, IS_NULLABLE
-                        FROM INFORMATION_SCHEMA.COLUMNS
-                        WHERE TABLE_NAME = ? AND COLUMN_NAME = ?
-                          AND TABLE_SCHEMA = DATABASE()
-                    ", [$table, $col]);
+            SELECT data_type, udt_name, is_nullable, character_maximum_length
+            FROM information_schema.columns
+            WHERE table_name = ? AND column_name = ?
+        ", [$table, $col]);
 
                     if (!$info) continue;
 
-                    $type = $info->COLUMN_TYPE;
-                    $nullable = $info->IS_NULLABLE === 'YES';
-                    $rule = '';
+                    $type     = strtolower($info->udt_name ?? $info->data_type);
+                    $nullable = $info->is_nullable === 'YES';
+                    $maxLen   = $info->character_maximum_length;
+                    $rule     = '';
 
-                    if (preg_match('/^varchar\((\d+)\)$/i', $type, $m)) $rule = "string|max:{$m[1]}";
-                    elseif (preg_match('/^enum\((.+)\)$/i', $type, $m))
-                        $rule = 'in:' . implode(',', array_map(fn($v) => trim($v, " '\""), explode(',', $m[1])));
-                    elseif (in_array($type, ['text', 'mediumtext', 'longtext'])) $rule = 'string';
-                    elseif (preg_match('/int|bigint/i', $type)) $rule = 'integer';
-                    elseif (preg_match('/tinyint\(1\)/i', $type)) $rule = 'boolean';
-                    elseif (preg_match('/decimal|float|double/i', $type)) $rule = 'numeric';
-                    elseif (preg_match('/date|datetime|timestamp/i', $type)) $rule = 'date';
-                    elseif ($type === 'json') $rule = 'array';
+                    if ($type === 'varchar' || $type === 'bpchar') {
+                        $rule = $maxLen ? "string|max:{$maxLen}" : 'string';
+                    } elseif (in_array($type, ['text', 'citext'])) {
+                        $rule = 'string';
+                    } elseif (in_array($type, ['int2', 'int4', 'int8', 'integer', 'bigint', 'smallint'])) {
+                        $rule = 'integer';
+                    } elseif ($type === 'bool') {
+                        $rule = 'boolean';
+                    } elseif (in_array($type, ['numeric', 'float4', 'float8', 'decimal'])) {
+                        $rule = 'numeric';
+                    } elseif (in_array($type, ['date', 'timestamp', 'timestamptz'])) {
+                        $rule = 'date';
+                    } elseif ($type === 'jsonb' || $type === 'json') {
+                        $rule = 'array';
+                    }
 
+                    // FK check
                     if (Str::endsWith($col, '_id')) {
                         $related = Str::snake(Str::plural(Str::replaceLast('_id', '', $col)));
                         if (Schema::hasTable($related)) {
@@ -75,12 +83,25 @@ class RequestGenerator
                         }
                     }
 
+                    // File check
                     if (preg_match('/(image|img|file|attachment|photo|picture)/i', $col)) {
                         $rule .= ($rule ? '|' : '') . 'file|max:2048';
                     }
 
-                    $unique = DB::select("SHOW INDEX FROM {$table} WHERE Column_name='{$col}' AND Non_unique=0");
-                    if (!empty($unique) && !Str::endsWith($col, '_id')) {
+                    // ✅ Unique check بـ PostgreSQL syntax بدل SHOW INDEX
+                    $uniqueCheck = DB::selectOne("
+            SELECT COUNT(*) as cnt
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.constraint_column_usage ccu
+                ON tc.constraint_name = ccu.constraint_name
+            WHERE tc.constraint_type = 'UNIQUE'
+              AND tc.table_name = ?
+              AND ccu.column_name = ?
+        ", [$table, $col]);
+
+                    $isUnique = ($uniqueCheck->cnt ?? 0) > 0;
+
+                    if ($isUnique && !Str::endsWith($col, '_id')) {
                         $rule .= $isUpdate
                             ? ($rule ? '|' : '') . "unique:{$table},{$col},'.\$this->route('{$routeParam}').',id"
                             : ($rule ? '|' : '') . "unique:{$table},{$col}";
@@ -95,7 +116,6 @@ class RequestGenerator
 
                 return $rules;
             };
-
             // 🧾 إنشاء الملفات
             $storeRules = $generateRules(false);
             $updateRules = $generateRules(true);

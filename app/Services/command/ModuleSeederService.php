@@ -144,7 +144,11 @@ class {$model}Seeder extends Seeder
 
     private static function getEnumValues($table, $column)
     {
-        $type = DB::selectOne("SHOW COLUMNS FROM {$table} WHERE Field = '{$column}'")->Type ?? '';
+        $type = DB::selectOne("
+    SELECT data_type as Type 
+    FROM information_schema.columns 
+    WHERE table_name = ? AND column_name = ?
+", [$table, $column])->type ?? '';
         preg_match("/^enum\('(.*)'\)$/", $type, $matches);
         return isset($matches[1]) ? explode("','", $matches[1]) : [];
     }
