@@ -18,8 +18,6 @@ class ReceiverAccountController extends BaseController
             repository: $repository,
             collectionName: 'ReceiverAccount',
             fileFields: ['logo']
-
-
         );
 
         $this->storeRequestClass = ReceiverAccountStoreRequest::class;

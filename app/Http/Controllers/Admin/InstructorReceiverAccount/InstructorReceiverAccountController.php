@@ -21,7 +21,6 @@ class InstructorReceiverAccountController extends BaseController
             collectionName: 'InstructorReceiverAccount'
         );
         $this->withRelationships = ['receiverAccount'];
-        $this->fileFields = ['logo'];
 
         $this->storeRequestClass = InstructorReceiverAccountStoreRequest::class;
         $this->updateRequestClass = InstructorReceiverAccountUpdateRequest::class;
