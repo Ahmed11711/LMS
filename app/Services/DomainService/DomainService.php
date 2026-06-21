@@ -233,8 +233,9 @@ class DomainService
         $configPath = "/etc/nginx/sites-enabled/{$domain}";
 
         if (file_exists($configPath)) {
-            $this->safeExec("sudo rm -f " . escapeshellarg($configPath));
-            Log::info("Deleted Nginx config: {$domain}");
+            $deleteMarker = "/tmp/nginx-pending/{$domain}.delete";
+            file_put_contents($deleteMarker, "");
+            Log::info("Queued Nginx config deletion for: {$domain}");
         }
     }
 
@@ -244,30 +245,50 @@ class DomainService
 
     private function generateSSL(string $domain): array
     {
-        $safeDomain = escapeshellarg($domain);
-        $safeEmail  = escapeshellarg($this->adminEmail);
+        $pending    = "/tmp/nginx-pending/{$domain}.ssl";
+        $resultFile = "/tmp/nginx-pending/{$domain}.ssl.result";
+        $logFile    = "/tmp/nginx-pending/{$domain}.ssl.log";
 
-        $output = $this->safeExec(
-            "sudo certbot certonly --webroot -w /var/www/LMS/public"
-                . " -d {$safeDomain} --non-interactive --agree-tos -m {$safeEmail}"
-        );
+        // Clean up any previous result
+        @unlink($resultFile);
+        @unlink($logFile);
 
-        Log::info("Certbot output for {$domain}: " . $output);
+        // Write the SSL request for the cron job
+        file_put_contents($pending, $this->adminEmail);
 
-        // Fix permissions
-        $this->safeExec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/live/{$domain}/");
-        $this->safeExec("sudo chown -R root:{$this->webUser} /etc/letsencrypt/archive/{$domain}/");
-        $this->safeExec("sudo chmod 750 /etc/letsencrypt/live/{$domain}/");
-        $this->safeExec("sudo chmod 750 /etc/letsencrypt/archive/{$domain}/");
+        Log::info("Queued SSL request for: {$domain}");
 
-        $certPath = $this->findCertPath($domain);
+        // Wait up to 120s for certbot to finish
+        $timeout = 120;
+        $start   = time();
 
-        if (!$certPath) {
-            return $this->fail("SSL generation failed for {$domain}", ['ssl_output' => $output]);
+        while (time() - $start < $timeout) {
+            if (file_exists($resultFile)) {
+                $result = trim(file_get_contents($resultFile));
+                $log    = file_exists($logFile) ? file_get_contents($logFile) : '';
+                @unlink($resultFile);
+                @unlink($logFile);
+
+                Log::info("Certbot output for {$domain}: " . $log);
+
+                if ($result === 'success') {
+                    $certPath = $this->findCertPath($domain);
+                    if (!$certPath) {
+                        return $this->fail("SSL generation failed for {$domain}", ['ssl_output' => $log]);
+                    }
+                    return ['success' => true, 'certPath' => $certPath];
+                }
+
+                return $this->fail("SSL generation failed for {$domain}", ['ssl_output' => $log]);
+            }
+            sleep(2);
         }
 
-        return ['success' => true, 'certPath' => $certPath];
+        @unlink($pending);
+        Log::error("Timed out waiting for SSL generation for: {$domain}");
+        return $this->fail("SSL generation timed out for {$domain}");
     }
+
 
     private function findCertPath(string $domain): ?string
     {
@@ -310,32 +331,34 @@ class DomainService
 
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $dest   = "/etc/nginx/sites-enabled/{$domain}";
-        $result = file_put_contents($dest, $config);
+        $pending = "/tmp/nginx-pending/{$domain}.conf";
+        $result  = file_put_contents($pending, $config);
 
         if ($result === false) {
-            Log::error("file_put_contents failed for: {$dest} | error: " . json_encode(error_get_last()));
+            Log::error("Failed to write pending config for: {$domain} | error: " . json_encode(error_get_last()));
             return false;
         }
 
-        return true;
+        // Wait up to 70s for the cron job to pick it up and move it to sites-enabled
+        $dest    = "/etc/nginx/sites-enabled/{$domain}";
+        $timeout = 70;
+        $start   = time();
+
+        while (time() - $start < $timeout) {
+            if (file_exists($dest)) {
+                Log::info("Nginx config deployed for: {$domain}");
+                return true;
+            }
+            sleep(2);
+        }
+
+        @unlink($pending);
+        Log::error("Timed out waiting for nginx config deployment for: {$domain}");
+        return false;
     }
     private function reloadNginx(): array
     {
-        $testOutput = $this->safeExec("sudo nginx -t");
-
-        if ($this->outputHasError($testOutput)) {
-            Log::error("Nginx config test failed: " . $testOutput);
-            return $this->fail("Nginx config test failed: " . $testOutput);
-        }
-
-        $reloadOutput = $this->safeExec("sudo systemctl reload nginx");
-
-        if ($this->outputHasError($reloadOutput)) {
-            Log::error("Nginx reload failed: " . $reloadOutput);
-            return $this->fail("Nginx reload failed: " . $reloadOutput);
-        }
-
+        // Reload is handled by the nginx-domain-sync.sh cron job.
         return ['success' => true];
     }
 

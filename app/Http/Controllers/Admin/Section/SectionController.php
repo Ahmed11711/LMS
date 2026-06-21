@@ -6,9 +6,12 @@ use App\Repositories\Section\SectionRepositoryInterface;
 use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\Section\SectionStoreRequest;
 use App\Http\Requests\Admin\Section\SectionUpdateRequest;
+use App\Http\Requests\Admin\Section\SectionBulkStoreRequest;
 use App\Http\Resources\Admin\Section\SectionResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SectionController extends BaseController
 {
@@ -62,6 +65,79 @@ class SectionController extends BaseController
         }
 
         return $this->successResponse(null, 'Sections reordered successfully');
+    }
+
+    /**
+     * 🌟 استقبال كل أقسام الصفحة دفعة واحدة (Bulk Replace)
+     *
+     * بيمسح كل الـ sections القديمة بتاعة الصفحة (مع الـ items بتاعتها)
+     * وينشئ الجديدة بدلها، كل ده جوه transaction واحدة.
+     *
+     * Body:
+     * {
+     *   "pages_id": 5,
+     *   "sections": [
+     *      { "type": "hero", "order": 1, "props": {...}, "items": [ { "order": 1, "props": {...} } ] },
+     *      { "type": "gallery", "order": 2, "props": {...} }
+     *   ]
+     * }
+     */
+    public function bulkStore(SectionBulkStoreRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $pageId    = $validated['pages_id'];
+        $sections  = $validated['sections'];
+
+        try {
+            $created = DB::transaction(function () use ($pageId, $sections) {
+                // 1) امسح كل الأقسام القديمة بتاعة الصفحة دي مع الـ items بتاعتها
+                $oldSections = $this->repository->query()
+                    ->where('pages_id', $pageId)
+                    ->get();
+
+                foreach ($oldSections as $oldSection) {
+                    $oldSection->items()->delete();
+                }
+
+                $this->repository->query()
+                    ->where('pages_id', $pageId)
+                    ->delete();
+
+                // 2) أنشئ الأقسام الجديدة بالترتيب اللي جايين بيه
+                $newRecords = [];
+
+                foreach ($sections as $sectionData) {
+                    $record = $this->repository->create([
+                        'pages_id' => $pageId,
+                        'type'     => $sectionData['type'],
+                        'order'    => $sectionData['order'],
+                        'props'    => json_encode($sectionData['props'], JSON_UNESCAPED_UNICODE),
+                    ]);
+
+                    $this->syncItems($record, $sectionData['items'] ?? []);
+
+                    $newRecords[] = $record;
+                }
+
+                return $newRecords;
+            });
+
+            $createdIds = collect($created)->pluck('id');
+
+            $freshSections = $this->repository->query()
+                ->whereIn('id', $createdIds)
+                ->with('items')
+                ->orderBy('order')
+                ->get();
+
+            return $this->successResponse(
+                SectionResource::collection($freshSections),
+                'Sections saved successfully'
+            );
+        } catch (\Throwable $e) {
+            Log::error("Error in bulkStore Section: " . $e->getMessage());
+            return $this->errorResponse("Failed to save sections: " . $e->getMessage(), 500);
+        }
     }
 
     // ----------------------------------------------------------------
