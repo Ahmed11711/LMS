@@ -2,16 +2,28 @@
 
 namespace App\Services\DomainService;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class DomainService
 {
+    private string $serverIp;
     private string $adminEmail    = 'admin@darab.academy';
     private string $webUser       = 'hestiamail';
     private string $wildcardCert  = '/etc/letsencrypt/live/darab.academy-0001';
     private string $protectedBase = 'darab.academy';
 
     private array $protectedSubdomains = ['www', 'api', 'mail', 'admin'];
+
+    // Max time (seconds) a single setup/cleanup operation is allowed to hold
+    // the lock for a given domain. Generous because certbot + nginx reload
+    // can legitimately take a while.
+    private const LOCK_TIMEOUT_SECONDS = 120;
+
+    public function __construct()
+    {
+        $this->serverIp = config('domain.server_ip');
+    }
 
     // ============================================================
     // Public Entry Point
@@ -21,17 +33,25 @@ class DomainService
     {
         $domain = strtolower(trim($domain));
 
-        try {
-            if ($this->isProtectedDomain($domain)) {
-                return $this->fail("This domain is protected and cannot be used.");
-            }
+        if ($this->isProtectedDomain($domain)) {
+            return $this->fail("This domain is protected and cannot be used.");
+        }
 
+        $lock = Cache::lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
+
+        if (!$lock->get()) {
+            return $this->fail("A setup operation is already in progress for {$domain}. Please wait a moment and try again.");
+        }
+
+        try {
             return $this->isInternalSubdomain($domain)
                 ? $this->setupSubdomain($domain)
                 : $this->setupExternalDomain($domain);
         } catch (\Exception $e) {
             Log::error("Domain setup failed for {$domain}: " . $e->getMessage());
             return $this->fail($e->getMessage());
+        } finally {
+            $lock->release();
         }
     }
 
@@ -44,9 +64,22 @@ class DomainService
             return;
         }
 
-        $this->isInternalSubdomain($domain)
-            ? $this->cleanupSubdomain($domain)
-            : $this->cleanupExternalDomain($domain);
+        $lock = Cache::lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
+
+        if (!$lock->get()) {
+            Log::warning("Could not acquire lock to cleanup {$domain} — a setup may be in progress.");
+            return;
+        }
+
+        try {
+            $this->isInternalSubdomain($domain)
+                ? $this->cleanupSubdomain($domain)
+                : $this->cleanupExternalDomain($domain);
+        } catch (\Exception $e) {
+            Log::error("Domain cleanup failed for {$domain}: " . $e->getMessage());
+        } finally {
+            $lock->release();
+        }
     }
 
     // ============================================================
@@ -103,36 +136,58 @@ class DomainService
             return $this->fail($validation['message']);
         }
 
-        // 2. Find or generate SSL cert
+        // 2. Check if a real cert already exists (e.g. re-running setup)
         $certPath = $this->findCertPath($domain);
 
         if (!$certPath) {
+            // 2a. Write a TEMPORARY config using our wildcard cert.
+            //     This makes Nginx accept connections for this domain
+            //     on port 80/443, so the HTTP-01 challenge can succeed.
+            $tempConfig = $this->generateNginxConfig($domain, $this->wildcardCert);
+            if (!$this->writeNginxConfig($domain, $tempConfig)) {
+                return $this->fail("Failed to write temporary Nginx config for {$domain}");
+            }
+
+            $tempReload = $this->reloadNginx();
+            if (!$tempReload['success']) {
+                $this->deleteNginxConfig($domain);
+                $this->reloadNginx();
+                return $this->fail("Temporary Nginx config invalid for {$domain}: " . ($tempReload['message'] ?? ''));
+            }
+
+            // 2b. Now request the real certificate — port 80 is live for this domain.
             $this->remountWritable();
             $certResult = $this->generateSSL($domain);
+
             if (!$certResult['success']) {
+                // Roll back: remove the temp config, nothing real was created.
+                $this->deleteNginxConfig($domain);
+                $this->reloadNginx();
                 return $certResult;
             }
+
             $certPath = $certResult['certPath'];
         }
 
-        // 3. Write Nginx config
-        $config  = $this->generateNginxConfig($domain, $certPath);
-        $written = $this->writeNginxConfig($domain, $config);
-
-        if (!$written) {
-            // Rollback cert if we just generated it
-            $this->deleteCert($domain);
-            return $this->fail("Failed to write Nginx config for {$domain}");
+        // 3. Write the FINAL config pointing at the real certificate.
+        $finalConfig = $this->generateNginxConfig($domain, $certPath);
+        if (!$this->writeNginxConfig($domain, $finalConfig)) {
+            // We have a real cert now but couldn't write the final config.
+            // Don't delete the cert — it's valid and reusable on retry.
+            return $this->fail("Failed to write final Nginx config for {$domain}");
         }
 
         Log::info("Nginx config written for external domain: {$domain}");
 
-        // 4. Reload Nginx
+        // 4. Reload Nginx with the final config.
         $reload = $this->reloadNginx();
 
         if (!$reload['success']) {
-            // Rollback: remove bad config
+            // Roll back the bad config, but keep the cert (it's still valid
+            // and reusable on the next attempt). A scheduled cleanup job
+            // is responsible for removing certs that stay unused too long.
             $this->deleteNginxConfig($domain);
+            $this->reloadNginx();
         }
 
         return $reload;
@@ -241,6 +296,7 @@ class DomainService
 
         return true;
     }
+
     private function reloadNginx(): array
     {
         $testOutput = $this->safeExec("sudo nginx -t");
@@ -300,20 +356,37 @@ NGINX;
             return ['valid' => false, 'message' => "Invalid domain format"];
         }
 
-        $domainIp = gethostbyname($domain);
-        if ($domainIp === $domain) {
+        // 1. Check for a CNAME record first (the path we recommend to customers).
+        $cnameRecords = @dns_get_record($domain, DNS_CNAME);
+
+        // 2. Check for a direct A record too (some customers may use this instead).
+        $aRecords = @dns_get_record($domain, DNS_A);
+
+        if (empty($cnameRecords) && empty($aRecords)) {
             return [
                 'valid'   => false,
-                'message' => "Please make sure {$domain} is pointing to our server IP. DNS changes can take up to 24-48 hours."
+                'message' => "No DNS records found for {$domain}. Please add a CNAME record pointing to cname.darab.academy, or contact support if DNS was just changed (propagation can take up to 24-48 hours)."
             ];
         }
 
-        $serverIp = trim($this->safeExec("curl -4 -s ifconfig.me"));
+        // 3. Resolve the domain to its final IP address, following the CNAME chain.
+        //    gethostbyname() follows CNAMEs automatically and returns the final A record IP.
+        $resolvedIp = gethostbyname($domain);
 
-        if ($domainIp !== $serverIp) {
+        if ($resolvedIp === $domain) {
+            // gethostbyname() returns the input unchanged when resolution fails entirely.
             return [
                 'valid'   => false,
-                'message' => "Domain {$domain} does not point to this server. Got: {$domainIp}, Expected: {$serverIp}"
+                'message' => "Could not resolve {$domain} to an IP address. DNS changes can take up to 24-48 hours to propagate."
+            ];
+        }
+
+        // 4. Compare against our known server IP (configured once, not fetched per request).
+        if ($resolvedIp !== $this->serverIp) {
+            $via = !empty($cnameRecords) ? "CNAME ({$cnameRecords[0]['target']})" : "A record";
+            return [
+                'valid'   => false,
+                'message' => "Domain {$domain} resolves via {$via} to {$resolvedIp}, but our server is {$this->serverIp}. Please check your DNS settings."
             ];
         }
 
@@ -333,6 +406,10 @@ NGINX;
     /**
      * Execute a shell command safely.
      * Returns output string (never null).
+     *
+     * NOTE: this does NOT sanitize the command itself — every caller is
+     * responsible for escaping any interpolated value with
+     * escapeshellarg() before it reaches this method.
      */
     private function safeExec(string $command): string
     {
