@@ -24,8 +24,8 @@ class SectionController extends BaseController
             collectionName: 'Section'
         );
 
-        $this->storeRequestClass  = SectionBulkStoreRequest::class;
-        $this->updateRequestClass = SectionBulkStoreRequest::class;
+        $this->storeRequestClass  = SectionStoreRequest::class;
+        $this->updateRequestClass = SectionUpdateRequest::class;
         $this->resourceClass      = SectionResource::class;
         $this->withRelationships  = ['items'];
     }

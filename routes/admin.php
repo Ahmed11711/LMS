@@ -38,7 +38,8 @@ use App\Http\Controllers\Tenant\TenantMigrationController;
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
     Route::apiResource('pages', PagesController::class)->names('pages');
-    Route::apiResource('sections', SectionController::class)->names('section');
+    Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update']);
+    Route::post('sections', [SectionController::class, 'bulkStore'])->name('section.store');
 
 
     // handel migrate new model for this tenant
