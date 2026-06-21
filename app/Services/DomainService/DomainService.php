@@ -284,30 +284,42 @@ class DomainService
     // Nginx
     // ============================================================
 
+    // private function writeNginxConfig(string $domain, string $config): bool
+    // {
+    //     $dest = "/etc/nginx/sites-enabled/{$domain}";
+
+    //     $attempts = 3;
+    //     for ($i = 1; $i <= $attempts; $i++) {
+    //         $result = @file_put_contents($dest, $config);
+
+    //         if ($result !== false) {
+    //             return true;
+    //         }
+
+    //         Log::warning("file_put_contents failed for {$dest} (attempt {$i}/{$attempts})");
+
+    //         if ($i < $attempts) {
+    //             $this->safeExec("sudo mount -o remount,rw /");
+    //             usleep(500_000); // 0.5s
+    //         }
+    //     }
+
+    //     Log::error("file_put_contents failed for {$dest} after {$attempts} attempts");
+    //     return false;
+    // }
+
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $dest = "/etc/nginx/sites-enabled/{$domain}";
+        $dest   = "/etc/nginx/sites-enabled/{$domain}";
+        $result = file_put_contents($dest, $config);
 
-        $attempts = 3;
-        for ($i = 1; $i <= $attempts; $i++) {
-            $result = @file_put_contents($dest, $config);
-
-            if ($result !== false) {
-                return true;
-            }
-
-            Log::warning("file_put_contents failed for {$dest} (attempt {$i}/{$attempts})");
-
-            if ($i < $attempts) {
-                $this->safeExec("sudo mount -o remount,rw /");
-                usleep(500_000); // 0.5s
-            }
+        if ($result === false) {
+            Log::error("file_put_contents failed for: {$dest} | error: " . json_encode(error_get_last()));
+            return false;
         }
 
-        Log::error("file_put_contents failed for {$dest} after {$attempts} attempts");
-        return false;
+        return true;
     }
-
     private function reloadNginx(): array
     {
         $testOutput = $this->safeExec("sudo nginx -t");
