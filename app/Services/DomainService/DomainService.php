@@ -286,15 +286,26 @@ class DomainService
 
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $dest   = "/etc/nginx/sites-enabled/{$domain}";
-        $result = file_put_contents($dest, $config);
+        $dest = "/etc/nginx/sites-enabled/{$domain}";
 
-        if ($result === false) {
-            Log::error("file_put_contents failed for: {$dest}");
-            return false;
+        $attempts = 3;
+        for ($i = 1; $i <= $attempts; $i++) {
+            $result = @file_put_contents($dest, $config);
+
+            if ($result !== false) {
+                return true;
+            }
+
+            Log::warning("file_put_contents failed for {$dest} (attempt {$i}/{$attempts})");
+
+            if ($i < $attempts) {
+                $this->safeExec("sudo mount -o remount,rw /");
+                usleep(500_000); // 0.5s
+            }
         }
 
-        return true;
+        Log::error("file_put_contents failed for {$dest} after {$attempts} attempts");
+        return false;
     }
 
     private function reloadNginx(): array
