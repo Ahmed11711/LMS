@@ -331,23 +331,39 @@ class DomainService
 
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $pending = "/tmp/nginx-pending/{$domain}.conf";
-        $result  = file_put_contents($pending, $config);
+        $pendingDir = "/tmp/nginx-pending";
+        if (!is_dir($pendingDir)) {
+            mkdir($pendingDir, 0775, true);
+        }
 
+        $pending      = "{$pendingDir}/{$domain}.conf";
+        $resultFile   = "{$pendingDir}/{$domain}.nginx.result";
+
+        // Clean up old result
+        @unlink($resultFile);
+
+        $result = file_put_contents($pending, $config);
         if ($result === false) {
             Log::error("Failed to write pending config for: {$domain} | error: " . json_encode(error_get_last()));
             return false;
         }
 
-        // Wait up to 70s for the cron job to pick it up and move it to sites-enabled
-        $dest    = "/etc/nginx/sites-enabled/{$domain}";
+        // Wait up to 70s for the cron job to process it
         $timeout = 70;
         $start   = time();
 
         while (time() - $start < $timeout) {
-            if (file_exists($dest)) {
-                Log::info("Nginx config deployed for: {$domain}");
-                return true;
+            if (file_exists($resultFile)) {
+                $resultContent = trim(file_get_contents($resultFile));
+                @unlink($resultFile);
+
+                if ($resultContent === 'success') {
+                    Log::info("Nginx config deployed for: {$domain}");
+                    return true;
+                }
+
+                Log::error("Nginx config failed for: {$domain} | " . $resultContent);
+                return false;
             }
             sleep(2);
         }
@@ -368,7 +384,15 @@ class DomainService
 server {
     listen 80;
     server_name {$domain};
-    return 301 https://\$host\$request_uri;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/LMS/public;
+        allow all;
+    }
+
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
 }
 
 server {
@@ -415,24 +439,32 @@ NGINX;
             ];
         }
 
-        // 3. Resolve the domain to its final IP address, following the CNAME chain.
-        //    gethostbyname() follows CNAMEs automatically and returns the final A record IP.
+        // 3. If CNAME exists, verify it points to our cname entry (direct or via Cloudflare proxy).
+        if (!empty($cnameRecords)) {
+            $target = rtrim(strtolower($cnameRecords[0]['target']), '.');
+            if ($target !== 'cname.darab.academy') {
+                return [
+                    'valid'   => false,
+                    'message' => "Domain {$domain} has a CNAME pointing to {$target}, but it should point to cname.darab.academy."
+                ];
+            }
+            return ['valid' => true, 'message' => "Domain is valid"];
+        }
+
+        // 4. If A record exists, verify it points to our server IP directly.
         $resolvedIp = gethostbyname($domain);
 
         if ($resolvedIp === $domain) {
-            // gethostbyname() returns the input unchanged when resolution fails entirely.
             return [
                 'valid'   => false,
                 'message' => "Could not resolve {$domain} to an IP address. DNS changes can take up to 24-48 hours to propagate."
             ];
         }
 
-        // 4. Compare against our known server IP (configured once, not fetched per request).
         if ($resolvedIp !== $this->serverIp) {
-            $via = !empty($cnameRecords) ? "CNAME ({$cnameRecords[0]['target']})" : "A record";
             return [
                 'valid'   => false,
-                'message' => "Domain {$domain} resolves via {$via} to {$resolvedIp}, but our server is {$this->serverIp}. Please check your DNS settings."
+                'message' => "Domain {$domain} resolves to {$resolvedIp}, but our server is {$this->serverIp}. Please check your DNS settings."
             ];
         }
 
