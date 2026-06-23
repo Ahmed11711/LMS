@@ -39,7 +39,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     Route::apiResource('pages', PagesController::class)->names('pages');
     Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update', 'get']);
-    Route::get('index', [SectionController::class, 'byPage'])->name('section.byPage');
+    Route::get('sections', [SectionController::class, 'byPage'])->name('section.byPage');
     Route::post('sections', [SectionController::class, 'bulkStore'])->name('section.store');
 
 
