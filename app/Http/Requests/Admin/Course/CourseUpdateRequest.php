@@ -30,8 +30,8 @@ class CourseUpdateRequest extends BaseRequest
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
-            'receiver_accounts'    => 'required|array',
-            'receiver_accounts.*' => 'required_with:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
+            'receiver_accounts'    => 'nullable|array',
+            'receiver_accounts.*' => 'nullable:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
         ];
     }
 
