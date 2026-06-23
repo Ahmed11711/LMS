@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Section\SectionStoreRequest;
 use App\Http\Requests\Admin\Section\SectionUpdateRequest;
 use App\Http\Requests\Admin\Section\SectionBulkStoreRequest;
 use App\Http\Resources\Admin\Section\SectionResource;
+use App\Models\Pages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,19 +33,22 @@ class SectionController extends BaseController
 
     /**
      */
-    public function byPage(int $pageId): JsonResponse
+    public function byPage(): JsonResponse
     {
+        $activePage = Pages::where('is_active', 1)->first();
+
+        if (!$activePage) {
+            return $this->errorResponse('No active page found', 404);
+        }
+
         $sections = $this->repository->query()
-            ->where('pages_id', $pageId)
-            ->whereHas('page', function ($query) {
-                $query->where('is_active', 1);
-            })
+            ->where('pages_id', $activePage->id)
             ->with('items')
             ->orderBy('order')
             ->get();
 
         if ($sections->isEmpty()) {
-            return $this->errorResponse('No active page found or no sections available', 404);
+            return $this->errorResponse('No sections found for the active page', 404);
         }
 
         return $this->successResponse(
@@ -52,10 +56,7 @@ class SectionController extends BaseController
             'Sections retrieved successfully'
         );
     }
-    /**
-     * تغيير ترتيب السيكشنز (drag & drop)
-     * Body: [{ id: 1, order: 1 }, { id: 2, order: 2 }, ...]
-     */
+
     public function reorder(Request $request): JsonResponse
     {
         $items = $request->validate([
