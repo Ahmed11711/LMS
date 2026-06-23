@@ -6,8 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pages extends Model
 {
-    public $fillable = [
-
-        'is_active',
-    ];
+    public $filterable = ['is_active'];
 }
