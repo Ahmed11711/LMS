@@ -38,7 +38,8 @@ use App\Http\Controllers\Tenant\TenantMigrationController;
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
     Route::apiResource('pages', PagesController::class)->names('pages');
-    Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update']);
+    Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update', 'get']);
+    Route::get('index', [SectionController::class, 'byPage'])->name('section.byPage');
     Route::post('sections', [SectionController::class, 'bulkStore'])->name('section.store');
 
 

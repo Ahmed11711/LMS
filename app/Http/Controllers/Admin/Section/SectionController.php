@@ -36,16 +36,22 @@ class SectionController extends BaseController
     {
         $sections = $this->repository->query()
             ->where('pages_id', $pageId)
+            ->whereHas('page', function ($query) {
+                $query->where('is_active', 1);
+            })
             ->with('items')
             ->orderBy('order')
             ->get();
+
+        if ($sections->isEmpty()) {
+            return $this->errorResponse('No active page found or no sections available', 404);
+        }
 
         return $this->successResponse(
             SectionResource::collection($sections),
             'Sections retrieved successfully'
         );
     }
-
     /**
      * تغيير ترتيب السيكشنز (drag & drop)
      * Body: [{ id: 1, order: 1 }, { id: 2, order: 2 }, ...]
