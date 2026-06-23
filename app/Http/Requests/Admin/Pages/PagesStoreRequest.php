@@ -16,6 +16,7 @@ class PagesStoreRequest extends BaseRequest
         return [
             'title' => 'required|unique:pages,title|string|max:255',
             'status' => 'required|string|max:255',
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

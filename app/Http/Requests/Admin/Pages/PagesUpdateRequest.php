@@ -13,6 +13,8 @@ class PagesUpdateRequest extends BaseRequest
         return [
             'title' => 'sometimes|unique:pages,title|string|max:255',
             'status' => 'sometimes|required|string|max:255',
+            'is_active' => 'nullable|boolean',
+
         ];
     }
 }

@@ -31,7 +31,6 @@ class SectionController extends BaseController
     }
 
     /**
-     * جلب الأقسام بناءً على رقم الصفحة
      */
     public function byPage(int $pageId): JsonResponse
     {
