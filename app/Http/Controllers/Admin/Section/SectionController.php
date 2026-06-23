@@ -35,7 +35,7 @@ class SectionController extends BaseController
      */
     public function byPage(): JsonResponse
     {
-        $activePage = Pages::where('is_active', 1)->first();
+        $activePage = Pages::where('is_active', true)->first();
 
         if (!$activePage) {
             return $this->errorResponse('No active page found', 404);
