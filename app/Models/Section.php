@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Section extends Model
 {
 
-    public $filterable = ['id', 'pages_id'];
+    public $searchable = ['pages_id'];
+    public $filterable = ['pages_id'];
 
 
     public function pages()
