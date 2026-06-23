@@ -15,12 +15,10 @@ class PagesController extends BaseController
     public function __construct(PagesRepositoryInterface $repository)
     {
         parent::__construct();
-
         $this->initService(
             repository: $repository,
             collectionName: 'Pages'
         );
-
         $this->storeRequestClass = PagesStoreRequest::class;
         $this->updateRequestClass = PagesUpdateRequest::class;
         $this->resourceClass = PagesResource::class;
@@ -29,6 +27,11 @@ class PagesController extends BaseController
     protected function beforeStore(array $data, Request $request): array
     {
         $data['slug'] = Str::slug($data['title']);
+
+        if (!empty($data['is_active']) && $data['is_active'] == 1) {
+            $this->repository->query()->where('is_active', 1)->update(['is_active' => 0]);
+        }
+
         return $data;
     }
 
@@ -37,6 +40,14 @@ class PagesController extends BaseController
         if (!empty($data['title'])) {
             $data['slug'] = Str::slug($data['title']);
         }
+
+        if (isset($data['is_active']) && $data['is_active'] == 1) {
+            $this->repository->query()
+                ->where('id', '!=', $existingRecord->id)
+                ->where('is_active', 1)
+                ->update(['is_active' => 0]);
+        }
+
         return $data;
     }
 }

@@ -67,21 +67,7 @@ class SectionController extends BaseController
         return $this->successResponse(null, 'Sections reordered successfully');
     }
 
-    /**
-     * 🌟 استقبال كل أقسام الصفحة دفعة واحدة (Bulk Replace)
-     *
-     * بيمسح كل الـ sections القديمة بتاعة الصفحة (مع الـ items بتاعتها)
-     * وينشئ الجديدة بدلها، كل ده جوه transaction واحدة.
-     *
-     * Body:
-     * {
-     *   "pages_id": 5,
-     *   "sections": [
-     *      { "type": "hero", "order": 1, "props": {...}, "items": [ { "order": 1, "props": {...} } ] },
-     *      { "type": "gallery", "order": 2, "props": {...} }
-     *   ]
-     * }
-     */
+
     public function bulkStore(SectionBulkStoreRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -90,7 +76,6 @@ class SectionController extends BaseController
 
         try {
             $created = DB::transaction(function () use ($pageId, $sections) {
-                // 1) امسح كل الأقسام القديمة بتاعة الصفحة دي مع الـ items بتاعتها
                 $oldSections = $this->repository->query()
                     ->where('pages_id', $pageId)
                     ->get();
@@ -103,7 +88,7 @@ class SectionController extends BaseController
                     ->where('pages_id', $pageId)
                     ->delete();
 
-                // 2) أنشئ الأقسام الجديدة بالترتيب اللي جايين بيه
+
                 $newRecords = [];
 
                 foreach ($sections as $sectionData) {

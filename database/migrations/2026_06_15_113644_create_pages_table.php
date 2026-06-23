@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('status')->default('published');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
