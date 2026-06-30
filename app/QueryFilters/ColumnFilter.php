@@ -20,6 +20,8 @@ class ColumnFilter
                 if ($value !== null && $value !== '') {
                     if (is_array($value)) {
                         $query->whereIn($key, $value);
+                    } elseif (is_string($value) && str_contains($value, ',')) {
+                        $query->whereIn($key, array_map('trim', explode(',', $value)));
                     } else {
                         $query->where($key, $value);
                     }
