@@ -15,7 +15,7 @@ class User extends TenantModel  implements JWTSubject
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     public $searchable = ['name'];
-    public $filterable = ['id', 'role'];
+    public $filterable = ['id', 'role', 'name', 'email', 'created_at'];
     public array $allowedFields = ['id', 'name', 'email', 'created_at'];
 
     /**
