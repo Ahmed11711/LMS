@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\UserSubscribe;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class UserSubscribeStoreRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -16,6 +18,7 @@ class UserSubscribeStoreRequest extends BaseRequest
             'course_id' => 'required|integer|exists:courses,id',
             'starts_at' => 'required|date',
             'status' => 'required|in:active,refunded,cancelled,pending',
+            'message' => 'nullable|string|max:255',
         ];
     }
 }

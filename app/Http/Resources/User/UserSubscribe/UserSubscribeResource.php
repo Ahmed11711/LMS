@@ -18,6 +18,7 @@ class UserSubscribeResource extends JsonResource
             'transaction_id' => $this->transaction_id,
             'receipt'        => $this->receipt,
             'status'         => $this->status,
+            'message'        => $this->message,
             'created_by'     => $this->created_by,
             'created_at'     => $this->created_at,
             'updated_at'     => $this->updated_at,

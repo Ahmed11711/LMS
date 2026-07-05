@@ -15,6 +15,7 @@ class UserSubscribeResource extends JsonResource
             'starts_at' => $this->starts_at,
             'receipt'        => $this->receipt,
             'status' => $this->status,
+            'message' => $this->message,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
