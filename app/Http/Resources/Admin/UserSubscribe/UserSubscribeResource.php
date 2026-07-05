@@ -16,6 +16,21 @@ class UserSubscribeResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
+            'course' => $this->whenLoaded('course', function () {
+                return [
+                    'id' => $this->course->id,
+                    'title' => $this->course->title,
+                ];
+            }),
+
+            'user' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'name' => $this->user->name,
+                    'email' => $this->user->email,
+                ];
+            }),
         ];
     }
 }

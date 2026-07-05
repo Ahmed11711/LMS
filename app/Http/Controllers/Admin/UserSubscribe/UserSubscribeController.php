@@ -19,8 +19,10 @@ class UserSubscribeController extends BaseController
             collectionName: 'UserSubscribe'
         );
 
+
         $this->storeRequestClass = UserSubscribeStoreRequest::class;
         $this->updateRequestClass = UserSubscribeUpdateRequest::class;
         $this->resourceClass = UserSubscribeResource::class;
+        $this->withRelationships = ['course:id,title', 'user:id,name,email'];
     }
 }
