@@ -25,7 +25,20 @@ use App\Http\Middleware\TenantJwtMiddleware;
 
 // push ahmed
 
+// 1. Verification - بيتنادى مرة واحدة من Meta وقت ربط الـ Webhook
+Route::get('webhook', function (Request $request) {
+    Log::info('Webhook Data:', $request->all());
+    return response('OK', 200);
+});
 
+// 2. استقبال الرسائل الفعلية من العملاء
+Route::post('webhook', function (Request $request) {
+    // نعرض كل الداتا اللي جايه
+    Log::info('Webhook Data:', $request->all());
+
+    // نرجع 200 لازم عشان Meta متعتبرش الطلب فشل
+    return response('OK', 200);
+});
 
 
 Route::middleware([ResolveTenant::class])->group(function () {

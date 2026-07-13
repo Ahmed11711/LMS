@@ -19,6 +19,8 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\LandingPage\LandingPageController;
+
 use App\Http\Controllers\Admin\Section\SectionController;
 use App\Http\Controllers\Admin\Pages\PagesController;
 
@@ -84,6 +86,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     // for orginization profile
     Route::apiResource('organization_profiles', OrganizationProfileController::class)->names('organization_profile');
+    Route::apiResource('landing_pages', LandingPageController::class)->names('landing_page');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])

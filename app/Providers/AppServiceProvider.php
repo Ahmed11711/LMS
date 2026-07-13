@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\LandingPage\LandingPageRepositoryInterface;
+use App\Repositories\LandingPage\LandingPageRepository;
+
+
 use App\Repositories\Section\SectionRepositoryInterface;
 use App\Repositories\Section\SectionRepository;
 
@@ -122,6 +126,7 @@ $this->app->bind(
         $this->app->bind(UserPlanRepositoryInterface::class, UserPlanRepository::class);
         $this->app->bind(PagesRepositoryInterface::class, PagesRepository::class);
         $this->app->bind(SectionRepositoryInterface::class, SectionRepository::class);
+        $this->app->bind(LandingPageRepositoryInterface::class, LandingPageRepository::class);
 }
 
     /**
