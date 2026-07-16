@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\User\Course\MyCourseShowResource;
 use App\Models\Course;
+use App\Models\LandingPage;
 use App\Repositories\UserSubscribe\UserSubscribeRepository;
 use App\Services\PlanAccessService\PlanAccessService;
 use App\Traits\ApiResponseTrait;
@@ -60,5 +61,23 @@ class MyCourseController extends Controller
         }
 
         return $this->successResponse(new MyCourseShowResource($course), 'Course retrieved successfully');
+    }
+
+    public function landingpageMyCourse(string $slug)
+    {
+        $course = Course::where('slug', $slug)
+            ->where('status', 'published')
+            ->first();
+
+        if (!$course) {
+            return $this->errorResponse('Course not found', 404);
+        }
+
+        $landingpage = LandingPage::where('course_id', $course->id)->first();
+
+        return $this->successResponse(
+            $landingpage,
+            'Landing page retrieved successfully'
+        );
     }
 }

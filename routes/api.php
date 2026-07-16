@@ -25,24 +25,18 @@ use App\Http\Middleware\TenantJwtMiddleware;
 
 // push ahmed
 
-// 1. Verification - بيتنادى مرة واحدة من Meta وقت ربط الـ Webhook
 Route::get('webhook', function (Request $request) {
     Log::info('Webhook Data:', $request->all());
     return response('OK', 200);
 });
 
-// 2. استقبال الرسائل الفعلية من العملاء
 Route::post('webhook', function (Request $request) {
-    // نعرض كل الداتا اللي جايه
     Log::info('Webhook Data:', $request->all());
-
-    // نرجع 200 لازم عشان Meta متعتبرش الطلب فشل
     return response('OK', 200);
 });
 
 
 Route::middleware([ResolveTenant::class])->group(function () {
-
     Route::prefix('auth')->group(function () {
         Route::post('login', [LoginController::class, 'login']);
     });
@@ -93,6 +87,7 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('my-courses', [MyCourseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::get('my-courses/{id}', [MyCourseController::class, 'show'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('my-courses/landingpage/{slug}', [MyCourseController::class, 'landingpageMyCourse'])->middleware(TenantJwtMiddleware::class . ':student');
 
     Route::prefix('auth')->group(function () {
         Route::post('login', [LoginController::class, 'login']);

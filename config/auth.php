@@ -23,13 +23,12 @@ return [
     */
 
     'guards' => [
-        // Tenant Users (default web session)
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
 
-        // Tenant Users API (JWT)
+
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
