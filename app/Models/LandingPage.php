@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class LandingPage extends Model
 {
-    //
+    protected $casts = [
+        'content'   => 'array',
+        'is_active' => 'boolean',
+    ];
 
     public function course()
     {
@@ -18,5 +21,4 @@ class LandingPage extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
 }
