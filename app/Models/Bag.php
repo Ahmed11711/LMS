@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrlCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Bag extends Model
 {
+
+    protected $casts = [
+        'image' => StorageUrlCast::class,
+    ];
     use HasFactory;
 
     protected $fillable = [
