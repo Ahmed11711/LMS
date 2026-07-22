@@ -35,7 +35,7 @@ class BagStoreRequest extends BaseRequest
             'items.*.type' => 'required_with:items|string|max:255',
 
             'payment_info_ids' => 'nullable|array',
-            'payment_info_ids.*' => 'integer|exists:user_payment_infos,id',
+            'payment_info_ids.*' => 'integer|exists:instructor_receiver_accounts,id',
         ];
     }
 }
