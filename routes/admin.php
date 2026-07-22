@@ -82,7 +82,6 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('organization_profiles', OrganizationProfileController::class)->names('organization_profile');
     Route::apiResource('landing_pages', LandingPageController::class)->names('landing_page');
     Route::apiResource('bags', BagController::class)->names('bag');
-    //
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -95,8 +94,7 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::put('profile', [InstructorController::class, 'update']);
         Route::apiResource('user_payment_infos', UserPaymentInfoController::class)->names('user_payment_info');
         Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_accounts');
-        Route::apiResource('bags', BagController::class)->names('bag');
-
+        Route::apiResource('bags', BagController::class)->names('instructor.bag');
         // Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
     });
 
