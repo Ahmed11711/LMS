@@ -9,7 +9,7 @@ class BagsPayment extends Model
 {
     use HasFactory;
 
-    protected $table = 'bags_payment';
+    protected $table = 'bag_payments';
 
     protected $fillable = [
         'bag_id',
