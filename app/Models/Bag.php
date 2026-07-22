@@ -31,6 +31,6 @@ class Bag extends Model
 
     public function userPaymentInfos()
     {
-        return $this->belongsToMany(UserPaymentInfo::class, 'bags_payment');
+        return $this->belongsToMany(UserPaymentInfo::class, 'bag_payments');
     }
 }

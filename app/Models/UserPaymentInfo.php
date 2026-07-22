@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPaymentInfo extends Model
 {
+    protected $table = 'bag_payments';
     protected $casts = [
         'value' => 'array',
         'is_default' => 'boolean',
