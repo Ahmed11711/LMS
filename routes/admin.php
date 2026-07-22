@@ -82,6 +82,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('organization_profiles', OrganizationProfileController::class)->names('organization_profile');
     Route::apiResource('landing_pages', LandingPageController::class)->names('landing_page');
     Route::apiResource('bags', BagController::class)->names('bag');
+    //
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
