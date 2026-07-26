@@ -29,11 +29,16 @@ class BagController extends BaseController
 
         $this->isUserBound = true;
 
+        // ده هيفضل يتستخدم في الـ show بس دلوقتي
         $this->withRelationships = ['items', 'userPaymentInfos'];
     }
 
     /**
      */
+    protected function getIndexRelationships(): array
+    {
+        return [];
+    }
     protected function beforeStore(array $data, Request $request): array
     {
         $data['user_id'] = auth('api')->id();
