@@ -31,7 +31,7 @@ class BagController extends BaseController
         $this->isUserBound = true;
         $this->hasGallery = true;
 
-        $this->withRelationships = ['items', 'userPaymentInfos'];
+        $this->withRelationships = ['items', 'userPaymentInfos', 'gallery'];
     }
 
     /**
