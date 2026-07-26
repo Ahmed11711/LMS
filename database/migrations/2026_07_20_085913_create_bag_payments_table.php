@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('bag_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('bag_id');
-            $table->foreign('bag_id')->references('id')->on('bags')->onDelete('cascade');
-            $table->unsignedBigInteger('user_payment_info_id');
-            $table->foreign('user_payment_info_id')->references('id')->on('user_payment_infos')->onDelete('cascade');
+
+            $table->foreignId('bag_id')
+                ->constrained('bags')
+                ->cascadeOnDelete();
+
+            $table->foreignId('user_payment_info_id')
+                ->constrained('instructor_receiver_accounts')
+                ->cascadeOnDelete();
+
             $table->timestamps();
         });
     }

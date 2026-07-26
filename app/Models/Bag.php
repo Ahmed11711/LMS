@@ -36,6 +36,11 @@ class Bag extends Model
 
     public function userPaymentInfos()
     {
-        return $this->belongsToMany(UserPaymentInfo::class, 'bag_payments');
+        return $this->belongsToMany(
+            InstructorReceiverAccount::class,
+            'bag_payments',
+            'bag_id',                  // المفتاح بتاع Bag في الـ pivot
+            'user_payment_info_id'     // المفتاح بتاع InstructorReceiverAccount في الـ pivot
+        );
     }
 }

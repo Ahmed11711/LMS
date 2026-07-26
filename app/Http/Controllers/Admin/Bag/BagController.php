@@ -43,18 +43,14 @@ class BagController extends BaseController
         return $data;
     }
 
-    /**
-     * بعد الإنشاء: نربط الـ items (ملفات) ووسايل الدفع
-     */
+
     protected function afterStore($record, Request $request): void
     {
         $this->syncItems($record, $request);
         $this->syncPaymentInfos($record, $request);
     }
 
-    /**
-     * قبل التحديث: نشيل الحقول اللي مش أعمدة فعلية في جدول bags
-     */
+
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         unset($data['items'], $data['payment_info_ids']);
@@ -63,7 +59,6 @@ class BagController extends BaseController
     }
 
     /**
-     * بعد التحديث: نعيد ربط الـ items ووسايل الدفع
      */
     protected function afterUpdate($updatedRecord, $oldRecord, Request $request): void
     {
