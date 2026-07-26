@@ -23,7 +23,6 @@ class BagController extends BaseController
             fileFields: ['image']
         );
 
-
         $this->storeRequestClass = BagStoreRequest::class;
         $this->updateRequestClass = BagUpdateRequest::class;
         $this->resourceClass = BagResource::class;
@@ -40,15 +39,15 @@ class BagController extends BaseController
     {
         return [];
     }
+
     protected function beforeStore(array $data, Request $request): array
     {
         $data['user_id'] = auth('api')->id();
 
-        unset($data['items'], $data['payment_info_ids']);
+        unset($data['items'], $data['payment_info_ids'], $data['gallery']);
 
         return $data;
     }
-
 
     protected function afterStore($record, Request $request): void
     {
@@ -56,10 +55,9 @@ class BagController extends BaseController
         $this->syncPaymentInfos($record, $request);
     }
 
-
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
-        unset($data['items'], $data['payment_info_ids']);
+        unset($data['items'], $data['payment_info_ids'], $data['gallery']);
 
         return $data;
     }
@@ -73,7 +71,6 @@ class BagController extends BaseController
     }
 
     /**
-     * رفع وربط ملفات الـ items بالباج
      */
     protected function syncItems($bag, Request $request, bool $isUpdate = false): void
     {
@@ -108,7 +105,6 @@ class BagController extends BaseController
     }
 
     /**
-     * حذف الـ items القديمة (ملفات + سجلات) قبل إضافة الجديدة عند التحديث
      */
     protected function deleteOldItems($bag): void
     {
@@ -121,7 +117,6 @@ class BagController extends BaseController
     }
 
     /**
-     * ربط وسايل الدفع المختارة بالباج
      */
     protected function syncPaymentInfos($bag, Request $request): void
     {
