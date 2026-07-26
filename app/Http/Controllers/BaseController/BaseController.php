@@ -286,16 +286,38 @@ abstract class BaseController extends Controller
   }
   /**
    */
+  // protected function uploadGalleryFiles(Request $request, $record): void
+  // {
+  //   if ($request->hasFile('gallery') && method_exists($record, 'gallery')) {
+  //     foreach ($request->file('gallery') as $file) {
+  //       try {
+  //         $filename = time() . '_' . Str::random(8) . '_' . $file->getClientOriginalName();
+  //         $path = $file->storeAs("uploads/{$this->collectionName}/gallery", $filename, $this->uploadDisk);
+
+  //         $record->gallery()->create([
+  //           'image' => "/storage/app/public/" . $path
+  //         ]);
+  //       } catch (\Throwable $e) {
+  //         Log::error("Gallery upload failed for {$this->collectionName}: " . $e->getMessage());
+  //       }
+  //     }
+  //   }
+  // }
+
   protected function uploadGalleryFiles(Request $request, $record): void
   {
     if ($request->hasFile('gallery') && method_exists($record, 'gallery')) {
       foreach ($request->file('gallery') as $file) {
         try {
-          $filename = time() . '_' . Str::random(8) . '_' . $file->getClientOriginalName();
+          $originalName = $file->getClientOriginalName();
+          $decodedName  = urldecode($originalName);
+          $cleanName    = preg_replace('/\s+/', '_', trim($decodedName));
+
+          $filename = time() . '_' . Str::random(8) . '_' . $cleanName;
           $path = $file->storeAs("uploads/{$this->collectionName}/gallery", $filename, $this->uploadDisk);
 
           $record->gallery()->create([
-            'image' => "/storage/app/public/" . $path
+            'image' => "/storage/" . $path
           ]);
         } catch (\Throwable $e) {
           Log::error("Gallery upload failed for {$this->collectionName}: " . $e->getMessage());
@@ -303,7 +325,6 @@ abstract class BaseController extends Controller
       }
     }
   }
-
   // Hooks
   protected function beforeStore(array $data, Request $request): array
   {

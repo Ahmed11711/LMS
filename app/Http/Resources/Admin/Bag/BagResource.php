@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Admin\Bag;
 
 use App\Http\Resources\Admin\Bag\BagItemResource;
+use App\Http\Resources\Admin\BagGallery\BagGalleryResource;
 use App\Http\Resources\Admin\UserPaymentInfo\UserPaymentInfoResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,6 +26,7 @@ class BagResource extends JsonResource
             'count_view' => $this->count_view,
             'is_active' => $this->is_active,
             'items' => BagItemResource::collection($this->whenLoaded('items')),
+            'gallery' => BagGalleryResource::collection($this->whenLoaded('gallery')),
             'payment_infos' => UserPaymentInfoResource::collection($this->whenLoaded('userPaymentInfos')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

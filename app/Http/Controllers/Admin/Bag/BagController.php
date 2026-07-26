@@ -23,13 +23,14 @@ class BagController extends BaseController
             fileFields: ['image']
         );
 
+
         $this->storeRequestClass = BagStoreRequest::class;
         $this->updateRequestClass = BagUpdateRequest::class;
         $this->resourceClass = BagResource::class;
 
         $this->isUserBound = true;
+        $this->hasGallery = true;
 
-        // ده هيفضل يتستخدم في الـ show بس دلوقتي
         $this->withRelationships = ['items', 'userPaymentInfos'];
     }
 

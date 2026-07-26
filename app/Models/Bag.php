@@ -43,4 +43,9 @@ class Bag extends Model
             'user_payment_info_id'
         );
     }
+
+    public function gallery()
+    {
+        return $this->hasMany(BagGallery::class);
+    }
 }
