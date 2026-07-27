@@ -34,6 +34,7 @@ class CreateAcademyInfoService
                 'phone_academy' => $data['phone_academy'],
                 'country_code'  => $data['country_code'],
                 'specialties'   => $data['specialties'],
+                'type'       => $data['type'],
             ]);
 
             $userPackage = $this->assignFreePackage($user);
