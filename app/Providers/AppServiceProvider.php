@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\BagPurchase\BagPurchaseRepositoryInterface;
+use App\Repositories\BagPurchase\BagPurchaseRepository;
+
 use App\Repositories\Bag\BagRepositoryInterface;
 use App\Repositories\Bag\BagRepository;
 
@@ -131,6 +134,7 @@ $this->app->bind(
         $this->app->bind(SectionRepositoryInterface::class, SectionRepository::class);
         $this->app->bind(LandingPageRepositoryInterface::class, LandingPageRepository::class);
         $this->app->bind(BagRepositoryInterface::class, BagRepository::class);
+        $this->app->bind(BagPurchaseRepositoryInterface::class, BagPurchaseRepository::class);
 }
 
     /**

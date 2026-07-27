@@ -122,6 +122,61 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
 
 
+Route::match(['GET', 'POST'], '/meta-webhook', function (Request $request) {
+
+    $verifyToken = 'my_secret_token_123';
+
+    Log::info('Meta Webhook Request', [
+        'method'  => $request->method(),
+        'url'     => $request->fullUrl(),
+        'query'   => $request->query(),
+        'body'    => $request->all(),
+        'headers' => $request->headers->all(),
+        'raw'     => $request->getContent(),
+    ]);
+
+    if ($request->isMethod('GET')) {
+
+        $mode = $request->input('hub.mode');
+        $token = $request->input('hub.verify_token');
+        $challenge = $request->input('hub.challenge');
+
+        Log::info('Meta Verify Request', [
+            'mode' => $mode,
+            'token' => $token,
+            'challenge' => $challenge,
+            'expected_token' => $verifyToken,
+        ]);
+
+        if ($mode === 'subscribe' && $token === $verifyToken) {
+
+            Log::info('Meta Verify Success');
+
+            return response($challenge, 200)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        Log::warning('Meta Verify Failed');
+
+        return response()->json([
+            'status' => 'forbidden',
+            'mode' => $mode,
+            'token' => $token,
+            'expected' => $verifyToken,
+        ], 403);
+    }
+
+    Log::info('Meta Event Received', [
+        'payload' => $request->all(),
+        'raw' => $request->getContent(),
+    ]);
+
+    return response()->json([
+        'status' => 'received',
+    ], 200);
+});
+
+
 
 
 

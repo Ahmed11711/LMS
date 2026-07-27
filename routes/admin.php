@@ -19,6 +19,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\Bag\BagController;
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 
@@ -96,6 +97,7 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_accounts');
         Route::apiResource('bags', BagController::class)->names('instructor.bag');
         // Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
+        Route::apiResource('bag_purchases', BagPurchaseController::class)->names('bag_purchase');
     });
 
 

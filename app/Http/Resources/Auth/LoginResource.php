@@ -21,6 +21,7 @@ class LoginResource extends JsonResource
             'phone' => $this->phone,
             'username' => $this->username,
             'role' => $this->role,
+            'type' => $this->type,
             'email_verified_at' => boolval($this->email_verified_at),
             'is_active' => boolval($this->is_active),
             'statusPayed' => $this->status_payment ?? 'free_trial',

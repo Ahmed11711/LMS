@@ -18,6 +18,7 @@ class CreateInfoAcademy extends BaseRequest
             'country_code' => 'required|string',
             'specialties' => 'required|string',
             'link_academy'  => 'required|string|unique:tenants,domain',
+            'type' => 'required|string|in:academy,coach,schoolteacher',
         ];
     }
 }
