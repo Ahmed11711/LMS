@@ -24,6 +24,7 @@ class CourseUpdateRequest extends BaseRequest
             'final_price'     => 'sometimes|required|numeric|min:0',
             'status'          => 'sometimes|required|in:published,draft',
             'currency'      => 'sometimes|string|max:50',
+            'completion_percentage' => 'nullable|numeric|min:0|max:100',
 
 
             'infos'           => 'nullable|array',

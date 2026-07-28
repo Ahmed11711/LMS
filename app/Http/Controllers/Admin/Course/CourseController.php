@@ -8,7 +8,14 @@ use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\Course\CourseStoreRequest;
 use App\Http\Requests\Admin\Course\CourseUpdateRequest;
 use App\Http\Resources\Admin\Course\CourseResource;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\Log;
 use Override;
 
 class CourseController extends BaseController
@@ -29,7 +36,6 @@ class CourseController extends BaseController
         $this->withRelationships = ['category:id,name', 'user:id,name'];
     }
 
-
     #[Override]
     protected function getShowRelationships(): array
     {
@@ -41,6 +47,65 @@ class CourseController extends BaseController
             'user:id,name'
         ];
     }
+
+    // ----------------------------------------
+    // Overridden index/show (with aggregates)
+    // ----------------------------------------
+
+    #[Override]
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $query = $this->repository->query()
+                ->with($this->getIndexRelationships())
+                ->withCount('activeSubscribers')
+                ->withSum(['activeSubscribers as total_sales'], 'price');
+
+            $query = $this->applyScoping($query);
+
+            $data = app(Pipeline::class)
+                ->send($query)
+                ->through([
+                    Search::class,
+                    ColumnFilter::class,
+                    SelectFields::class,
+                    SortBy::class,
+                ])
+                ->thenReturn()
+                ->latest()
+                ->paginate($request->input('per_page', 10));
+
+            $data = CourseResource::collection($data);
+
+            return $this->successResponsePaginate($data, "Data retrieved via Pipeline");
+        } catch (\Throwable $e) {
+            Log::error("Pipeline Error: " . $e->getMessage());
+            return $this->errorResponse("Failed to fetch data", 500);
+        }
+    }
+
+    #[Override]
+    public function show($id): JsonResponse
+    {
+        $query = $this->repository->query()
+            ->with($this->getShowRelationships())
+            ->withCount('activeSubscribers')
+            ->withSum(['activeSubscribers as total_sales'], 'price');
+
+        $query = $this->applyScoping($query);
+
+        $record = $query->where($this->lookupColumn(), $id)->first();
+
+        if (!$record) {
+            return $this->errorResponse("Record not found", 404);
+        }
+
+        return $this->successResponse(new CourseResource($record), 'Record retrieved successfully');
+    }
+
+    // ----------------------------------------
+    // Hooks
+    // ----------------------------------------
 
     protected function beforeStore(array $data, Request $request): array
     {
@@ -57,6 +122,7 @@ class CourseController extends BaseController
         $this->syncInfos($record, $request);
         $this->syncReceiverAccounts($record, $request);
     }
+
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         unset($data['infos']);
@@ -72,6 +138,18 @@ class CourseController extends BaseController
     {
         $this->syncInfos($updatedRecord, $request);
         $this->syncReceiverAccounts($updatedRecord, $request);
+    }
+
+    protected function beforeDestroy($record): void
+    {
+        if ($record->subscribers()->exists()) {
+            abort(422, 'Cannot delete course with active enrollments');
+        }
+
+        $record->chapters()->each(function ($chapter) {
+            $chapter->lessons()->delete();
+            $chapter->delete();
+        });
     }
 
     // ----------------------------------------
@@ -95,17 +173,6 @@ class CourseController extends BaseController
 
             $record->infos()->createMany($infos);
         }
-    }
-    protected function beforeDestroy($record): void
-    {
-        if ($record->subscribers()->exists()) {
-            abort(422, 'Cannot delete course with active enrollments');
-        }
-
-        $record->chapters()->each(function ($chapter) {
-            $chapter->lessons()->delete();
-            $chapter->delete();
-        });
     }
 
     private function syncReceiverAccounts($record, Request $request): void

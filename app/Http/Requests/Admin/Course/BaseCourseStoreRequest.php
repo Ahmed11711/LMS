@@ -24,6 +24,7 @@ abstract class BaseCourseStoreRequest  extends BaseRequest
             'final_price' => 'required|numeric|min:0',
             'status'      => 'required|in:published,draft',
             "currency"    => 'required|string|max:50',
+            'completion_percentage' => 'nullable|numeric|min:0|max:100',
             'infos'           => 'nullable|array',
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',

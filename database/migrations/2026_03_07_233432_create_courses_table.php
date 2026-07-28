@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('status')->default('published');
             $table->string('slug')->nullable();
             $table->string('currency')->nullable();
+            $table->integer('completion_percentage')->nullable();
             $table->timestamps();
         });
     }
