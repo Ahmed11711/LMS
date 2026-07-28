@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources\Admin\Course;
 
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Admin\Category\CategoryResource;
 
 use App\Http\Resources\Admin\Chapter\ChapterResource;
+use App\Http\Resources\Admin\User\UserResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseResource extends JsonResource
 {
@@ -27,6 +29,8 @@ class CourseResource extends JsonResource
             'slug' => $this->slug,
             'currency' => $this->currency,
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
+            'category'    => new CategoryResource($this->whenLoaded('category')),
+            'user'        => new UserResource($this->whenLoaded('user')),
             'infos'    =>  $this->whenLoaded('infos'),
             'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
                 return $this->courseReceiverAccounts->map(fn($item) => [

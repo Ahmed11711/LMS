@@ -25,15 +25,6 @@ use App\Http\Middleware\TenantJwtMiddleware;
 
 // push ahmed
 
-Route::get('webhook', function (Request $request) {
-    Log::info('Webhook Data:', $request->all());
-    return response('OK', 200);
-});
-
-Route::post('webhook', function (Request $request) {
-    Log::info('Webhook Data:', $request->all());
-    return response('OK', 200);
-});
 
 
 Route::middleware([ResolveTenant::class])->group(function () {
@@ -56,23 +47,6 @@ Route::prefix('front')->group(function () {
     });
 });
 
-Route::post('webhook-test', function (Request $request) {
-
-    Log::info('Webhook received', [
-        'ahmed_samir_headers' => $request->headers->all(),
-        'ahmed_samir_body'    => $request->all(),
-    ]);
-
-    return response()->json(['status' => 'ok']);
-});
-Route::get('webhook-test', function (Request $request) {
-
-    Log::info('Webhook received', [
-        'ahmed_samir_headers' => $request->headers->all(),
-        'ahmed_samir_body'    => $request->all(),
-    ]);
-    return response()->json(['status' => 'ok']);
-});
 
 
 
@@ -99,7 +73,6 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
     Route::prefix('lessons/{lessonId}')->middleware([TenantJwtMiddleware::class . ':student', EnsureEnrolled::class,])
         ->group(function () {
 
-            // Comments
             Route::get('comments', [LessonCommentController::class, 'index']);
             Route::post('comments', [LessonCommentController::class, 'store']);
             Route::delete('comments/{commentId}', [LessonCommentController::class, 'destroy']);

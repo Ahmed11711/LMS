@@ -26,6 +26,7 @@ class CourseController extends BaseController
         $this->storeRequestClass  = CourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass      = CourseResource::class;
+        $this->withRelationships = ['category:id,name', 'user:id,name'];
     }
 
 
@@ -36,6 +37,8 @@ class CourseController extends BaseController
             'chapters.lessons',
             'infos',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
+            'category:id,name',
+            'user:id,name'
         ];
     }
 
