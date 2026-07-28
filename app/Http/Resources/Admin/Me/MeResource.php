@@ -26,8 +26,9 @@ class MeResource extends JsonResource
             'email_verified_at' => boolval($this->email_verified_at),
             'is_active' => boolval($this->is_active),
             'statusPayed' => $this->status_payment ?? 'free_trial',
-            'onboarding' => $this->created_at?->greaterThan(Carbon::now()->subMinutes(15)) ?? false,
-
+            'onboarding' => $this->created_at
+                ? $this->created_at->copy()->utc()->greaterThan(Carbon::now('UTC')->subMinutes(15))
+                : false,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
