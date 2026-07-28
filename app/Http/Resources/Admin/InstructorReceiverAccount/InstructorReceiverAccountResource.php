@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin\InstructorReceiverAccount;
 
+use App\Http\Resources\Admin\ReceiverAccount\ReceiverAccountResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class InstructorReceiverAccountResource extends JsonResource
@@ -12,10 +13,11 @@ class InstructorReceiverAccountResource extends JsonResource
             'id'                  => $this->id,
             'user_id'             => $this->user_id,
             'receiver_account_id' => $this->receiver_account_id,
-            'receiver_account'    => $this->whenLoaded('receiverAccount', fn() => [
-                'name'  => $this->receiverAccount->name,
-                'logo' => $this->receiverAccount->logo,
-            ]),
+            'receiver_account' => ReceiverAccountResource::make($this->whenLoaded('receiverAccount')),
+            // 'receiver_account'    => $this->whenLoaded('receiverAccount', fn() => [
+            //     'name'  => $this->receiverAccount->name,
+            //     'logo' => $this->receiverAccount->logo,
+            // ]),
             'account_value'       => $this->account_value,
             'is_active'           => $this->is_active,
             'created_at'          => $this->created_at,
