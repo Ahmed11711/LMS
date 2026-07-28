@@ -47,8 +47,8 @@ class CourseResource extends JsonResource
                     'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
                 ]);
             }),
-            'subscribers_count' => $this->when(isset($this->active_subscribers_count), $this->active_subscribers_count),
-            'total_sales' => $this->when(isset($this->total_sales), (float) $this->total_sales),
+            'subscribers_count' => $this->active_subscribers_count ?? 0,
+            'total_sales' => (float) ($this->total_sales ?? 0),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

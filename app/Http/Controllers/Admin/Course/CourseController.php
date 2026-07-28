@@ -17,6 +17,9 @@ use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Log;
 use Override;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
 
 class CourseController extends BaseController
 {
@@ -52,14 +55,23 @@ class CourseController extends BaseController
     // Overridden index/show (with aggregates)
     // ----------------------------------------
 
+
     #[Override]
     public function index(Request $request): JsonResponse
     {
         try {
+            $priceColumnExists = Schema::hasColumn('user_subscribes', 'price');
+
             $query = $this->repository->query()
                 ->with($this->getIndexRelationships())
-                ->withCount('activeSubscribers')
-                ->withSum(['activeSubscribers as total_sales'], 'price');
+                ->withCount('activeSubscribers');
+
+            if ($priceColumnExists) {
+                $query->withSum(
+                    ['activeSubscribers as total_sales'],
+                    DB::raw("CAST(NULLIF(price, '') AS numeric)")
+                );
+            }
 
             $query = $this->applyScoping($query);
 
@@ -75,6 +87,14 @@ class CourseController extends BaseController
                 ->latest()
                 ->paginate($request->input('per_page', 10));
 
+            // لو العمود مش موجود، نضيف total_sales = 0 يدويًا لكل عنصر
+            if (!$priceColumnExists) {
+                $data->getCollection()->transform(function ($item) {
+                    $item->total_sales = 0;
+                    return $item;
+                });
+            }
+
             $data = CourseResource::collection($data);
 
             return $this->successResponsePaginate($data, "Data retrieved via Pipeline");
@@ -87,10 +107,18 @@ class CourseController extends BaseController
     #[Override]
     public function show($id): JsonResponse
     {
+        $priceColumnExists = Schema::hasColumn('user_subscribes', 'price');
+
         $query = $this->repository->query()
             ->with($this->getShowRelationships())
-            ->withCount('activeSubscribers')
-            ->withSum(['activeSubscribers as total_sales'], 'price');
+            ->withCount('activeSubscribers');
+
+        if ($priceColumnExists) {
+            $query->withSum(
+                ['activeSubscribers as total_sales'],
+                DB::raw("CAST(NULLIF(price, '') AS numeric)")
+            );
+        }
 
         $query = $this->applyScoping($query);
 
@@ -100,9 +128,12 @@ class CourseController extends BaseController
             return $this->errorResponse("Record not found", 404);
         }
 
+        if (!$priceColumnExists) {
+            $record->total_sales = 0;
+        }
+
         return $this->successResponse(new CourseResource($record), 'Record retrieved successfully');
     }
-
     // ----------------------------------------
     // Hooks
     // ----------------------------------------
