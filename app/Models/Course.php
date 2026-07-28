@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use \App\Models\UserSubscribe;
 use App\Models\BaseModel\TenantModel;
 use App\Traits\TracksFeatureUsage;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,7 +21,11 @@ class Course extends TenantModel
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
+    public function activeSubscribers()
+    {
+        return $this->hasMany(UserSubscribe::class)
+            ->where('status', 'active');
+    }
 
     public function category()
     {
