@@ -52,6 +52,7 @@ class UserSubscribeService
                 'transaction_id' => 'TXN-' . Str::uuid(),
                 'receipt'        => $receiptPath ?? null,
                 'created_by'     => $createdBy,
+                'price'          => $course->final_price,
             ]
         );
 
