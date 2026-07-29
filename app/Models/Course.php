@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use \App\Models\Template;
 use \App\Models\UserSubscribe;
 use App\Models\BaseModel\TenantModel;
 use App\Traits\TracksFeatureUsage;
@@ -81,5 +82,9 @@ class Course extends TenantModel
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+    public function template()
+    {
+        return $this->belongsTo(Template::class);
     }
 }

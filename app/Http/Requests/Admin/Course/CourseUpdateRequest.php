@@ -25,7 +25,10 @@ class CourseUpdateRequest extends BaseRequest
             'status'          => 'sometimes|required|in:published,draft',
             'currency'      => 'sometimes|string|max:50',
             'completion_percentage' => 'nullable|numeric|min:0|max:100',
-
+            'grade_id'         => 'nullable|integer|exists:grades,id',
+            'term_id'          => 'nullable|integer|exists:terms,id',
+            'subject_id'       => 'nullable|integer|exists:subjects,id',
+            'academic_year_id' => 'nullable|integer|exists:academic_years,id',
 
             'infos'           => 'nullable|array',
             'infos.*.key'     => 'required_with:infos|string|max:255',
@@ -33,6 +36,7 @@ class CourseUpdateRequest extends BaseRequest
             'infos.*.order'   => 'nullable|integer|min:1',
             'receiver_accounts'    => 'nullable|array',
             'receiver_accounts.*' => 'nullable:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
+            'template_id' => 'nullable|exists:templates,id',
         ];
     }
 

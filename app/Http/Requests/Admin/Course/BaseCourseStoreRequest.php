@@ -36,6 +36,7 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
+            'template_id' => 'nullable|exists:templates,id',
         ];
     }
 
