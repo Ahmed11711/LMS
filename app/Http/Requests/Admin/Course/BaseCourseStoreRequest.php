@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Course;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
 
-abstract class BaseCourseStoreRequest  extends BaseRequest
+abstract class BaseCourseStoreRequest extends BaseRequest
 {
     public function authorize(): bool
     {
@@ -13,7 +13,6 @@ abstract class BaseCourseStoreRequest  extends BaseRequest
 
     public function rules(): array
     {
-
         return [
             'title'       => 'required|string|max:255',
             'type'        => 'required|in:recorded,online,physical',
@@ -37,8 +36,6 @@ abstract class BaseCourseStoreRequest  extends BaseRequest
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
-            'receiver_accounts'    => 'nullable|array',
-            'receiver_accounts.*' => 'nullable:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
         ];
     }
 

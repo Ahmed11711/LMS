@@ -38,16 +38,6 @@ class CourseResource extends JsonResource
             }),
             'user'        => new UserResource($this->whenLoaded('user')),
             'infos'    =>  $this->whenLoaded('infos'),
-            'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
-                return $this->courseReceiverAccounts->map(fn($item) => [
-                    'id'            => $item->id,
-                    'account_value' => $item->instructorReceiverAccount->account_value,
-                    'name'          => $item->instructorReceiverAccount->receiverAccount->name,
-                    'logo'          => asset($item->instructorReceiverAccount->receiverAccount->logo),
-                    'country_code'  => $item->instructorReceiverAccount->receiverAccount->country_code,
-                    'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
-                ]);
-            }),
             'subscribers_count' => $this->active_subscribers_count ?? 0,
             'total_sales' => (float) ($this->total_sales ?? 0),
             'completion_percentage' => $this->completion_percentage ?? 0,
