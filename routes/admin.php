@@ -19,6 +19,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Template\TemplateController;
 use App\Http\Controllers\Admin\Subject\SubjectController;
 use App\Http\Controllers\Admin\Term\TermController;
 use App\Http\Controllers\Admin\Grade\GradeController;
@@ -92,6 +93,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('grades', GradeController::class)->names('grade');
     Route::apiResource('terms', TermController::class)->names('term');
     Route::apiResource('subjects', SubjectController::class)->names('subject');
+    Route::apiResource('academy templates', TemplateController::class)->names('academy.template');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -122,6 +124,8 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::apiResource('subjects', SubjectController::class)
             ->only(['index', 'show'])
             ->names('instructor.subject');
+
+        Route::apiResource('templates', TemplateController::class)->names('instructor.template');
     });
 
 

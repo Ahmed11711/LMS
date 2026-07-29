@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Template\TemplateRepositoryInterface;
+use App\Repositories\Template\TemplateRepository;
+
 use App\Repositories\Subject\SubjectRepositoryInterface;
 use App\Repositories\Subject\SubjectRepository;
 
@@ -151,6 +154,7 @@ $this->app->bind(
         $this->app->bind(GradeRepositoryInterface::class, GradeRepository::class);
         $this->app->bind(TermRepositoryInterface::class, TermRepository::class);
         $this->app->bind(SubjectRepositoryInterface::class, SubjectRepository::class);
+        $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
 }
 
     /**
