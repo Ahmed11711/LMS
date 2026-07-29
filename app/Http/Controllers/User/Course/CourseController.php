@@ -135,6 +135,10 @@ class CourseController extends BaseController
             'infos',
             'category',
             'user:id,name,profile_image',
+            'grade',
+            'term',
+            'subject',
+            'academicYear',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
 
         ];
