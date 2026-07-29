@@ -93,7 +93,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('grades', GradeController::class)->names('grade');
     Route::apiResource('terms', TermController::class)->names('term');
     Route::apiResource('subjects', SubjectController::class)->names('subject');
-    Route::apiResource('academy templates', TemplateController::class)->names('academy.template');
+    Route::apiResource('templates', TemplateController::class)->names('academy.template');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
