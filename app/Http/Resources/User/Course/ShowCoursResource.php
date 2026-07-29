@@ -57,6 +57,30 @@ class ShowCoursResource extends JsonResource
                     'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
                 ]);
             }),
+            'grade' => $this->whenLoaded('grade', function () {
+                return [
+                    'id'   => $this->grade->id,
+                    'name' => $this->grade->name,
+                ];
+            }),
+            'term' => $this->whenLoaded('term', function () {
+                return [
+                    'id'   => $this->term->id,
+                    'name' => $this->term->name,
+                ];
+            }),
+            'subject' => $this->whenLoaded('subject', function () {
+                return [
+                    'id'   => $this->subject->id,
+                    'name' => $this->subject->name,
+                ];
+            }),
+            'academic_year' => $this->whenLoaded('academicYear', function () {
+                return [
+                    'id'   => $this->academicYear->id,
+                    'name' => $this->academicYear->name,
+                ];
+            }),
 
         ];
     }
