@@ -1,48 +1,50 @@
 <?php
 
 use \App\Http\Controllers\Admin\Auth\SendOtpController;
+use App\Http\Controllers\Admin\AcademicYear\AcademicYearController;
 use App\Http\Controllers\Admin\Auth\CheckOtpController;
+use App\Http\Controllers\Admin\Bag\BagController;
+use App\Http\Controllers\Admin\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Chapter\ChapterController;
 use App\Http\Controllers\Admin\Course\CourseController;
+use App\Http\Controllers\Admin\Course\CourseStatisticsController;
 use App\Http\Controllers\Admin\CustomDomain\CustomDomainController;
 use App\Http\Controllers\Admin\CustomDomain\CustomSubdomainController;
+use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\Grade\GradeController;
+use App\Http\Controllers\Admin\InstructorReceiverAccount\InstructorReceiverAccountController;
+use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Lesson\LessonController;
 use App\Http\Controllers\Admin\Me\MeController;
 use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
+use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController;
+use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailController;
+use App\Http\Controllers\Admin\Plan\PlanController;
+use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
+use App\Http\Controllers\Admin\Section\SectionController;
+use App\Http\Controllers\Admin\Subject\SubjectController;
+use App\Http\Controllers\Admin\Template\TemplateController;
+use App\Http\Controllers\Admin\Term\TermController;
+
 use App\Http\Controllers\Admin\User\UserController;
+use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
+
+
 use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
+use App\Http\Controllers\Admin\UserPlan\UserPlanController;
+use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
 use App\Http\Controllers\Instructor\Course\CourseController as CourseCourseController;
+use App\Http\Controllers\Instructor\InstructorController;
+use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
+use App\Http\Controllers\Tenant\TenantMigrationController;
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\Template\TemplateController;
-use App\Http\Controllers\Admin\Subject\SubjectController;
-use App\Http\Controllers\Admin\Term\TermController;
-use App\Http\Controllers\Admin\Grade\GradeController;
-use App\Http\Controllers\Admin\AcademicYear\AcademicYearController;
-use App\Http\Controllers\Admin\BagPurchase\BagPurchaseController;
-use App\Http\Controllers\Admin\Bag\BagController;
-use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 
-use App\Http\Controllers\Admin\Section\SectionController;
-use App\Http\Controllers\Admin\Pages\PagesController;
-
-
-use App\Http\Controllers\Admin\InstructorReceiverAccount\InstructorReceiverAccountController;
-use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
-use App\Http\Controllers\Admin\Dashboard\DashboardController;
-use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController;
-use App\Http\Controllers\Admin\Plan\PlanController;
-use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
-use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
-use App\Http\Controllers\Admin\UserPlan\UserPlanController;
-use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
-use App\Http\Controllers\Instructor\InstructorController;
-use App\Http\Controllers\Tenant\TenantMigrationController;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
@@ -66,6 +68,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('courses', [CourseController::class, 'store'])
         ->middleware(CheckFeatureLimit::class . ':max_courses')
         ->name('course.store');
+    Route::get('courses/{course}/statistics/overview', [CourseStatisticsController::class, 'overview']);
+    Route::get('courses/{course}/statistics/subscribers', [CourseStatisticsController::class, 'subscribers']);
 
     Route::apiResource('online_sessions', OnlineSessionController::class)->names('online_session');
     Route::apiResource('physical_course_details', PhysicalCourseDetailController::class)->names('physical_course_detail');
@@ -100,6 +104,8 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
     ->group(function () {
         Route::apiResource('courses', CourseCourseController::class)
             ->names('instructor.course');
+        Route::get('courses/{course}/statistics/overview', [CourseStatisticsController::class, 'overview']);
+        Route::get('courses/{course}/statistics/subscribers', [CourseStatisticsController::class, 'subscribers']);
         Route::get('wallet', [UserBalalnceController::class, 'index']);
 
         Route::apiResource('profile', InstructorController::class)->except('post', 'delete', 'put');
