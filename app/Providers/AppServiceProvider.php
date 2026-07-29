@@ -2,6 +2,18 @@
 
 namespace App\Providers;
 
+use App\Repositories\Subject\SubjectRepositoryInterface;
+use App\Repositories\Subject\SubjectRepository;
+
+use App\Repositories\Term\TermRepositoryInterface;
+use App\Repositories\Term\TermRepository;
+
+use App\Repositories\Grade\GradeRepositoryInterface;
+use App\Repositories\Grade\GradeRepository;
+
+use App\Repositories\AcademicYear\AcademicYearRepositoryInterface;
+use App\Repositories\AcademicYear\AcademicYearRepository;
+
 use App\Repositories\BagPurchase\BagPurchaseRepositoryInterface;
 use App\Repositories\BagPurchase\BagPurchaseRepository;
 
@@ -135,6 +147,10 @@ $this->app->bind(
         $this->app->bind(LandingPageRepositoryInterface::class, LandingPageRepository::class);
         $this->app->bind(BagRepositoryInterface::class, BagRepository::class);
         $this->app->bind(BagPurchaseRepositoryInterface::class, BagPurchaseRepository::class);
+        $this->app->bind(AcademicYearRepositoryInterface::class, AcademicYearRepository::class);
+        $this->app->bind(GradeRepositoryInterface::class, GradeRepository::class);
+        $this->app->bind(TermRepositoryInterface::class, TermRepository::class);
+        $this->app->bind(SubjectRepositoryInterface::class, SubjectRepository::class);
 }
 
     /**

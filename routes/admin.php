@@ -19,6 +19,10 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Subject\SubjectController;
+use App\Http\Controllers\Admin\Term\TermController;
+use App\Http\Controllers\Admin\Grade\GradeController;
+use App\Http\Controllers\Admin\AcademicYear\AcademicYearController;
 use App\Http\Controllers\Admin\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\Bag\BagController;
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
@@ -83,6 +87,11 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('organization_profiles', OrganizationProfileController::class)->names('organization_profile');
     Route::apiResource('landing_pages', LandingPageController::class)->names('landing_page');
     Route::apiResource('bags', BagController::class)->names('bag');
+
+    Route::apiResource('academic_years', AcademicYearController::class)->names('academic_year');
+    Route::apiResource('grades', GradeController::class)->names('grade');
+    Route::apiResource('terms', TermController::class)->names('term');
+    Route::apiResource('subjects', SubjectController::class)->names('subject');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -98,6 +107,21 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::apiResource('bags', BagController::class)->names('instructor.bag');
         // Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
         Route::apiResource('bag_purchases', BagPurchaseController::class)->names('bag_purchase');
+        Route::apiResource('academic_years', AcademicYearController::class)
+            ->only(['index', 'show'])
+            ->names('instructor.academic_year');
+
+        Route::apiResource('grades', GradeController::class)
+            ->only(['index', 'show'])
+            ->names('instructor.grade');
+
+        Route::apiResource('terms', TermController::class)
+            ->only(['index', 'show'])
+            ->names('instructor.term');
+
+        Route::apiResource('subjects', SubjectController::class)
+            ->only(['index', 'show'])
+            ->names('instructor.subject');
     });
 
 

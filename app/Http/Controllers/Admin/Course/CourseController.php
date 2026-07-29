@@ -42,12 +42,16 @@ class CourseController extends BaseController
     #[Override]
     protected function getShowRelationships(): array
     {
-        return  [
+        return [
             'chapters.lessons',
             'infos',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
             'category:id,name',
-            'user:id,name'
+            'user:id,name',
+            'grade:id,name',
+            'term:id,name',
+            'subject:id,name',
+            'academicYear:id,name',
         ];
     }
 

@@ -13,18 +13,26 @@ abstract class BaseCourseStoreRequest  extends BaseRequest
 
     public function rules(): array
     {
+
         return [
             'title'       => 'required|string|max:255',
             'type'        => 'required|in:recorded,online,physical',
             'category_id' => 'nullable|integer|exists:categories,id',
             'description' => 'required|string',
+            'short_description' => 'nullable|string|max:255',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'price_type'  => 'required|in:free,paid',
             'price'       => 'required|numeric|min:0',
             'final_price' => 'required|numeric|min:0',
             'status'      => 'required|in:published,draft',
-            "currency"    => 'required|string|max:50',
+            'currency'    => 'required|string|max:50',
             'completion_percentage' => 'nullable|numeric|min:0|max:100',
+
+            'grade_id'         => 'nullable|integer|exists:grades,id',
+            'term_id'          => 'nullable|integer|exists:terms,id',
+            'subject_id'       => 'nullable|integer|exists:subjects,id',
+            'academic_year_id' => 'nullable|integer|exists:academic_years,id',
+
             'infos'           => 'nullable|array',
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
@@ -80,6 +88,11 @@ abstract class BaseCourseStoreRequest  extends BaseRequest
             'infos.*.value.max'         => 'The info value must not exceed 255 characters.',
             'infos.*.order.integer'     => 'The info order must be a valid integer.',
             'infos.*.order.min'         => 'The info order must be at least 1.',
+
+            'grade_id.exists'         => 'The selected grade does not exist.',
+            'term_id.exists'          => 'The selected term does not exist.',
+            'subject_id.exists'       => 'The selected subject does not exist.',
+            'academic_year_id.exists' => 'The selected academic year does not exist.',
         ];
     }
 }

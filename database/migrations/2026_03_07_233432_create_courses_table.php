@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('category_id')->nullable()->constrained();
             $table->text('description')->nullable();
+            $table->text('short_description')->nullable();
             $table->string('image')->nullable();
 
             $table->decimal('price', 10, 2)->default(0);
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('slug')->nullable();
             $table->string('currency')->nullable();
             $table->integer('completion_percentage')->nullable();
+
             $table->timestamps();
         });
     }
