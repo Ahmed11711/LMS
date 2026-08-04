@@ -10,6 +10,8 @@ class TenantSeeder extends Seeder
     {
         $this->call([
             ReceiverAccountSeeder::class,
+            PagesSeeder::class,
+
         ]);
     }
 }
