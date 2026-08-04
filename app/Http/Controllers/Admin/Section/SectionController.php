@@ -37,19 +37,14 @@ class SectionController extends BaseController
     {
         $activePage = Pages::where('is_active', true)->first();
 
+        $sections = collect();
 
-        if (!$activePage) {
-            return $this->errorResponse('No active page found', 404);
-        }
-
-        $sections = $this->repository->query()
-            ->where('pages_id', $activePage->id)
-            ->with('items')
-            ->orderBy('order')
-            ->get();
-
-        if ($sections->isEmpty()) {
-            return $this->errorResponse('No sections found for the active page', 404);
+        if ($activePage) {
+            $sections = $this->repository->query()
+                ->where('pages_id', $activePage->id)
+                ->with('items')
+                ->orderBy('order')
+                ->get();
         }
 
         return $this->successResponse(
@@ -57,7 +52,6 @@ class SectionController extends BaseController
             'Sections retrieved successfully'
         );
     }
-
     public function reorder(Request $request): JsonResponse
     {
         $items = $request->validate([
