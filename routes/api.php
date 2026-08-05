@@ -1,17 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\Plan\PlanController;
+use App\Http\Controllers\Auth\ForgetRestPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
 use App\Http\Controllers\Center\Auth\LoginAccountController;
 use App\Http\Controllers\Center\Payment\KashierPaymentController;
 use App\Http\Controllers\Front\Package\PackageController;
 use App\Http\Controllers\Tenant\CreateTenantController;
-use App\Http\Middleware\ResolveTenant;
-use App\Models\Central\User;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use App\Http\Controllers\User\Course\CourseController;
 use App\Http\Controllers\User\Course\MyCourseController;
 use App\Http\Controllers\User\Lesson\LessonCommentController;
@@ -21,7 +17,13 @@ use App\Http\Controllers\User\Profile\ProfileController;
 use App\Http\Controllers\User\UserPlan\UserPlanController;
 use App\Http\Controllers\User\UserSubscribe\UserSubscribeController;
 use App\Http\Middleware\EnsureEnrolled;
+use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
+use App\Models\Central\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+
 
 // push ahmed
 
@@ -30,6 +32,9 @@ use App\Http\Middleware\TenantJwtMiddleware;
 Route::middleware([ResolveTenant::class])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('login', [LoginController::class, 'login']);
+        Route::post('forget-password', [ForgetRestPasswordController::class, 'forgetPassword']);
+        Route::post('verify-otp', [ForgetRestPasswordController::class, 'verifyOtp']);
+        Route::post('reset-password', [ForgetRestPasswordController::class, 'resetPassword']);
     });
 });
 
