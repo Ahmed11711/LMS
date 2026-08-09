@@ -28,7 +28,7 @@ class UserSubscribeController extends Controller
   }
   public function store(StoreUserSubscribeRequest $request)
   {
-    $user =  $request->get('tenant_user');
+    $user = $request->get('tenant_user');
     $tenant = app('tenant');
 
     $result = $this->service->execute(
@@ -38,16 +38,13 @@ class UserSubscribeController extends Controller
       customerContact: $user->email ?? $user->phone,
       tenantDomain: $tenant->domain,
       receipt: $request->file('receipt'),
+      receiverAccountId: $request->validated('receiver_account_id'),
     );
 
     if (!$result['success']) {
       return $this->errorResponse($result['message'], 422);
     }
 
-
-    return $this->successResponse([
-      'payment_url' => $result['payment_url'] ?? null,
-      'message'     => $result['message'] ?? null,
-    ]);
+    return $this->successResponse($result);
   }
 }

@@ -27,7 +27,14 @@ class UserSubscribeRepository extends BaseRepository implements UserSubscribeRep
             ->where('course_id', $courseId)
             ->where('status', 'active')->exists();
     }
-
+    public function isActiveOrPendingSubscription(int $userId, int $courseId): bool
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->whereIn('status', ['pending', 'paid', 'active'])
+            ->exists();
+    }
     public function findByTransactionId(string $transactionId)
     {
         return $this->model

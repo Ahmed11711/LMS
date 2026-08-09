@@ -22,12 +22,11 @@ class UserSubscribeService
         bool $payment,
         ?string $tenantDomain = null,
         $receipt = null,
+        ?int $receiverAccountId = null,
         string $createdBy = 'self',
-        string $status = "penidng",
+        string $status = 'pending',
     ) {
-        // 1. Check if already subscribed
-        $alreadySubscribed = $this->userSubscribeRepo->isAlreadySubscribed($userId, $courseId);
-
+        $alreadySubscribed = $this->userSubscribeRepo->isActiveOrPendingSubscription($userId, $courseId);
         if ($alreadySubscribed) {
             return [
                 'success' => false,
@@ -35,45 +34,38 @@ class UserSubscribeService
             ];
         }
 
-        // 2. Get course price
         $course = $this->courseRepo->find($courseId);
-
-        // 3. Create transaction reference
         $transactionReference = 'TXN-' . Str::uuid();
 
-        // 4. Save subscription as pending
-        if ($receipt) {
-            $receiptPath = $receipt->store('uploads/receipts', 'public');
-        }
+        $receiptPath = $receipt ? $receipt->store('uploads/receipts', 'public') : null;
+
         $this->userSubscribeRepo->updateOrCreate(
             ['user_id' => $userId, 'course_id' => $courseId],
             [
-                'status'         => $status,
-                'transaction_id' => 'TXN-' . Str::uuid(),
-                'receipt'        => $receiptPath ?? null,
-                'created_by'     => $createdBy,
-                'price'          => $course->final_price,
+                'status'              => $status,
+                'transaction_id'      => $transactionReference,
+                'receipt'             => $receiptPath,
+                'created_by'          => $createdBy,
+                'price'               => $course->final_price,
+                'receiver_account_id' => $receiverAccountId,
             ]
         );
 
-        // 5. Create payment link
-        if ($payment) {
-            $result = $this->createPaymentUrl(
-                course: $course,
-                customerContact: $customerContact,
-                transactionReference: $transactionReference,
-                tenantDomain: $tenantDomain,
-            );
-
-            if (!$result['success']) {
-                return $result;
-            }
-        } else {
+        if (!$payment) {
             return [
                 'success' => true,
                 'message' => 'Your subscription is being processed and will be activated shortly.',
             ];
         }
+
+        $result = $this->createPaymentUrl(
+            course: $course,
+            customerContact: $customerContact,
+            transactionReference: $transactionReference,
+            tenantDomain: $tenantDomain,
+        );
+
+        return $result; // كانت ناقصة قبل كده
     }
 
     protected function createPaymentUrl($course, string $customerContact, string $transactionReference, ?string $tenantDomain): array
