@@ -37,6 +37,9 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
             'template_id' => 'nullable|exists:templates,id',
+            'access_duration_type' => 'required|in:lifetime,until_date,days',
+            'access_days'           => 'required_if:access_duration_type,days|nullable|integer|min:1',
+            'access_until_date'     => 'required_if:access_duration_type,until_date|nullable|date|after:today',
         ];
     }
 
@@ -91,6 +94,16 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'term_id.exists'          => 'The selected term does not exist.',
             'subject_id.exists'       => 'The selected subject does not exist.',
             'academic_year_id.exists' => 'The selected academic year does not exist.',
+            'access_duration_type.required' => 'You must specify the access duration type.',
+            'access_duration_type.in'       => 'Access duration type must be: lifetime, until_date, or days.',
+
+            'access_days.required_if' => 'You must specify the number of access days.',
+            'access_days.integer'     => 'Access days must be a valid integer.',
+            'access_days.min'         => 'Access days must be at least 1.',
+
+            'access_until_date.required_if' => 'You must specify the access end date.',
+            'access_until_date.date'        => 'Access end date must be a valid date.',
+            'access_until_date.after'       => 'Access end date must be a future date.',
         ];
     }
 }

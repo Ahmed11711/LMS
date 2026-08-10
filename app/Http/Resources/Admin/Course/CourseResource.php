@@ -29,6 +29,9 @@ class CourseResource extends JsonResource
             'status' => $this->status,
             'slug' => $this->slug,
             'currency' => $this->currency,
+            'access_duration_type' => $this->access_duration_type,
+            'access_days' => $this->access_days,
+            'access_until_date' => $this->access_until_date,
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
             'category' => $this->whenLoaded('category', function () {
                 return [

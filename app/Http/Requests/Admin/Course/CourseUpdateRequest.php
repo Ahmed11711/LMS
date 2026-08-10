@@ -37,6 +37,9 @@ class CourseUpdateRequest extends BaseRequest
             'receiver_accounts'    => 'nullable|array',
             'receiver_accounts.*' => 'nullable:receiver_accounts|integer|exists:instructor_receiver_accounts,id',
             'template_id' => 'nullable|exists:templates,id',
+            'access_duration_type' => 'sometimes|required|in:lifetime,until_date,days',
+            'access_days'           => 'required_if:access_duration_type,days|nullable|integer|min:1',
+            'access_until_date'     => 'required_if:access_duration_type,until_date|nullable|date|after:today',
         ];
     }
 
@@ -84,6 +87,16 @@ class CourseUpdateRequest extends BaseRequest
             'infos.*.value.max'           => 'The info value must not exceed 255 characters.',
             'infos.*.order.integer'       => 'The info order must be a valid integer.',
             'infos.*.order.min'           => 'The info order must be at least 1.',
+            'access_duration_type.required' => 'You must specify the access duration type.',
+            'access_duration_type.in'       => 'Access duration type must be: lifetime, until_date, or days.',
+
+            'access_days.required_if' => 'You must specify the number of access days.',
+            'access_days.integer'     => 'Access days must be a valid integer.',
+            'access_days.min'         => 'Access days must be at least 1.',
+
+            'access_until_date.required_if' => 'You must specify the access end date.',
+            'access_until_date.date'        => 'Access end date must be a valid date.',
+            'access_until_date.after'       => 'Access end date must be a future date.',
         ];
     }
 }

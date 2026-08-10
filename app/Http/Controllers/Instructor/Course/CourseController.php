@@ -47,6 +47,8 @@ class CourseController extends BaseController
         $data['slug']    = Str::slug($data['title']) . '-' . Str::random(6);
         $data['user_id'] = $request->attributes->get('user_id');
 
+        $data = $this->sanitizeAccessDuration($data);
+
         return $data;
     }
 
@@ -57,6 +59,8 @@ class CourseController extends BaseController
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         unset($data['infos']);
+
+        $data = $this->sanitizeAccessDuration($data);
 
         return $data;
     }
@@ -88,5 +92,33 @@ class CourseController extends BaseController
 
             $record->infos()->createMany($infos);
         }
+    }
+
+    /**
+     * Ensure only the fields relevant to the selected access_duration_type
+     * are persisted; nulls out the irrelevant ones to avoid stale/conflicting data.
+     */
+    private function sanitizeAccessDuration(array $data): array
+    {
+        if (!isset($data['access_duration_type'])) {
+            return $data;
+        }
+
+        switch ($data['access_duration_type']) {
+            case 'lifetime':
+                $data['access_days']       = null;
+                $data['access_until_date'] = null;
+                break;
+
+            case 'days':
+                $data['access_until_date'] = null;
+                break;
+
+            case 'until_date':
+                $data['access_days'] = null;
+                break;
+        }
+
+        return $data;
     }
 }
