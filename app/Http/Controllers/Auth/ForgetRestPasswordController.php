@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 class ForgetRestPasswordController extends Controller
 {
+    use ApiResponseTrait;
 
     public function forgetPassword(ForgetPasswordRequest $request)
     {
