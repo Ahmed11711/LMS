@@ -36,6 +36,10 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'infos.*.key'     => 'required_with:infos|string|max:255',
             'infos.*.value'   => 'required_with:infos|string|max:255',
             'infos.*.order'   => 'nullable|integer|min:1',
+
+            'receiver_accounts'   => 'nullable|array',
+            'receiver_accounts.*' => 'integer|exists:instructor_receiver_accounts,id',
+
             'template_id' => 'nullable|exists:templates,id',
             'access_duration_type' => 'required|in:lifetime,until_date,days',
             'access_days'           => 'required_if:access_duration_type,days|nullable|integer|min:1',
@@ -89,6 +93,10 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'infos.*.value.max'         => 'The info value must not exceed 255 characters.',
             'infos.*.order.integer'     => 'The info order must be a valid integer.',
             'infos.*.order.min'         => 'The info order must be at least 1.',
+
+            'receiver_accounts.array'        => 'Receiver accounts must be a list.',
+            'receiver_accounts.*.integer'    => 'Each receiver account ID must be a valid integer.',
+            'receiver_accounts.*.exists'     => 'One or more selected receiver accounts do not exist.',
 
             'grade_id.exists'         => 'The selected grade does not exist.',
             'term_id.exists'          => 'The selected term does not exist.',
