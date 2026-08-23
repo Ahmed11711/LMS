@@ -24,7 +24,7 @@ return new class extends Migration
                 ->constrained('instructor_receiver_accounts')
                 ->nullOnDelete();
 
-            $table->string('receipt'); // مسار صورة/ملف الإيصال
+            $table->string('receipt')->nullable(); // مسار صورة/ملف الإيصال
             $table->decimal('amount', 10, 2)->nullable(); // السعر وقت الشراء (نسخة ثابتة)
             $table->string('status')->default('pending'); // pending | approved | rejected
             $table->text('rejection_reason')->nullable();

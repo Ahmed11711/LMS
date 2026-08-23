@@ -31,7 +31,7 @@ class CreateAcademyInfoService
 
             $user->update([
                 'username'      => $data['username'],
-                'phone_academy' => $data['phone_academy'],
+                'phone_academy' => $data['phone_academy'] ?? null,
                 'country_code'  => $data['country_code'],
                 'specialties'   => $data['specialties'],
                 'type'       => $data['type'],
@@ -60,7 +60,7 @@ class CreateAcademyInfoService
             'name'            => $user->username,
             'domain'          => $data['link_academy'],
             'user_name'       => $user->username,
-            'phone_academy'   => $user->phone_academy,
+            'phone_academy' => $data['phone_academy'] ?? null,
             'country_code'    => $user->country_code,
             'specialties'     => $user->specialties,
             'user_id'         => $user->id,

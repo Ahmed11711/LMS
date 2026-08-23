@@ -13,7 +13,7 @@ class CreateInfoAcademy extends BaseRequest
         return [
             'email' => 'nullable|email|required_without:phone|exists:users,email',
             'phone' => 'nullable|string|required_without:email|exists:users,phone',
-            'phone_academy' => 'required|string|min:10',
+            'phone_academy' => 'nullable|string|min:10',
             'username' => 'required|string|unique:users,username',
             'country_code' => 'required|string',
             'specialties' => 'required|string',
