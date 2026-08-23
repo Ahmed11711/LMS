@@ -68,6 +68,22 @@ class CourseResource extends JsonResource
                     'name' => $this->academicYear->name,
                 ];
             }),
+            'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
+                return $this->courseReceiverAccounts->map(function ($cra) {
+                    $instructorAccount = $cra->instructorReceiverAccount;
+                    $receiverAccount   = $instructorAccount?->receiverAccount;
+
+                    return [
+                        'instructor_receiver_account_id' => $instructorAccount?->id,
+                        'receiver_account' => $receiverAccount ? [
+                            'id'   => $receiverAccount->id,
+                            'name' => $receiverAccount->name,
+                            'key'  => $receiverAccount->key,
+                            'logo' => $receiverAccount->logo,
+                        ] : null,
+                    ];
+                });
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
