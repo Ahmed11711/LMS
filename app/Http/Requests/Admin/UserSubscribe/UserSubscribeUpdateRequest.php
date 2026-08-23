@@ -16,7 +16,7 @@ class UserSubscribeUpdateRequest extends BaseRequest
         return [
             'user_id' => 'sometimes|required|integer|exists:users,id',
             'course_id' => 'sometimes|required|integer|exists:courses,id',
-            'starts_at' => 'sometimes|required|date',
+            'starts_at' => 'sometimes|date_format:Y-m-d',
             'status' => 'sometimes|required|in:active,refunded,cancelled,pending',
             'message' => 'nullable|string|max:255',
 
