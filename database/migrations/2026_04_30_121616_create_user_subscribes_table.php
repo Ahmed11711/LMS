@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->timestamp('starts_at')->useCurrent();
+            $table->timestamp('ends_at')->nullable();
             $table->string('transaction_id')->nullable();
             $table->string('receipt')->nullable();
             $table->integer('receiver_account_id')->nullable();

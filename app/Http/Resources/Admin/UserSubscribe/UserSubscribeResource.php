@@ -13,6 +13,7 @@ class UserSubscribeResource extends JsonResource
             'user_id' => $this->user_id,
             'course_id' => $this->course_id,
             'starts_at' => $this->starts_at,
+            'ends_at' => $this->ends_at ?? null,
             'receipt'        => $this->receipt,
             'status' => $this->status,
             'message' => $this->message,
