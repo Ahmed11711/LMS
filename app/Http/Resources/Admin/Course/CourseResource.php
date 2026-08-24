@@ -79,13 +79,18 @@ class CourseResource extends JsonResource
                             'id'   => $receiverAccount->id,
                             'name' => $receiverAccount->name,
                             'key'  => $receiverAccount->key,
-                            'logo' => $receiverAccount->logo
-                                ? preg_replace(
-                                    '#^(https?://[^/]+)/(?!storage/uploads/)#',
-                                    '$1/storage/uploads/',
-                                    $receiverAccount->logo
-                                )
-                                : null,
+                            'logo' => (function () use ($receiverAccount) {
+                                if (!$receiverAccount->logo) return null;
+
+                                $url = $receiverAccount->logo;
+
+                                // لو مفيهاش /storage/uploads/ خالص، ضيفها بعد الدومين
+                                if (!str_contains($url, '/storage/uploads/')) {
+                                    $url = preg_replace('#^(https?://[^/]+)/#', '$1/storage/uploads/', $url);
+                                }
+
+                                return $url;
+                            })(),
                         ] : null,
                     ];
                 });
