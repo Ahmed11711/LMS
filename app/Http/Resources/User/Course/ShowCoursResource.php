@@ -52,7 +52,12 @@ class ShowCoursResource extends JsonResource
                     'id'            => $item->id,
                     'account_value' => $item->instructorReceiverAccount->account_value,
                     'name'          => $item->instructorReceiverAccount->receiverAccount->name,
-                    'logo'          => asset($item->instructorReceiverAccount->receiverAccount->logo),
+                    'logo' => $item->instructorReceiverAccount->receiverAccount->logo
+                        ? asset('storage/' . ltrim(
+                            preg_replace('#^https?://[^/]+/(storage/)?#', '', $item->instructorReceiverAccount->receiverAccount->logo),
+                            '/'
+                        ))
+                        : null,
                     'country_code'  => $item->instructorReceiverAccount->receiverAccount->country_code,
                     'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
                 ]);
