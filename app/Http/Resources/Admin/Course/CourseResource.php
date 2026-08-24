@@ -80,7 +80,11 @@ class CourseResource extends JsonResource
                             'name' => $receiverAccount->name,
                             'key'  => $receiverAccount->key,
                             'logo' => $receiverAccount->logo
-                                ? asset('storage/uploads/' . ltrim($receiverAccount->logo, '/'))
+                                ? preg_replace(
+                                    '#^(https?://[^/]+)/(?!storage/uploads/)#',
+                                    '$1/storage/uploads/',
+                                    $receiverAccount->logo
+                                )
                                 : null,
                         ] : null,
                     ];
