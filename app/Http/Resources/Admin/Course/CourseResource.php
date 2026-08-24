@@ -79,8 +79,8 @@ class CourseResource extends JsonResource
                             'id'   => $receiverAccount->id,
                             'name' => $receiverAccount->name,
                             'key'  => $receiverAccount->key,
-                            'logo' => $this->logo
-                                ? asset(ltrim($this->logo, '/'))
+                            'logo' => $receiverAccount->logo
+                                ? asset('storage/uploads/' . ltrim($receiverAccount->logo, '/'))
                                 : null,
                         ] : null,
                     ];
