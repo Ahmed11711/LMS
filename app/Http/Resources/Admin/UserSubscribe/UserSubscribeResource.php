@@ -14,7 +14,9 @@ class UserSubscribeResource extends JsonResource
             'course_id' => $this->course_id,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at ?? null,
-            'receipt'        => $this->receipt,
+            'receipt' => $this->receipt
+                ? asset(ltrim($this->receipt, '/'))
+                : null,
             'status' => $this->status,
             'message' => $this->message,
             'created_at' => $this->created_at,
