@@ -15,9 +15,10 @@ class UserSubscribeResource extends JsonResource
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at ?? null,
             'receipt' => $this->receipt
-                ? (str_starts_with($this->receipt, 'http')
-                    ? $this->receipt
-                    : asset('storage/' . ltrim($this->receipt, '/')))
+                ? asset('storage/' . ltrim(
+                    preg_replace('#^https?://[^/]+/(storage/)?#', '', $this->receipt),
+                    '/'
+                ))
                 : null,
             'status' => $this->status,
             'message' => $this->message,
