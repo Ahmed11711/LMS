@@ -23,7 +23,7 @@ class EnsureEnrolled
         $lesson = Lesson::with('chapter.course')->find($lessonId);
 
         if (!$lesson) {
-            return response()->json(['message' => 'Lesson not found'], 404);
+            return response()->json(['message' => 'Lesson not found'], 200);
         }
 
         $course   = $lesson->chapter->course;
