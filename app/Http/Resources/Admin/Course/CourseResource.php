@@ -80,7 +80,7 @@ class CourseResource extends JsonResource
                             'name' => $receiverAccount->name,
                             'key'  => $receiverAccount->key,
                             'logo' => $this->logo
-                                ? asset(ltrim('/' . $this->logo, '/'))
+                                ? asset(ltrim($this->logo, '/'))
                                 : null,
                         ] : null,
                     ];

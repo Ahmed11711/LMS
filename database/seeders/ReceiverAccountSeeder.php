@@ -38,7 +38,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Etisalat Cash',
                 'key'          => 'etisalat_cash',
-                'logo'         => 'receiver-account-logos/etisalat-cash.png',
+                'logo'         => '/receiver-account-logos/etisalat-cash.png',
                 'country_code' => 'EG',
                 'country_name' => 'Egypt',
                 'is_active'    => true,
@@ -46,7 +46,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Fawry',
                 'key'          => 'fawry',
-                'logo'         => 'receiver-account-logos/fawry.png',
+                'logo'         => '/receiver-account-logos/fawry.png',
                 'country_code' => 'EG',
                 'country_name' => 'Egypt',
                 'is_active'    => true,
@@ -56,7 +56,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'STC Pay',
                 'key'          => 'stc_pay',
-                'logo'         => 'receiver-account-logos/stc-pay.png',
+                'logo'         => '/receiver-account-logos/stc-pay.png',
                 'country_code' => 'SA',
                 'country_name' => 'Saudi Arabia',
                 'is_active'    => true,
@@ -64,7 +64,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Urpay',
                 'key'          => 'urpay',
-                'logo'         => 'receiver-account-logos/urpay.png',
+                'logo'         => '/receiver-account-logos/urpay.png',
                 'country_code' => 'SA',
                 'country_name' => 'Saudi Arabia',
                 'is_active'    => true,
@@ -72,7 +72,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Apple Pay',
                 'key'          => 'apple_pay_sa',
-                'logo'         => 'receiver-account-logos/apple-pay.png',
+                'logo'         => '/receiver-account-logos/apple-pay.png',
                 'country_code' => 'SA',
                 'country_name' => 'Saudi Arabia',
                 'is_active'    => true,
@@ -82,7 +82,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Apple Pay',
                 'key'          => 'apple_pay_ae',
-                'logo'         => 'receiver-account-logos/apple-pay.png',
+                'logo'         => '/receiver-account-logos/apple-pay.png',
                 'country_code' => 'AE',
                 'country_name' => 'UAE',
                 'is_active'    => true,
@@ -90,7 +90,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Etisalat Wallet',
                 'key'          => 'etisalat_wallet_ae',
-                'logo'         => 'receiver-account-logos/etisalat-wallet.png',
+                'logo'         => '/receiver-account-logos/etisalat-wallet.png',
                 'country_code' => 'AE',
                 'country_name' => 'UAE',
                 'is_active'    => true,
@@ -100,7 +100,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Zain Cash',
                 'key'          => 'zain_cash_kw',
-                'logo'         => 'receiver-account-logos/zain-cash.png',
+                'logo'         => '/receiver-account-logos/zain-cash.png',
                 'country_code' => 'KW',
                 'country_name' => 'Kuwait',
                 'is_active'    => true,
@@ -108,7 +108,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Benefit Pay',
                 'key'          => 'benefit_pay',
-                'logo'         => 'receiver-account-logos/benefit-pay.png',
+                'logo'         => '/receiver-account-logos/benefit-pay.png',
                 'country_code' => 'KW',
                 'country_name' => 'Kuwait',
                 'is_active'    => true,
@@ -118,7 +118,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Zain Cash',
                 'key'          => 'zain_cash_jo',
-                'logo'         => 'receiver-account-logos/zain-cash.png',
+                'logo'         => '/receiver-account-logos/zain-cash.png',
                 'country_code' => 'JO',
                 'country_name' => 'Jordan',
                 'is_active'    => true,
@@ -126,7 +126,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'eFAWATEERcom',
                 'key'          => 'efawateer',
-                'logo'         => 'receiver-account-logos/efawateer.png',
+                'logo'         => '/receiver-account-logos/efawateer.png',
                 'country_code' => 'JO',
                 'country_name' => 'Jordan',
                 'is_active'    => true,
@@ -136,7 +136,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'PayPal',
                 'key'          => 'paypal',
-                'logo'         => 'receiver-account-logos/paypal.png',
+                'logo'         => '/receiver-account-logos/paypal.png',
                 'country_code' => 'GLOBAL',
                 'country_name' => 'Global',
                 'is_active'    => true,
@@ -144,7 +144,7 @@ class ReceiverAccountSeeder extends Seeder
             [
                 'name'         => 'Wise',
                 'key'          => 'wise',
-                'logo'         => 'receiver-account-logos/wise.png',
+                'logo'         => '/receiver-account-logos/wise.png',
                 'country_code' => 'GLOBAL',
                 'country_name' => 'Global',
                 'is_active'    => true,
