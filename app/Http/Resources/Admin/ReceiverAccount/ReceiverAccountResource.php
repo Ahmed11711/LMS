@@ -13,7 +13,7 @@ class ReceiverAccountResource extends JsonResource
             'name' => $this->name,
             'key' => $this->key,
             'logo' => $this->logo
-                ? asset(ltrim('storage/uploads/' . $this->logo, '/'))
+                ? preg_replace('#^(https?://[^/]+)/#', '$1/storage/uploads/', $this->logo, 1)
                 : null,
             'country_code' => $this->country_code,
             'country_name' => $this->country_name,
