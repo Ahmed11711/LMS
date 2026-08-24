@@ -53,7 +53,7 @@ class ShowCoursResource extends JsonResource
                     'account_value' => $item->instructorReceiverAccount->account_value,
                     'name'          => $item->instructorReceiverAccount->receiverAccount->name,
                     'logo' => $item->instructorReceiverAccount->receiverAccount->logo
-                        ? asset('storage/' . ltrim(
+                        ? asset('storage/uploads' . ltrim(
                             preg_replace('#^https?://[^/]+/(storage/)?#', '', $item->instructorReceiverAccount->receiverAccount->logo),
                             '/'
                         ))
