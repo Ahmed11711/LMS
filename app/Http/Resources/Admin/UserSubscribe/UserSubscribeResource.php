@@ -15,7 +15,7 @@ class UserSubscribeResource extends JsonResource
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at ?? null,
             'receipt' => $this->receipt
-                ? asset(ltrim($this->receipt, '/'))
+                ? asset(ltrim('storage/' . $this->receipt, '/'))
                 : null,
             'status' => $this->status,
             'message' => $this->message,
