@@ -13,7 +13,7 @@ class ReceiverAccountResource extends JsonResource
             'name' => $this->name,
             'key' => $this->key,
             'logo' => $this->logo
-                ? asset(ltrim($this->logo, '/'))
+                ? asset(ltrim('storage/uploads/' . $this->logo, '/'))
                 : null,
             'country_code' => $this->country_code,
             'country_name' => $this->country_name,
