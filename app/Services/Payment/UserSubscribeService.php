@@ -37,7 +37,7 @@ class UserSubscribeService
         $course = $this->courseRepo->find($courseId);
         $transactionReference = 'TXN-' . Str::uuid();
 
-        $receiptPath = $receipt ? $receipt->store('uploads/receipts', 'public') : null;
+        $receiptPath = $receipt ? $receipt->store('storage/uploads/receipts', 'public') : null;
 
         $this->userSubscribeRepo->updateOrCreate(
             ['user_id' => $userId, 'course_id' => $courseId],

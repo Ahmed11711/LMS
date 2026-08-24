@@ -17,7 +17,7 @@ class UserSubscribeStoreRequest extends BaseRequest
             'user_id' => 'required|integer|exists:users,id',
             'course_id' => 'required|integer|exists:courses,id',
             'starts_at' => 'required|date_format:Y-m-d',
-            'status' => 'required|in:active,refunded,cancelled,pending',
+            'status' => 'required|in:active,refunded,cancelled,pending,completed',
             'message' => 'nullable|string|max:255',
         ];
     }
