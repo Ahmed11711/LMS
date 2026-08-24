@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources\User\Course;
 
+use App\Http\Resources\Admin\Chapter\ChapterResource;
+use App\Http\Resources\Admin\ReceiverAccount\ReceiverAccountResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Admin\Chapter\ChapterResource;
 
 
 class ShowCoursResource extends JsonResource
@@ -51,17 +52,10 @@ class ShowCoursResource extends JsonResource
                 return $this->courseReceiverAccounts->map(fn($item) => [
                     'id'            => $item->id,
                     'account_value' => $item->instructorReceiverAccount->account_value,
-                    'name'          => $item->instructorReceiverAccount->receiverAccount->name,
-                    'logo' => $item->instructorReceiverAccount->receiverAccount->logo
-                        ? asset('storage/uploads' . ltrim(
-                            preg_replace('#^https?://[^/]+/(storage/)?#', '', $item->instructorReceiverAccount->receiverAccount->logo),
-                            '/'
-                        ))
-                        : null,
-                    'country_code'  => $item->instructorReceiverAccount->receiverAccount->country_code,
-                    'country_name'  => $item->instructorReceiverAccount->receiverAccount->country_name,
+                    'receiver_account' => new ReceiverAccountResource($item->instructorReceiverAccount->receiverAccount),
                 ]);
             }),
+
             'grade' => $this->whenLoaded('grade', function () {
                 return [
                     'id'   => $this->grade->id,
