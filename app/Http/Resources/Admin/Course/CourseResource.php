@@ -5,8 +5,9 @@ namespace App\Http\Resources\Admin\Course;
 use App\Http\Resources\Admin\Category\CategoryResource;
 
 use App\Http\Resources\Admin\Chapter\ChapterResource;
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Admin\ReceiverAccount\ReceiverAccountResource;
 use App\Http\Resources\Admin\User\UserResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseResource extends JsonResource
 {
@@ -75,23 +76,9 @@ class CourseResource extends JsonResource
 
                     return [
                         'instructor_receiver_account_id' => $instructorAccount?->id,
-                        'receiver_account' => $receiverAccount ? [
-                            'id'   => $receiverAccount->id,
-                            'name' => $receiverAccount->name,
-                            'key'  => $receiverAccount->key,
-                            'logo' => (function () use ($receiverAccount) {
-                                if (!$receiverAccount->logo) return null;
-
-                                $url = $receiverAccount->logo;
-
-                                // لو مفيهاش /storage/uploads/ خالص، ضيفها بعد الدومين
-                                if (!str_contains($url, '/storage/uploads/')) {
-                                    $url = preg_replace('#^(https?://[^/]+)/#', '$1/storage/uploads/', $url);
-                                }
-
-                                return $url;
-                            })(),
-                        ] : null,
+                        'receiver_account' => $receiverAccount
+                            ? (new ReceiverAccountResource($receiverAccount))->resolve()
+                            : null,
                     ];
                 });
             }),
