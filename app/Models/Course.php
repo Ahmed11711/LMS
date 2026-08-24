@@ -4,6 +4,7 @@ namespace App\Models;
 
 use \App\Models\Template;
 use \App\Models\UserSubscribe;
+use App\Casts\StorageUrlCast;
 use App\Models\BaseModel\TenantModel;
 use App\Traits\TracksFeatureUsage;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Course extends TenantModel
 {
     use TracksFeatureUsage;
+    protected $casts = [
+        'image' => StorageUrlCast::class,
+    ];
     public array $filterable = ['user_id', 'type', 'category_id'];
 
     public function getFeatureSlug(): string
