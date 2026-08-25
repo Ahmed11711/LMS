@@ -12,7 +12,7 @@ class MeController extends Controller
     use ApiResponseTrait;
     public function me(Request $request)
     {
-        return $user = $request->user();
+        $user = auth('api')->user();
         return $this->successResponse(new MeResource($user), 'Me data retrieved successfully');
     }
 }
