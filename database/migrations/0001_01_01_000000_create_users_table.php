@@ -32,6 +32,8 @@ return new class extends Migration
             $table->string('username')->unique()->nullable();
 
             $table->string('country_code', 10)->nullable();
+            $table->string('type')->nullable()->index()->after('role');
+
 
             $table->string('specialties')->nullable();
             $table->string('profile_image')->nullable();

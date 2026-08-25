@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('type')->nullable()->index()->after('role');
-        });
+        Schema::table('users', function (Blueprint $table) {});
     }
 
     /**
