@@ -22,6 +22,9 @@ class PackageStoreRequest extends BaseRequest
             'duration_months' => 'required|integer',
             'order' => 'nullable|integer',
             'recomnd' => 'nullable|integer',
+            'features' => ['sometimes', 'array'],
+            'features.*.feature_id' => ['required_with:features', 'integer', 'exists:features,id'],
+            'features.*.value' => ['nullable', 'string'],
         ];
     }
 }

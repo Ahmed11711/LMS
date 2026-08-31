@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\Package;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class PackageUpdateRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -20,6 +22,9 @@ class PackageUpdateRequest extends BaseRequest
             'duration_months' => 'sometimes|required|integer',
             'order' => 'sometimes|required|integer',
             'recomnd' => 'sometimes|required|integer',
+            'features' => ['sometimes', 'array'],
+            'features.*.feature_id' => ['required_with:features', 'integer', 'exists:features,id'],
+            'features.*.value' => ['nullable', 'string'],
         ];
     }
 }
