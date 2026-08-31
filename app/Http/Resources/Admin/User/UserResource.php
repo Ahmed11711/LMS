@@ -18,6 +18,7 @@ class UserResource extends JsonResource
         $fieldsToInclude = [
             'name',
             'email',
+            'phone',
             'email_verified_at',
             // 'password',
             // 'remember_token',
