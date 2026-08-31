@@ -18,7 +18,7 @@ class AcademyResource extends JsonResource
             'phone_academy' => $this->phone_academy,
             'is_active' => $this->is_active,
             'domain' => $this->whenLoaded('tenant', function () {
-                return optional($this->tenant?->domains?->first())->domain;
+                return $this->tenant?->domain;
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

@@ -12,8 +12,7 @@ class AcademyController extends BaseController
     {
         parent::__construct();
 
-        // بنعمل object بسيط بس عنده method اسمها query()
-        // عشان يتوافق مع الطريقة اللي BaseController متعامل بيها
+
         $this->repository = new class {
             public function query()
             {
@@ -23,7 +22,7 @@ class AcademyController extends BaseController
 
         $this->collectionName = 'Academy';
         $this->resourceClass = AcademyResource::class;
-        $this->withRelationships = ['tenant.domains'];
+        $this->withRelationships = ['tenant'];
     }
 
     protected function applyScoping($query)
