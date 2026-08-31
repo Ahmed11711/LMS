@@ -27,6 +27,7 @@ class User extends TenantModel  implements JWTSubject
         'name',
         'email',
         'password',
+        'phone'
     ];
 
 
