@@ -1,5 +1,6 @@
 <?php
 
+use \App\Http\Controllers\SuperAdmin\Acdamey\AcademyController;
 use App\Http\Controllers\Admin\Country\CountryController;
 use App\Http\Controllers\Admin\FeaturePackage\FeaturePackageController;
 use App\Http\Controllers\Admin\Features\FeaturesController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\SuperAdmin\Auth\LoginController;
 use App\Http\Controllers\Tenant\TenantMigrationController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -31,5 +33,6 @@ Route::prefix('superAdmin')->group(function () {
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
         Route::apiResource('countries', CountryController::class)->names('country');
         Route::apiResource('payment_methods', PaymentMethodController::class)->names('payment_method');
+        Route::apiResource('academies', AcademyController::class)->names('academy');
     });
 });
