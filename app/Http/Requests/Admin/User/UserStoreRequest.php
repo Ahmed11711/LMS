@@ -18,7 +18,8 @@ class UserStoreRequest extends BaseRequest
             'role' => 'required|string|in:admin,academy,student',
             'specialties' => 'nullable|string|max:255',
             'course_id' => 'sometimes|integer|exists:courses,id',
-            'is_active' => 'sometimes|boolean'
+            'is_active' => 'sometimes|boolean',
+            'phone' => 'nullable|string|max:20',
 
         ];
     }
