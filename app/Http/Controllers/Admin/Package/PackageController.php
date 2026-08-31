@@ -81,21 +81,28 @@ class PackageController extends BaseController
     protected function syncFeatures($package, array $features): void
     {
         if (empty($features)) {
+            $package->packageFeatures()->delete();
             return;
         }
 
-        $syncData = [];
+        $featureIds = collect($features)
+            ->pluck('feature_id')
+            ->filter()
+            ->toArray();
+
+        $package->packageFeatures()
+            ->whereNotIn('feature_id', $featureIds)
+            ->delete();
 
         foreach ($features as $feature) {
             if (!isset($feature['feature_id'])) {
                 continue;
             }
 
-            $syncData[$feature['feature_id']] = [
-                'value' => $feature['value'] ?? null,
-            ];
+            $package->packageFeatures()->updateOrCreate(
+                ['feature_id' => $feature['feature_id']],
+                ['value' => $feature['value'] ?? null]
+            );
         }
-
-        $package->packageFeatures()->sync($syncData);
     }
 }
