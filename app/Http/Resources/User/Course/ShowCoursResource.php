@@ -50,7 +50,7 @@ class ShowCoursResource extends JsonResource
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
             'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
                 return $this->courseReceiverAccounts->map(fn($item) => [
-                    'id'            => $item->id,
+                    'id'            => $item->instructor_receiver_account_id,
                     'account_value' => $item->instructorReceiverAccount->account_value,
                     'receiver_account' => new ReceiverAccountResource($item->instructorReceiverAccount->receiverAccount),
                 ]);

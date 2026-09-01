@@ -72,27 +72,7 @@ class CourseController extends BaseController
         return $this->successResponse(new $this->showResourceClass($record), 'Record retrieved successfully');
     }
 
-    // private function applyEnrollment($target): void
-    // {
-    //     $user = auth('api')->user();
 
-    //     if (!$user) return;
-
-    //     $enrolledIds = $user->enrollments()->pluck('course_id')->toArray();
-
-    //     // لو collection (index)
-    //     if ($target instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-    //         $target->getCollection()->transform(function ($course) use ($enrolledIds) {
-    //             $course->setAttribute('is_enrolled', in_array($course->id, $enrolledIds));
-    //             return $course;
-    //         });
-    //     }
-
-    //     // لو single record (show)
-    //     else {
-    //         $target->setAttribute('is_enrolled', in_array($target->id, $enrolledIds));
-    //     }
-    // }
 
     private function applyEnrollment($target): void
     {
