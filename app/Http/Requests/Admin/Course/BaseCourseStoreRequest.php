@@ -32,10 +32,10 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'subject_id'       => 'nullable|integer|exists:subjects,id',
             'academic_year_id' => 'nullable|integer|exists:academic_years,id',
 
-            'infos'           => 'nullable|array',
-            'infos.*.key'     => 'required_with:infos|string|max:255',
-            'infos.*.value'   => 'required_with:infos|string|max:255',
-            'infos.*.order'   => 'nullable|integer|min:1',
+            'infos'              => 'nullable|array',
+            'infos.*.info_key'   => 'required_with:infos|string|max:255',
+            'infos.*.info_value' => 'required_with:infos|string|max:255',
+            'infos.*.order'      => 'nullable|integer|min:1',
 
             'receiver_accounts'   => 'nullable|array',
             'receiver_accounts.*' => 'integer|exists:instructor_receiver_accounts,id',
