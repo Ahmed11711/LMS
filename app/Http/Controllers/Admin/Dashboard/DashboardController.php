@@ -19,7 +19,6 @@ class DashboardController extends Controller
         $user    = auth()->user();
         $isAdmin = in_array($user->role, ['admin', 'super_admin']);
 
-        // الكاش يفرق حسب اليوزر لو مش أدمن، وحسب الأدمن لو أدمن (كلهم بيشوفوا نفس الداتا)
         $cacheKey = $isAdmin ? 'dashboard_stats_admin' : "dashboard_stats_user_{$user->id}";
 
         $data = Cache::remember($cacheKey, 30, function () use ($user, $isAdmin) {
@@ -33,7 +32,6 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        // ===== الدورات: total + قبل اليوم في query واحدة =====
         $coursesStats = Course::query()
             ->when(!$isAdmin, fn($q) => $q->where('user_id', $user->id))
             ->selectRaw('
@@ -67,7 +65,7 @@ class DashboardController extends Controller
 
         // ===== مبيعات الدورات =====
         $courseSalesStats = UserSubscribe::query()
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->when(!$isAdmin, fn($q) => $q->whereHas('course', fn($qq) => $qq->where('user_id', $user->id)))
             ->selectRaw("
                 COALESCE(SUM(CASE WHEN price ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(price AS numeric) ELSE 0 END), 0) as total,
