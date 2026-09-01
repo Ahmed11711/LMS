@@ -7,6 +7,7 @@ use App\Repositories\UserSubscribe\UserSubscribeRepository;
 use App\Services\PlanAccessService\PlanAccessService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class EnsureEnrolled
 {
@@ -19,6 +20,7 @@ class EnsureEnrolled
     {
         $user     = $request->get('tenant_user');
         $lessonId = $request->route('lessonId');
+        Log::info('EnsureEnrolled Middleware: User ID: ' . $user->id . ', Lesson ID: ' . $lessonId);
 
         $lesson = Lesson::with('chapter.course')->find($lessonId);
 
