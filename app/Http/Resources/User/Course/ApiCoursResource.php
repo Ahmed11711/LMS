@@ -34,6 +34,11 @@ class ApiCoursResource extends JsonResource
             'type' => $this->type,
             'slug' => $this->slug,
             'currency' => $this->currency,
+            'access_duration_type' => $this->access_duration_type ?? null,
+            'access_days' => $this->access_days ?? null,
+            'access_until_date' => $this->access_until_date ?? null,
+            'created_at' => $this->created_at,
+
 
         ];
     }
