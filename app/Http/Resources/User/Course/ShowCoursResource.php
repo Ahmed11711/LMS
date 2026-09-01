@@ -46,6 +46,10 @@ class ShowCoursResource extends JsonResource
             'updated_at' => $this->updated_at,
             'instructor' => $this->whenLoaded('user'),
             'infos' => $this->whenLoaded('infos'),
+            'access_duration_type' => $this->access_duration_type ?? null,
+            'access_days' => $this->access_days ?? null,
+            'access_until_date' => $this->access_until_date ?? null,
+
 
             'chapters'    => ChapterResource::collection($this->whenLoaded('chapters')),
             'receiver_accounts' => $this->whenLoaded('courseReceiverAccounts', function () {
