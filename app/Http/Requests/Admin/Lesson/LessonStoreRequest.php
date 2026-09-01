@@ -4,7 +4,8 @@ namespace App\Http\Requests\Admin\Lesson;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
 
-class LessonStoreRequest extends BaseRequest
+class
+LessonStoreRequest extends BaseRequest
 {
     public function authorize(): bool
     {
