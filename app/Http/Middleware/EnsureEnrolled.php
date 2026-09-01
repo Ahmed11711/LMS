@@ -20,7 +20,6 @@ class EnsureEnrolled
     {
         $user     = $request->get('tenant_user');
         $lessonId = $request->route('lessonId');
-        Log::info('EnsureEnrolled Middleware: User ID: ' . $user->id . ', Lesson ID: ' . $lessonId);
 
         $lesson = Lesson::with('chapter.course')->find($lessonId);
 
