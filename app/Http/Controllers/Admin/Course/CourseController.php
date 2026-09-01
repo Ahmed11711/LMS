@@ -162,7 +162,8 @@ class CourseController extends BaseController
     {
         unset($data['infos']);
         unset($data['receiver_accounts']);
-        if (isset($data['title'])) {
+
+        if (isset($data['title']) && $data['title'] !== $existingRecord->title) {
             $data['slug'] = Str::slug($data['title']) . '-' . Str::random(6);
         }
 
