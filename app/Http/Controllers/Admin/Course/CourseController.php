@@ -36,7 +36,16 @@ class CourseController extends BaseController
         $this->storeRequestClass  = CourseStoreRequest::class;
         $this->updateRequestClass = CourseUpdateRequest::class;
         $this->resourceClass      = CourseResource::class;
-        $this->withRelationships = ['category:id,name', 'user:id,name'];
+    }
+    #[Override]
+    protected function getIndexRelationships(): array
+    {
+        return [
+            'category:id,name',
+            'user:id,name',
+            'grade:id,name',
+            'subject:id,name',
+        ];
     }
 
     #[Override]
@@ -54,6 +63,8 @@ class CourseController extends BaseController
             'academicYear:id,name',
         ];
     }
+
+
 
     // ----------------------------------------
     // Overridden index/show (with aggregates)
