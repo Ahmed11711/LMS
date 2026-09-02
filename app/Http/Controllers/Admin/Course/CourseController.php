@@ -147,7 +147,6 @@ class CourseController extends BaseController
         unset($data['infos']);
         unset($data['receiver_accounts']);
         $data['slug'] = Str::slug($data['title']) . '-' . Str::random(6);
-        $data['status'] = "published";
 
         return $data;
     }
