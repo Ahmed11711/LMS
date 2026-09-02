@@ -73,14 +73,14 @@ class UserPackageController extends BaseController
         $path = $request->file('payment_proof')->store('upgrade-requests', 'public');
 
         $pendingRequest = $repository->createPendingUpgrade([
-            'user_id'      => $userId,
-            'package_id'   => $newPackage->id,
-            'package_name' => $newPackage->title,
-            'status'       => 'pending',
-            'active'       => false,
-            'price'        => $newPackage->price ?? 0,
+            'user_id'       => $userId,
+            'package_id'    => $newPackage->id,
+            'package_name'  => $newPackage->titile, // ✅ الاسم الصح
+            'status'        => 'pending',
+            'active'        => false,
+            'price'         => $newPackage->price ?? 0,
             'payment_proof' => $path,
-            'amount'       => $request->input('amount'),
+            'amount'        => $request->input('amount'),
         ]);
 
         return response()->json([
@@ -88,7 +88,6 @@ class UserPackageController extends BaseController
             'data'    => $pendingRequest,
         ]);
     }
-
     /**
      * السوبر أدمن بيوافق: بيتفعل الصف اللي كان pending ويقفل القديم
      */
@@ -100,20 +99,24 @@ class UserPackageController extends BaseController
             return response()->json(['message' => 'الطلب غير موجود أو تم التعامل معه من قبل'], 404);
         }
 
+        $packageInfo = DB::connection('LMS_CENTER')->table('packages')
+            ->where('id', $pendingRequest->package_id)
+            ->first();
+
+        $durationDays = (float) ($packageInfo->duration_months ?? 1) * 30;
+
         DB::connection('LMS_CENTER')->beginTransaction();
 
         try {
-            // 1. اقفل الباكدج النشطة الحالية
             $repository->expireActivePackage($pendingRequest->user_id);
 
-            // 2. فعّل الصف اللي كان pending
             $pendingRequest->update([
-                'status'       => 'active',
-                'active'       => true,
-                'start_date'   => now(),
-                'end_date'     => now()->addDays(30), // أو حسب duration_months بتاعة الباكدج
-                'approved_by'  => Auth::id(),
-                'approved_at'  => now(),
+                'status'      => 'active',
+                'active'      => true,
+                'start_date'  => now(),
+                'end_date'    => now()->addDays($durationDays),
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
             ]);
 
             $features = DB::connection('LMS_CENTER')->table('feature_packages')
@@ -122,7 +125,6 @@ class UserPackageController extends BaseController
 
             DB::connection('LMS_CENTER')->commit();
 
-            // 3. طبّق نفس التحديث في الـ tenant DB بتاعة الأكاديمية
             $tenant = DB::connection('LMS_CENTER')->table('tenants')
                 ->where('user_id', $pendingRequest->user_id)
                 ->first();
@@ -148,7 +150,7 @@ class UserPackageController extends BaseController
                     'package_id'   => $pendingRequest->package_id,
                     'package_name' => $pendingRequest->package_name,
                     'start_date'   => now(),
-                    'end_date'     => now()->addDays(30),
+                    'end_date'     => now()->addDays($durationDays),
                     'active'       => true,
                     'status'       => 'active',
                     'price'        => $pendingRequest->price,
