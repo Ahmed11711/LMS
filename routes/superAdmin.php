@@ -7,10 +7,12 @@ use App\Http\Controllers\Admin\Features\FeaturesController;
 use App\Http\Controllers\Admin\Package\PackageController;
 use App\Http\Controllers\Admin\PaymentMethod\PaymentMethodController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
+use App\Http\Controllers\SuperAdmin\AcademyPackage\AcademyPacakgaeController;
 use App\Http\Controllers\SuperAdmin\Auth\LoginController;
 use App\Http\Controllers\Tenant\TenantMigrationController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -27,6 +29,7 @@ Route::prefix('superAdmin')->group(function () {
 
 
     Route::middleware(SuperAdminMiddleware::class)->group(function () {
+        Route::apiResource('academy-packages', AcademyPacakgaeController::class);
         Route::apiResource('packages', PackageController::class)->names('package');
         Route::apiResource('features', FeaturesController::class)->names('features');
         Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->middleware('sync.feature.package');
