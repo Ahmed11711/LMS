@@ -72,6 +72,8 @@ class CourseController extends BaseController
         return $this->successResponse(new $this->showResourceClass($record), 'Record retrieved successfully');
     }
 
+
+
     private function applyEnrollment($target): void
     {
         $user = auth('api')->user();
@@ -86,7 +88,7 @@ class CourseController extends BaseController
                 return;
             }
 
-            $enrollments = $user->subscribes()->pluck('status', 'course_id');
+            $enrollments = $user->subscribes()->pluck('status', 'course_id'); // ✅
 
             $target->getCollection()->transform(function ($course) use ($enrollments) {
                 $status = $enrollments->get($course->id);
@@ -101,24 +103,11 @@ class CourseController extends BaseController
                 return;
             }
 
-            $enrollment = $user->subscribes()->where('course_id', $target->id)->first();
+            $enrollment = $user->subscribes()->where('course_id', $target->id)->first(); // ✅
             $target->setAttribute('is_enrolled', $enrollment?->status === 'approved');
             $target->setAttribute('enrollment_status', $enrollment?->status);
         }
     }
-
-    protected function getIndexRelationships(): array
-    {
-        return [
-            'category',
-            'grade',
-            'subject',
-            'term',
-            'academicYear',
-            'user:id,name,profile_image',
-        ];
-    }
-
     protected function getShowRelationships(): array
     {
         return [
@@ -131,6 +120,7 @@ class CourseController extends BaseController
             'subject',
             'academicYear',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
+
         ];
     }
 
