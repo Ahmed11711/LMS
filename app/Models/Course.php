@@ -15,8 +15,7 @@ class Course extends TenantModel
     protected $casts = [
         'image' => StorageUrlCast::class,
     ];
-    public array $filterable = ['user_id', 'type', 'category_id'];
-
+    public array $filterable = ['user_id', 'type', 'category_id', 'grade_id', 'subject_id'];
     public function getFeatureSlug(): string
     {
         return 'max_courses';
