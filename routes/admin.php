@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
+    Route::post('/user-packages/request-upgrade', [UserPackageController::class, 'requestUpgrade']);
 
     Route::apiResource('pages', PagesController::class)->names('pages');
     Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update', 'get']);
