@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Admin\UserPackage;
 
+use App\Http\Requests\BaseRequest\BaseRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpgradeRequestStoreRequest extends FormRequest
+class UpgradeRequestStoreRequest extends BaseRequest
 {
     public function authorize(): bool
     {
