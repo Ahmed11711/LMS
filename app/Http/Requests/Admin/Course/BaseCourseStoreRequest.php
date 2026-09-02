@@ -11,13 +11,54 @@ abstract class BaseCourseStoreRequest extends BaseRequest
         return true;
     }
 
+    // public function rules(): array
+    // {
+    //     return [
+    //         'title'       => 'required|string|max:255',
+    //         'type'        => 'required|in:recorded,online,physical',
+    //         'category_id' => 'nullable|integer|exists:categories,id',
+    //         'description' => 'required|string',
+    //         'short_description' => 'nullable|string|max:255',
+    //         'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+    //         'price_type'  => 'required|in:free,paid',
+    //         'price'       => 'required|numeric|min:0',
+    //         'final_price' => 'required|numeric|min:0',
+    //         'status'      => 'required|in:published,draft',
+    //         'currency'    => 'required|string|max:50',
+    //         'completion_percentage' => 'nullable|numeric|min:0|max:100',
+
+    //         'grade_id'         => 'nullable|integer|exists:grades,id',
+    //         'term_id'          => 'nullable|integer|exists:terms,id',
+    //         'subject_id'       => 'nullable|integer|exists:subjects,id',
+    //         'academic_year_id' => 'nullable|integer|exists:academic_years,id',
+
+    //         'infos'           => 'nullable|array',
+    //         'infos.*.key'     => 'required_with:infos|string|max:255',
+    //         'infos.*.value'   => 'required_with:infos|string|max:255',
+    //         'infos.*.order'   => 'nullable|integer|min:1',
+
+    //         'receiver_accounts'   => 'nullable|array',
+    //         'receiver_accounts.*' => 'integer|exists:instructor_receiver_accounts,id',
+
+    //         'template_id' => 'nullable|exists:templates,id',
+    //         'access_duration_type' => 'required|in:lifetime,until_date,days',
+    //         'access_days'           => 'required_if:access_duration_type,days|nullable|integer|min:1',
+    //         'access_until_date'     => 'required_if:access_duration_type,until_date|nullable|date|after:today',
+    //     ];
+    // }
+
     public function rules(): array
     {
+        $isDraft = $this->input('status') === 'draft';
+
         return [
             'title'       => 'required|string|max:255',
             'type'        => 'required|in:recorded,online,physical',
             'category_id' => 'nullable|integer|exists:categories,id',
-            'description' => 'required|string',
+
+            // لو draft، الوصف مش اجباري
+            'description' => $isDraft ? 'nullable|string' : 'required|string',
+
             'short_description' => 'nullable|string|max:255',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'price_type'  => 'required|in:free,paid',
@@ -41,9 +82,19 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'receiver_accounts.*' => 'integer|exists:instructor_receiver_accounts,id',
 
             'template_id' => 'nullable|exists:templates,id',
-            'access_duration_type' => 'required|in:lifetime,until_date,days',
-            'access_days'           => 'required_if:access_duration_type,days|nullable|integer|min:1',
-            'access_until_date'     => 'required_if:access_duration_type,until_date|nullable|date|after:today',
+
+            // لو draft، مفيش داعي إن الـ access duration يبقى اجباري
+            'access_duration_type' => $isDraft
+                ? 'nullable|in:lifetime,until_date,days'
+                : 'required|in:lifetime,until_date,days',
+
+            'access_days' => $isDraft
+                ? 'nullable|integer|min:1'
+                : 'required_if:access_duration_type,days|nullable|integer|min:1',
+
+            'access_until_date' => $isDraft
+                ? 'nullable|date|after:today'
+                : 'required_if:access_duration_type,until_date|nullable|date|after:today',
         ];
     }
 
