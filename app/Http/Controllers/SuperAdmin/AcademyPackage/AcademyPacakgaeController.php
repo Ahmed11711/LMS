@@ -17,6 +17,7 @@ class AcademyPacakgaeController extends Controller
         $perPage = $request->query('per_page', 15);
 
         $packages = UserPackage::query()
+            ->with('user:id,name,email')
             ->latest()
             ->paginate($perPage);
 
