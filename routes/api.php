@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\Plan\PlanController;
+use App\Http\Controllers\Admin\Section\SectionController;
 use App\Http\Controllers\Auth\ForgetRestPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
@@ -25,6 +26,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -62,7 +64,9 @@ Route::prefix('front')->group(function () {
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('pages', [PagesController::class, 'index']);
+    Route::get('sections', [SectionController::class, 'index']);
     Route::get('landing_pages', [LandingPageController::class, 'index']);
+
 
     Route::get('profile', [ProfileController::class, 'show'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::post('profile', [ProfileController::class, 'update'])->middleware(TenantJwtMiddleware::class . ':student');
