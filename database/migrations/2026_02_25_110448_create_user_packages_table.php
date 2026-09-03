@@ -23,8 +23,7 @@ return new class extends Migration
             $table->string('status')->default('pending');
             // $table->enum('status', ['pending', 'active', 'expired', 'cancelled', 'failed'])->default('pending'); // m SQL
             $table->decimal('price', 8, 2);
-            $table->string('payment_proof')->nullable();
-            $table->timestamp('approved_at')->nullable();
+
             $table->timestamps();
         });
     }
