@@ -79,7 +79,7 @@ class UserPackageController extends BaseController
             'status'        => 'pending',
             'active'        => false,
             'price'         => $newPackage->price ?? 0,
-            'payment_proof' => $path,
+            // 'payment_proof' => $path,
             'amount'        => $request->input('amount'),
         ]);
 
