@@ -80,7 +80,6 @@ class UserPackageController extends BaseController
             'active'        => false,
             'price'         => $newPackage->price ?? 0,
             // 'payment_proof' => $path,
-            'amount'        => $request->input('amount'),
         ]);
 
         return response()->json([
