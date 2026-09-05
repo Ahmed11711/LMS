@@ -58,6 +58,7 @@ Route::prefix('front')->group(function () {
     });
 
     Route::get('pages', [PagesController::class, 'index'])->middleware(ResolveTenant::class);
+    Route::get('sections', [SectionController::class, 'index'])->middleware(ResolveTenant::class);
 });
 
 
