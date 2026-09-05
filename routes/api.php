@@ -56,7 +56,10 @@ Route::prefix('front')->group(function () {
     Route::get('tenant', function () {
         return User::with('tenant')->get();
     });
+
+    Route::get('pages', [PagesController::class, 'index'])->middleware(ResolveTenant::class);
 });
+
 
 
 
