@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\UserPackage;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class UserPackageStoreRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -20,6 +22,7 @@ class UserPackageStoreRequest extends BaseRequest
             'transaction_id' => 'nullable|string|max:255',
             'status' => 'required|in:pending,active,expired,cancelled',
             'price' => 'required|numeric',
+            'payment_proof' => 'required|string',
         ];
     }
 }
