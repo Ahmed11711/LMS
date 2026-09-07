@@ -70,6 +70,8 @@ Route::prefix('front')->group(function () {
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('pages', [PagesController::class, 'index']);
+    Route::apiResource('bags', BagController::class)->except(['store', 'update', 'destroy']);
+
 
 
 
