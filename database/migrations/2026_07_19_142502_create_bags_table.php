@@ -6,33 +6,40 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('bags', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->string('title', 255);
             $table->string('short_description', 255)->nullable();
             $table->text('description')->nullable();
             $table->string('image', 255)->nullable();
-            $table->string('category_name', 255)->nullable();
+
+            $table->unsignedBigInteger('category_bag_id')->nullable();
+            $table->foreign('category_bag_id')->references('id')->on('category_bags')->onDelete('set null');
+
+
             $table->string('type_price', 255)->nullable();
             $table->decimal('price', 10, 2)->nullable();
             $table->decimal('discount_price', 10, 2)->nullable();
-            $table->string('count_download', 255)->nullable();
-            $table->string('count_view', 255)->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->string('currency', 10)->default('SAR');
+
+            $table->string('download_type')->default('unlimited');
+            $table->unsignedInteger('download_limit')->nullable();
+            $table->unsignedInteger('download_validity_days')->nullable();
+
+            // Stats
+            $table->unsignedInteger('count_view')->default(0);
+
+            $table->string('status')->default('draft');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('bags');

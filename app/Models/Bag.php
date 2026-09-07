@@ -48,4 +48,8 @@ class Bag extends Model
     {
         return $this->hasMany(BagGallery::class);
     }
+    public function category()
+    {
+        return $this->belongsTo(CategoryBag::class, 'category_bag_id');
+    }
 }
