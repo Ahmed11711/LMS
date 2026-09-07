@@ -10,6 +10,8 @@ class Bag extends Model
 {
     use HasFactory;
 
+
+
     protected $casts = [
         'image' => StorageUrlCast::class,
         'price' => 'decimal:2',

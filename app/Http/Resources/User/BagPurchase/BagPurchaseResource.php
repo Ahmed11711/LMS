@@ -6,6 +6,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BagPurchaseResource extends JsonResource
 {
+
+
     public function toArray($request): array
     {
         return [
@@ -13,7 +15,9 @@ class BagPurchaseResource extends JsonResource
             'bag' => [
                 'id' => $this->bag->id,
                 'title' => $this->bag->title,
-                'image' => $this->bag->image,
+                'image' => $this->bag->image
+                    ? asset(ltrim($this->bag->image, '/'))
+                    : null,
             ],
             'amount' => $this->amount,
             'receipt' => $this->receipt,
