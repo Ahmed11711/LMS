@@ -32,7 +32,7 @@ class BagPurchaseController extends Controller
 
     public function show(BagPurchase $bagPurchase)
     {
-        abort_if($bagPurchase->user_id !== auth('api')->id(), 403, 'غير مصرح لك بعرض هذه العملية.');
+        abort_if($bagPurchase->user_id !== auth('api')->id(), 403, 'غير مصرح لك بعرض هذه العملية');
 
         return $this->successResponse(new BagPurchaseResource($bagPurchase->load('bag')), 'تم جلب بيانات عملية الشراء بنجاح.');
     }
