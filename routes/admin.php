@@ -44,6 +44,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryBag\CategoryBagController;
 
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
@@ -100,10 +101,14 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('terms', TermController::class)->names('term');
     Route::apiResource('subjects', SubjectController::class)->names('subject');
     Route::apiResource('templates', TemplateController::class)->names('academy.template');
+    Route::apiResource('category_bags', CategoryBagController::class);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
     ->group(function () {
+        Route::get('category_bags', [CategoryBagController::class, 'index']);
+
+
         Route::apiResource('courses', CourseCourseController::class)
             ->names('instructor.course');
         Route::get('courses/{course}/statistics/overview', [CourseStatisticsController::class, 'overview']);
@@ -135,7 +140,3 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
 
         Route::apiResource('templates', TemplateController::class)->names('instructor.template');
     });
-
-
-
-Route::prefix('v1')->group(function () {});
