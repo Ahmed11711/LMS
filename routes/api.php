@@ -99,7 +99,7 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::post('bag-purchases', [BagPurchaseController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::get('my-bag-purchases', [BagPurchaseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
-    Route::get('my-bag-purchases/{bagPurchase}', [BagPurchaseController::class, 'show']);
+    Route::get('my-bag-purchases/{bagPurchase}', [BagPurchaseController::class, 'show'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::prefix('auth')->group(function () {
         Route::post('login', [LoginController::class, 'login']);
         Route::post('register', [LoginController::class, 'register']);

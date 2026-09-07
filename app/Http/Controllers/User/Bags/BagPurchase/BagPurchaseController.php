@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Bags\BagPurchase;
 
 
+use \App\Traits\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\BagPurchase\BagPurchaseStoreRequest;
 use App\Http\Resources\User\BagPurchase\BagPurchaseResource;
@@ -17,6 +18,7 @@ class BagPurchaseController extends Controller
 {
     protected string $uploadDisk = 'public';
 
+    use ApiResponseTrait;
     public function index(Request $request)
     {
         $purchases = BagPurchase::query()
@@ -25,14 +27,14 @@ class BagPurchaseController extends Controller
             ->latest()
             ->get();
 
-        return BagPurchaseResource::collection($purchases);
+        return $this->successResponse(BagPurchaseResource::collection($purchases), 'تم جلب عمليات شراء الحقائب بنجاح.');
     }
 
     public function show(BagPurchase $bagPurchase)
     {
         abort_if($bagPurchase->user_id !== auth('api')->id(), 403, 'غير مصرح لك بعرض هذه العملية.');
 
-        return new BagPurchaseResource($bagPurchase->load('bag'));
+        return $this->successResponse(new BagPurchaseResource($bagPurchase->load('bag')), 'تم جلب بيانات عملية الشراء بنجاح.');
     }
 
     public function store(BagPurchaseStoreRequest $request)
@@ -72,15 +74,11 @@ class BagPurchaseController extends Controller
                 ]);
             });
 
-            return (new BagPurchaseResource($purchase))
-                ->additional(['success' => true, 'message' => 'تم إرسال طلب الاشتراك بنجاح، في انتظار المراجعة.']);
+            return $this->successResponse(new BagPurchaseResource($purchase), 'تم إرسال طلب الاشتراك بنجاح، في انتظار المراجعة.');
         } catch (\Throwable $e) {
             Log::error('Bag purchase failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'حصل خطأ أثناء إرسال طلب الاشتراك، حاول تاني.',
-            ], 500);
+            return $this->errorResponse('حصل خطأ أثناء إرسال طلب الاشتراك، حاول تاني.', 500);
         }
     }
 }
