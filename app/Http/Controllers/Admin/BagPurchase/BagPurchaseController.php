@@ -7,6 +7,7 @@ use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Requests\Admin\BagPurchase\BagPurchaseStoreRequest;
 use App\Http\Requests\Admin\BagPurchase\BagPurchaseUpdateRequest;
 use App\Http\Resources\Admin\BagPurchase\BagPurchaseResource;
+use Illuminate\Http\Request;
 
 class BagPurchaseController extends BaseController
 {
@@ -29,5 +30,21 @@ class BagPurchaseController extends BaseController
     protected function getIndexRelationships(): array
     {
         return ['bag', 'user'];
+    }
+
+    /**
+     * فلترة الـ query الأساسي حسب دور المستخدم.
+     */
+    protected function applyIndexFilters($query, Request $request)
+    {
+        $authUser = auth('api')->user();
+
+        if ($authUser->role !== 'admin') {
+            $query->whereHas('bag', function ($q) use ($authUser) {
+                $q->where('user_id', $authUser->id);
+            });
+        }
+
+        return $query;
     }
 }
