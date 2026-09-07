@@ -3,41 +3,47 @@
 namespace App\Http\Requests\Admin\Bag;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
+use Illuminate\Validation\Rule;
 
 class BagStoreRequest extends BaseRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|file|image|max:2048',
-            'category_name' => 'nullable|string|max:255',
-            'type_price' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|min:0',
+            'image' => 'nullable|file|image|',
+
+            'category_bag_id' => 'nullable|integer|exists:category_bags,id',
+
+            // Pricing
+            'type_price' => ['nullable', Rule::in(['free', 'paid'])],
+            'price' => 'nullable|required_if:type_price,paid|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lte:price',
-            'is_active' => 'sometimes|boolean',
+            'currency' => 'nullable|string|max:10',
+
+            // Download policy
+            'download_type' => ['nullable', Rule::in(['unlimited', 'limited'])],
+            'download_limit' => 'nullable|required_if:download_type,limited|integer|min:1',
+            'download_validity_days' => 'nullable|integer|min:1',
+
+            // Visibility
+            'status' => ['sometimes', Rule::in(['hidden', 'draft', 'published'])],
 
             'items' => 'nullable|array',
-            'items.*.file' => 'required_with:items|file|max:20480',
-            'items.*.type' => 'required_with:items|string|max:255',
+            'items.*.file' => 'required_with:items|file|',
+            'items.*.type' => 'required_with:items|string|',
 
             'payment_info_ids' => 'nullable|array',
             'payment_info_ids.*' => 'integer|exists:instructor_receiver_accounts,id',
             'gallery' => 'nullable|array',
-            'gallery.*' => 'file|image|max:2048',
+            'gallery.*' => 'file|image|',
         ];
     }
 }
