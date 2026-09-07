@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrlCast;
 use Illuminate\Database\Eloquent\Model;
 
 class BagPurchase extends Model
 {
-    //
+
+    protected $casts = [
+        'receipt' => StorageUrlCast::class,
+    ];
 
     public function bag()
     {
@@ -24,5 +28,4 @@ class BagPurchase extends Model
     {
         return $this->belongsTo(PaymentInfo::class, 'payment_info_id');
     }
-
 }
