@@ -23,11 +23,11 @@ class BagPurchaseController extends BaseController
         $this->updateRequestClass = BagPurchaseUpdateRequest::class;
         $this->resourceClass = BagPurchaseResource::class;
 
-        $this->withRelationships = ['bag', 'user', 'paymentInfo'];
+        $this->withRelationships = ['bag', 'user'];
     }
 
     protected function getIndexRelationships(): array
     {
-        return ['bag', 'user', 'paymentInfo'];
+        return ['bag', 'user'];
     }
 }

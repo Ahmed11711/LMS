@@ -22,10 +22,6 @@ class BagPurchaseResource extends JsonResource
                 'name' => $this->whenLoaded('user', fn() => $this->user->name),
                 'email' => $this->whenLoaded('user', fn() => $this->user->email),
             ],
-            'payment_info' => $this->whenLoaded('paymentInfo', fn() => [
-
-                'title' => $this->paymentInfo->title,
-            ]),
             'payment_info_id' => $this->payment_info_id,
             'receipt' => $this->receipt,
             'amount' => $this->amount,
