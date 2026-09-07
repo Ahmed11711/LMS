@@ -11,7 +11,17 @@ class BagPurchaseResource extends JsonResource
         return [
             'id' => $this->id,
             'bag_id' => $this->bag_id,
+            'bag' => [
+                'id' => $this->whenLoaded('bag', fn() => $this->bag->id),
+                'title' => $this->whenLoaded('bag', fn() => $this->bag->title),
+                'price' => $this->whenLoaded('bag', fn() => $this->bag->price),
+            ],
             'user_id' => $this->user_id,
+            'user' => [
+                'id' => $this->whenLoaded('user', fn() => $this->user->id),
+                'name' => $this->whenLoaded('user', fn() => $this->user->name),
+                'email' => $this->whenLoaded('user', fn() => $this->user->email),
+            ],
             'payment_info_id' => $this->payment_info_id,
             'receipt' => $this->receipt,
             'amount' => $this->amount,
