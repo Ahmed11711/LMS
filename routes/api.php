@@ -1,5 +1,6 @@
 <?php
 
+use \App\Http\Controllers\User\Bags\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\Plan\PlanController;
@@ -26,6 +27,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -68,6 +70,10 @@ Route::prefix('front')->group(function () {
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('pages', [PagesController::class, 'index']);
+    Route::get('bag-purchases', [BagPurchaseController::class, 'index']);
+    Route::get('bag-purchases/{bagPurchase}', [BagPurchaseController::class, 'show']);
+    Route::post('bag-purchases', [BagPurchaseController::class, 'store']);
+
     Route::get('sections', [SectionController::class, 'index']);
     Route::get('landing_pages', [LandingPageController::class, 'index']);
 
