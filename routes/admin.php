@@ -47,6 +47,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CategoryBag\CategoryBagController;
 
 
+
+
+
+
+
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
 
     Route::post('/upgrade-packages', [UserPackageController::class, 'requestUpgrade']);
@@ -107,6 +112,11 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
     ->group(function () {
+        Route::get('me', [MeController::class, 'me'])->name('instructor.me');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('instructor.dashboard');
+
+
+
         Route::get('category_bags', [CategoryBagController::class, 'index']);
 
 
