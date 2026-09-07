@@ -102,6 +102,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('subjects', SubjectController::class)->names('subject');
     Route::apiResource('templates', TemplateController::class)->names('academy.template');
     Route::apiResource('category_bags', CategoryBagController::class);
+    Route::apiResource('bag_purchases', BagPurchaseController::class);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
