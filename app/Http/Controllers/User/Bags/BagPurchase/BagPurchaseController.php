@@ -23,7 +23,7 @@ class BagPurchaseController extends Controller
             ->where('user_id', auth('api')->id())
             ->with('bag')
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->get();
 
         return BagPurchaseResource::collection($purchases);
     }
