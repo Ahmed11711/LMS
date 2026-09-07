@@ -114,7 +114,6 @@ class UserPackageController extends BaseController
                 'active'      => true,
                 'start_date'  => now(),
                 'end_date'    => now()->addDays($durationDays),
-                'approved_by' => Auth::id(),
                 'approved_at' => now(),
             ]);
 
