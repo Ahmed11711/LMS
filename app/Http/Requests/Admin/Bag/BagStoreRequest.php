@@ -20,16 +20,16 @@ class BagStoreRequest extends BaseRequest
             'description' => 'nullable|string',
             'image' => 'nullable|file|image|',
 
-            'category_bag_id' => 'nullable|integer|exists:category_bags,id',
+            'category_bag_id' => 'required|integer|exists:category_bags,id',
 
             // Pricing
-            'type_price' => ['nullable', Rule::in(['free', 'paid'])],
+            'type_price' => ['required', Rule::in(['free', 'paid'])],
             'price' => 'nullable|required_if:type_price,paid|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lte:price',
             'currency' => 'nullable|string|max:10',
 
             // Download policy
-            'download_type' => ['nullable', Rule::in(['unlimited', 'limited'])],
+            'download_type' => ['required', Rule::in(['unlimited', 'limited'])],
             'download_limit' => 'nullable|required_if:download_type,limited|integer|min:1',
             'download_validity_days' => 'nullable|integer|min:1',
 
