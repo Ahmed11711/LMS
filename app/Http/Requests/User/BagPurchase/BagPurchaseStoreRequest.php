@@ -13,7 +13,7 @@ class BagPurchaseStoreRequest extends BaseRequest
         return [
             'bag_id' => 'required|integer|exists:bags,id',
             'payment_info_id' => [
-                'nullable',
+                'required',
                 'integer',
                 'exists:instructor_receiver_accounts,id',
             ],
