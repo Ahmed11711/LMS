@@ -29,6 +29,8 @@ Route::prefix('superAdmin')->group(function () {
 
 
     Route::middleware(SuperAdminMiddleware::class)->group(function () {
+        Route::post('/academy-packages/{userPackageId}/approve', [UserPackageController::class, 'approveUpgrade']);
+
         Route::apiResource('academy-packages', AcademyPacakgaeController::class);
         Route::apiResource('packages', PackageController::class)->names('package');
         Route::apiResource('features', FeaturesController::class)->names('features');
