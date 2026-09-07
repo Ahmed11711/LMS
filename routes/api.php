@@ -70,9 +70,8 @@ Route::prefix('front')->group(function () {
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('pages', [PagesController::class, 'index']);
-    Route::get('bag-purchases', [BagPurchaseController::class, 'index']);
-    Route::get('bag-purchases/{bagPurchase}', [BagPurchaseController::class, 'show']);
-    Route::post('bag-purchases', [BagPurchaseController::class, 'store']);
+
+
 
     Route::get('sections', [SectionController::class, 'index']);
     Route::get('landing_pages', [LandingPageController::class, 'index']);
@@ -88,8 +87,19 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
     Route::get('my-courses', [MyCourseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
     Route::get('my-courses/{id}', [MyCourseController::class, 'show'])->middleware([TenantJwtMiddleware::class . ':student']);
+
+
+
     Route::get('my-courses/landingpage/{slug}', [MyCourseController::class, 'landingpageMyCourse'])->middleware(TenantJwtMiddleware::class . ':student');
 
+
+    // my-bag
+
+
+
+    Route::post('bag-purchases', [BagPurchaseController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('my-bag-purchases', [BagPurchaseController::class, 'index'])->middleware(TenantJwtMiddleware::class . ':student');
+    Route::get('my-bag-purchases/{bagPurchase}', [BagPurchaseController::class, 'show']);
     Route::prefix('auth')->group(function () {
         Route::post('login', [LoginController::class, 'login']);
         Route::post('register', [LoginController::class, 'register']);
