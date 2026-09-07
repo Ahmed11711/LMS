@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bag extends Model
 {
+    use HasFactory;
 
     protected $casts = [
         'image' => StorageUrlCast::class,
+        'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
+        'download_limit' => 'integer',
+        'download_validity_days' => 'integer',
+        'count_view' => 'integer',
     ];
-    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -20,13 +25,16 @@ class Bag extends Model
         'short_description',
         'description',
         'image',
-        'category_name',
+        'category_bag_id',
         'type_price',
         'price',
         'discount_price',
-        'count_download',
+        'currency',
+        'download_type',
+        'download_limit',
+        'download_validity_days',
         'count_view',
-        'is_active',
+        'status',
     ];
 
     public function items()
@@ -48,6 +56,7 @@ class Bag extends Model
     {
         return $this->hasMany(BagGallery::class);
     }
+
     public function category()
     {
         return $this->belongsTo(CategoryBag::class, 'category_bag_id');
