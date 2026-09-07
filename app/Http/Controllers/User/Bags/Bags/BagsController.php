@@ -23,7 +23,7 @@ class BagsController extends BaseController
 
         $this->resourceClass = BagResource::class;
 
-        $this->isUserBound = true;
+
         $this->hasGallery = true;
 
         $this->withRelationships = ['items', 'userPaymentInfos', 'gallery', 'category'];
