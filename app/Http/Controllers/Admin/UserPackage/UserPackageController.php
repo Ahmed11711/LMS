@@ -144,7 +144,7 @@ class UserPackageController extends BaseController
                     ->update(['active' => false, 'status' => 'expired']);
 
                 DB::connection('tenant')->table('user_packages')->insert([
-                    // 'user_id'      => $pendingRequest->user_id,
+                    'user_id'      => $pendingRequest->user_id,
                     'package_id'   => $pendingRequest->package_id,
                     'package_name' => $pendingRequest->package_name,
                     'start_date'   => now(),
