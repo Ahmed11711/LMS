@@ -11,6 +11,7 @@ use App\Repositories\UserPackage\UserPackageRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserPackageController extends BaseController
 {
@@ -59,11 +60,6 @@ class UserPackageController extends BaseController
         $user = Auth::user();
         $userId = Auth::user()->id;
 
-        // if ($repository->hasPendingRequest($userId)) {
-        //     dd($userId);
-        //     return response()->json(['message' => 'لديك طلب ترقية معلق بالفعل، برجاء انتظار الرد'], 422);
-        // }
-
         $newPackage = DB::connection('LMS_CENTER')->table('packages')
             ->where('id', $request->input('package_id'))
             ->first();
@@ -74,15 +70,68 @@ class UserPackageController extends BaseController
 
         $path = $request->file('payment_proof')->store('upgrade-requests', 'public');
 
-        $pendingRequest = $repository->createPendingUpgrade([
-            'user_id'       => $user->academy_id,
+        // البيانات المشتركة بين الاتنين
+        $baseData = [
             'package_id'    => $newPackage->id,
             'package_name'  => $newPackage->titile,
             'status'        => 'pending',
             'active'        => false,
             'price'         => $newPackage->price ?? 0,
             // 'payment_proof' => $path,
+        ];
+
+        // 1) بيانات الـ Tenant: user_id = اليوزر نفسه
+        $tenantData = array_merge($baseData, [
+            'user_id' => $user->id,
         ]);
+
+        // 2) بيانات الـ Central: user_id = academy_id
+        $centralData = array_merge($baseData, [
+            'user_id' => $user->academy_id,
+        ]);
+
+        $pendingRequest = null;
+        $centralInserted = false;
+
+        try {
+            // إلغاء أي طلبات pending سابقة في الاتنين قبل إنشاء طلب جديد
+            $repository->cancelPendingRequests($user->id, $user->academy_id);
+
+            // تخزين في قاعدة بيانات الـ Tenant الحالية
+            $pendingRequest = $repository->createPendingUpgrade($tenantData);
+
+            // تخزين في قاعدة البيانات المركزية (Central)
+            DB::connection('LMS_CENTER')->table('user_packages')->insert(
+                array_merge($centralData, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ])
+            );
+            $centralInserted = true;
+        } catch (\Throwable $e) {
+
+            if ($pendingRequest && !$centralInserted) {
+                try {
+                    $repository->delete($pendingRequest->id ?? $pendingRequest['id']);
+                } catch (\Throwable $rollbackException) {
+                    Log::error('Failed to rollback tenant pending upgrade after central insert failure', [
+                        'user_id' => $userId,
+                        'message' => $rollbackException->getMessage(),
+                    ]);
+                }
+            }
+
+            Log::error('Failed to create upgrade request', [
+                'user_id' => $userId,
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
+                'file'    => $e->getFile(),
+            ]);
+
+            return response()->json([
+                'message' => 'حدث خطأ أثناء إرسال طلب الترقية، برجاء المحاولة مرة أخرى',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'تم إرسال طلب الترقية، بانتظار موافقة الأدمن',

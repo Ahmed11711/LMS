@@ -12,4 +12,5 @@ interface UserPackageRepositoryInterface extends BaseRepositoryInterface
     public function createPendingUpgrade(array $data);
     public function findPendingRequest($id);
     public function hasPendingRequest($userId);
+    public function cancelPendingRequests($tenantUserId, $centralUserId);
 }

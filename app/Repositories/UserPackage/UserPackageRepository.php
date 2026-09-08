@@ -2,9 +2,10 @@
 
 namespace App\Repositories\UserPackage;
 
-use App\Repositories\UserPackage\UserPackageRepositoryInterface;
-use App\Repositories\BaseRepository\BaseRepository;
 use App\Models\Central\UserPackage;
+use App\Repositories\BaseRepository\BaseRepository;
+use App\Repositories\UserPackage\UserPackageRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class UserPackageRepository extends BaseRepository implements UserPackageRepositoryInterface
 {
@@ -17,7 +18,23 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
     {
         return $this->model->where('user_id', $userId)->where('active', 1)->first();
     }
+    public function cancelPendingRequests($tenantUserId, $centralUserId): void
+    {
+        UserPackage::where('user_id', $tenantUserId)
+            ->where('status', 'pending')
+            ->update([
+                'status'     => 'cancelled',
+                'updated_at' => now(),
+            ]);
 
+        DB::connection('LMS_CENTER')->table('user_packages')
+            ->where('user_id', $centralUserId)
+            ->where('status', 'pending')
+            ->update([
+                'status'     => 'cancelled',
+                'updated_at' => now(),
+            ]);
+    }
     public function expireActivePackage($userId)
     {
         return $this->model
