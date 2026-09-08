@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Admin\Section\SectionController;
+use App\Http\Controllers\Admin\Setting\SettingController;
 use App\Http\Controllers\Auth\ForgetRestPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
@@ -29,6 +30,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -129,6 +131,7 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
             // Progress
             Route::post('progress', [LessonProgressController::class, 'update']);
+            Route::get('my-academy', [SettingController::class, 'index']);
         });
 });
 
