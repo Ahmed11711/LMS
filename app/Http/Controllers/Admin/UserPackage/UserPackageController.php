@@ -56,7 +56,8 @@ class UserPackageController extends BaseController
      */
     public function requestUpgrade(UpgradeRequestStoreRequest $request, UserPackageRepositoryInterface $repository)
     {
-        return   $userId = Auth::user();
+        $user = Auth::user();
+        $userId = Auth::user()->id;
 
         // if ($repository->hasPendingRequest($userId)) {
         //     dd($userId);
@@ -74,7 +75,7 @@ class UserPackageController extends BaseController
         $path = $request->file('payment_proof')->store('upgrade-requests', 'public');
 
         $pendingRequest = $repository->createPendingUpgrade([
-            'user_id'       => $userId,
+            'user_id'       => $user->academy_id,
             'package_id'    => $newPackage->id,
             'package_name'  => $newPackage->titile,
             'status'        => 'pending',
