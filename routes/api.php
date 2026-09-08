@@ -131,8 +131,8 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
             // Progress
             Route::post('progress', [LessonProgressController::class, 'update']);
-            Route::get('my-academy', [SettingController::class, 'index']);
         });
+    Route::get('my-academy', [SettingController::class, 'index']);
 });
 
 
