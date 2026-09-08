@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPackage extends TenantModel
 {
-    //
+    public $filterable = ['status'];
+
 
     public function user()
     {
