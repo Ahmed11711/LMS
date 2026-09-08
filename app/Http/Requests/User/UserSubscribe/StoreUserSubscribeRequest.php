@@ -22,7 +22,6 @@ class StoreUserSubscribeRequest extends BaseRequest
             'receipt' => 'required|image',
         ];
     }
-
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
