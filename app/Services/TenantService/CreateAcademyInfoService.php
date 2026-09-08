@@ -90,11 +90,11 @@ class CreateAcademyInfoService
         return $this->userPackageRepository->create([
             'user_id'        => $user->id,
             'package_id'     => $freePackage->id,
-            'package_name'   => $freePackage->title,
+            'package_name'   => $freePackage->titile,
             'active'         => true,
             'status'         => 'active',
             'start_date'     => now(),
-            'end_date' => now()->addDays((float)($freePackage->duration_months ?? 1) * 30),
+            'end_date' => now()->addDays(7),
             'price'          => 0,
             'transaction_id' => 'free-package-' . $user->id . '-' . time(),
         ]);
