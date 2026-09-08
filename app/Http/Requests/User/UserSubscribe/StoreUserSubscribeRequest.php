@@ -29,7 +29,7 @@ class StoreUserSubscribeRequest extends BaseRequest
             $course = Course::find($this->course_id);
             $account = InstructorReceiverAccount::find($this->receiver_account_id);
 
-            if ($course && $account && $account->user_id !== $course->user_id) {
+            if ($course && $account && (int) $account->user_id !== (int) $course->user_id) {
                 $validator->errors()->add(
                     'receiver_account_id',
                     'This receiver account does not belong to the course instructor.'
