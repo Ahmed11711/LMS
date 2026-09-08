@@ -6,7 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
 use App\Models\Central\UserPackage;
 use App\Traits\ApiResponseTrait;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Schema;
 
 class AcademyPacakgaeController extends Controller
@@ -19,9 +24,17 @@ class AcademyPacakgaeController extends Controller
 
         $hasReceipt = Schema::hasColumn('user_packages', 'receipt');
 
-        $packages = UserPackage::query()
-            ->with('user:id,name,email')
-            ->latest()
+        $query = UserPackage::query()->with('user:id,name,email');
+
+        $packages = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                Search::class,
+                ColumnFilter::class,
+                SelectFields::class,
+                SortBy::class,
+            ])
+            ->thenReturn()
             ->paginate($perPage);
 
         $packages->getCollection()->transform(function ($package) use ($hasReceipt) {
