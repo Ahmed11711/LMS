@@ -200,7 +200,24 @@ class TenantService
         // 2. Use Passed Data directly
         $userPackage = $data['passed_package'] ?? null;
         $features    = $data['passed_features'] ?? collect();
+        // settings
+        // ✅ Seed Site Settings
+        $settings = [
+            'site_name'     => $data['user_name'] ?? $data['username'] ?? null,
+            'site_email'    => $data['email'] ?? ($data['user_email'] ?? null),
+            'site_phone'    => $data['phone'] ?? null,
+            'academy_phone' => $data['phone_academy'] ?? null,
+            'academy_type'  => $data['type'] ?? null,
+        ];
 
+        foreach ($settings as $key => $value) {
+            DB::connection('tenant')->table('settings')->insert([
+                'key'        => $key,
+                'value'      => $value,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
         if ($userPackage) {
             // A. Insert User Package
             DB::connection('tenant')->table('user_packages')->insert([
