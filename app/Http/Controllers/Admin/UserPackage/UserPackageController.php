@@ -56,7 +56,7 @@ class UserPackageController extends BaseController
      */
     public function requestUpgrade(UpgradeRequestStoreRequest $request, UserPackageRepositoryInterface $repository)
     {
-        $userId = Auth::id();
+        return   $userId = Auth::user();
 
         // if ($repository->hasPendingRequest($userId)) {
         //     dd($userId);
