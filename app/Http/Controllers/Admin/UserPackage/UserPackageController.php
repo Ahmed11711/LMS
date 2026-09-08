@@ -58,10 +58,10 @@ class UserPackageController extends BaseController
     {
         $userId = Auth::id();
 
-        if ($repository->hasPendingRequest($userId)) {
-            dd($userId);
-            return response()->json(['message' => 'لديك طلب ترقية معلق بالفعل، برجاء انتظار الرد'], 422);
-        }
+        // if ($repository->hasPendingRequest($userId)) {
+        //     dd($userId);
+        //     return response()->json(['message' => 'لديك طلب ترقية معلق بالفعل، برجاء انتظار الرد'], 422);
+        // }
 
         $newPackage = DB::connection('LMS_CENTER')->table('packages')
             ->where('id', $request->input('package_id'))
@@ -76,7 +76,7 @@ class UserPackageController extends BaseController
         $pendingRequest = $repository->createPendingUpgrade([
             'user_id'       => $userId,
             'package_id'    => $newPackage->id,
-            'package_name'  => $newPackage->titile, // ✅ الاسم الصح
+            'package_name'  => $newPackage->titile,
             'status'        => 'pending',
             'active'        => false,
             'price'         => $newPackage->price ?? 0,

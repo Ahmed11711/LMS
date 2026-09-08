@@ -57,6 +57,10 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     Route::post('/upgrade-packages', [UserPackageController::class, 'requestUpgrade']);
 
+
+
+
+
     Route::apiResource('pages', PagesController::class)->names('pages');
     Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update', 'get']);
     Route::get('sections', [SectionController::class, 'byPage']);
