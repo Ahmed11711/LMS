@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPackage extends Model
 {
-    //
+
+    public $filterable = ['status'];
     protected static function boot()
     {
         parent::boot();

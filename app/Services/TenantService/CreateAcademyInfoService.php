@@ -87,6 +87,7 @@ class CreateAcademyInfoService
             throw new \Exception('No free package available in the system.');
         }
 
+
         return $this->userPackageRepository->create([
             'user_id'        => $user->id,
             'package_id'     => $freePackage->id,
@@ -94,7 +95,7 @@ class CreateAcademyInfoService
             'active'         => true,
             'status'         => 'active',
             'start_date'     => now(),
-            'end_date' => now()->addDays(7),
+            'end_date' =>    now()->addDays(7),
             'price'          => 0,
             'transaction_id' => 'free-package-' . $user->id . '-' . time(),
         ]);
