@@ -14,7 +14,7 @@ class StoreUserSubscribeRequest extends BaseRequest
         return [
             'course_id' => ['required', 'exists:courses,id'],
             'receiver_account_id' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('instructor_receiver_accounts', 'id')
                     ->where('is_active', true),
@@ -22,18 +22,18 @@ class StoreUserSubscribeRequest extends BaseRequest
             'receipt' => 'required|image',
         ];
     }
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($validator) {
-            $course = Course::find($this->course_id);
-            $account = InstructorReceiverAccount::find($this->receiver_account_id);
+    // public function withValidator($validator): void
+    // {
+    //     $validator->after(function ($validator) {
+    //         $course = Course::find($this->course_id);
+    //         $account = InstructorReceiverAccount::find($this->receiver_account_id);
 
-            if ($course && $account && (int) $account->user_id !== (int) $course->user_id) {
-                $validator->errors()->add(
-                    'receiver_account_id',
-                    'This receiver account does not belong to the course instructor.'
-                );
-            }
-        });
-    }
+    //         if ($course && $account && (int) $account->user_id !== (int) $course->user_id) {
+    //             $validator->errors()->add(
+    //                 'receiver_account_id',
+    //                 'This receiver account does not belong to the course instructor.'
+    //             );
+    //         }
+    //     });
+    // }
 }
