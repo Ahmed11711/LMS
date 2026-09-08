@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Course;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
+use Illuminate\Validation\Rule;
 
 abstract class BaseCourseStoreRequest extends BaseRequest
 {
@@ -79,8 +80,11 @@ abstract class BaseCourseStoreRequest extends BaseRequest
             'infos.*.order'   => 'nullable|integer|min:1',
 
             'receiver_accounts'   => 'nullable|array',
-            'receiver_accounts.*' => 'integer|exists:instructor_receiver_accounts,id',
-
+            'receiver_accounts.*' => [
+                'integer',
+                Rule::exists('instructor_receiver_accounts', 'id')
+                    ->where('user_id', auth()->id()),
+            ],
             'template_id' => 'nullable|exists:templates,id',
 
             // لو draft، مفيش داعي إن الـ access duration يبقى اجباري
