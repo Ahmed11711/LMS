@@ -5,9 +5,10 @@ namespace App\Http\Controllers\User\UserSubscribe;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserSubscribe\StoreUserSubscribeRequest;
 use App\Http\Resources\User\UserSubscribe\UserSubscribeResource;
-use App\Traits\ApiResponseTrait;
 use App\Services\Payment\UserSubscribeService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserSubscribeController extends Controller
 {
@@ -28,6 +29,7 @@ class UserSubscribeController extends Controller
   }
   public function store(StoreUserSubscribeRequest $request)
   {
+    return DB::table('instructor_receiver_accounts')->where('id', 1)->first();
     $user = $request->get('tenant_user');
     $tenant = app('tenant');
 
