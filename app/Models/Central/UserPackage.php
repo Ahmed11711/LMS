@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class UserPackage extends Model
 {
 
-    public $filterable = ['status'];
+    public $filterable = ['status', 'package_name', 'user_id', 'package_id'];
+    public $sortable = ['id', 'user_id', 'created_at', 'updated_at', 'package_id', 'package_name', 'status'];
+
     protected static function boot()
     {
         parent::boot();

@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPackage extends TenantModel
 {
-    public $filterable = ['status'];
+    public $filterable = ['status', 'package_name', 'user_id', 'package_id'];
+    public $sortable = ['id', 'user_id', 'created_at', 'updated_at', 'package_id', 'package_name', 'status'];
 
 
     public function user()
