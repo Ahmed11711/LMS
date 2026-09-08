@@ -44,6 +44,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Setting\SettingController;
 use App\Http\Controllers\Admin\CategoryBag\CategoryBagController;
 
 
@@ -108,6 +109,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('templates', TemplateController::class)->names('academy.template');
     Route::apiResource('category_bags', CategoryBagController::class);
     Route::apiResource('bag_purchases', BagPurchaseController::class);
+
+    Route::apiResource('settings', SettingController::class)->names('setting');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
@@ -151,3 +154,5 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
 
         Route::apiResource('templates', TemplateController::class)->names('instructor.template');
     });
+
+Route::prefix('v1')->group(function () {});

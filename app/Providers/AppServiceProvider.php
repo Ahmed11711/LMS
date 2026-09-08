@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Setting\SettingRepositoryInterface;
+use App\Repositories\Setting\SettingRepository;
+
 use App\Repositories\CategoryBag\CategoryBagRepositoryInterface;
 use App\Repositories\CategoryBag\CategoryBagRepository;
 
@@ -159,6 +162,7 @@ $this->app->bind(
         $this->app->bind(SubjectRepositoryInterface::class, SubjectRepository::class);
         $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
         $this->app->bind(CategoryBagRepositoryInterface::class, CategoryBagRepository::class);
+        $this->app->bind(SettingRepositoryInterface::class, SettingRepository::class);
 }
 
     /**
