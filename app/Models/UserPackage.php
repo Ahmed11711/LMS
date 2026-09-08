@@ -13,6 +13,7 @@ class UserPackage extends TenantModel
     public $sortable = ['id', 'user_id', 'created_at', 'updated_at', 'package_id', 'package_name', 'status'];
 
 
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
