@@ -92,6 +92,7 @@ class CreateAcademyInfoService
             'package_id'     => $freePackage->id,
             'package_name'   => $freePackage->title,
             'active'         => true,
+            'status'         => 'active',
             'start_date'     => now(),
             'end_date' => now()->addDays((float)($freePackage->duration_months ?? 1) * 30),
             'price'          => 0,

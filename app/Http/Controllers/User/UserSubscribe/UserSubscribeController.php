@@ -29,7 +29,6 @@ class UserSubscribeController extends Controller
   }
   public function store(StoreUserSubscribeRequest $request)
   {
-    // return DB::table('course_receiver_accounts')->where('id', $request->validated('course_id'))->first();
     $user = $request->get('tenant_user');
     $tenant = app('tenant');
 
