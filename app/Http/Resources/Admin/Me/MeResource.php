@@ -32,6 +32,7 @@ class MeResource extends JsonResource
                 : false,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'academy_id' => $this->academy_id ?? null,
 
 
 

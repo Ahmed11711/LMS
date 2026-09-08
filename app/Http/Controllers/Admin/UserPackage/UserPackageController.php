@@ -59,6 +59,7 @@ class UserPackageController extends BaseController
         $userId = Auth::id();
 
         if ($repository->hasPendingRequest($userId)) {
+            dd($userId);
             return response()->json(['message' => 'لديك طلب ترقية معلق بالفعل، برجاء انتظار الرد'], 422);
         }
 

@@ -193,6 +193,7 @@ class TenantService
             'username'      => $data['user_name'] ?? $data['username'],
             'role'          => 'admin',
             'type'          => $data['type'] ?? null,
+            'academy_id'     => $data['user_id'] ?? null,
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
