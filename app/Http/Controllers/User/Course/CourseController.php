@@ -32,7 +32,7 @@ class CourseController extends BaseController
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = $this->repository->query()->with($this->getIndexRelationships());
+            $query = $this->repository->query()->with($this->getIndexRelationships())->where('status', 'published');
 
             $data = app(Pipeline::class)
                 ->send($query)
