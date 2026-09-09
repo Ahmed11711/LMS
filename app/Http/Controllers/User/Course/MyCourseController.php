@@ -25,13 +25,36 @@ class MyCourseController extends Controller
         $user = $request->get('tenant_user');
 
         $fromSubscribe = Course::whereHas(
-                'subscribes',
-                fn($q) =>
+            'subscribes',
+            fn($q) =>
+            $q->where('user_id', $user->id)
+                ->whereIn('status', ['active', 'pending'])
+        )
+            ->with([
+                'subscribes' => fn($q) =>
                 $q->where('user_id', $user->id)
                     ->whereIn('status', ['active', 'pending'])
-            )->get();
+            ])
+            ->get()
+            ->map(function ($course) {
+                // بما إن الكورس ممكن يكون ليه أكتر من subscribe لنفس اليوزر (نظريًا)
+                // بناخد أول واحد، أو ممكن تحدد أولوية active الأول
+                $subscribe = $course->subscribes->sortBy(function ($s) {
+                    return $s->status === 'active' ? 0 : 1;
+                })->first();
 
-        $fromPlan = $this->planAccessService->getAccessibleCourses($user);
+                $course->subscription_status = $subscribe?->status; // active أو pending
+                unset($course->subscribes); // مش لازمة تتبعت للفرونت
+
+                return $course;
+            });
+
+        $fromPlan = $this->planAccessService->getAccessibleCourses($user)
+            ->map(function ($course) {
+                // الكورسات الجايه من الـ plan مالهاش subscribe status حقيقي
+                $course->subscription_status = 'plan'; // أو null لو حابب تفرقهم بشكل تاني
+                return $course;
+            });
 
         $allCourses = $fromSubscribe
             ->merge($fromPlan)
