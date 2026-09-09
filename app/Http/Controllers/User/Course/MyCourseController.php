@@ -24,12 +24,11 @@ class MyCourseController extends Controller
     {
         $user = $request->get('tenant_user');
 
-        $fromSubscribe = Course::where('status', 'published')
-            ->whereHas(
+        $fromSubscribe = Course::whereHas(
                 'subscribes',
                 fn($q) =>
                 $q->where('user_id', $user->id)
-                    ->where('status', 'active')
+                    ->whereIn('status', ['active', 'pending'])
             )->get();
 
         $fromPlan = $this->planAccessService->getAccessibleCourses($user);
