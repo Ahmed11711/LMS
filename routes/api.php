@@ -2,11 +2,14 @@
 
 use \App\Http\Controllers\User\Bags\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\Bag\BagController;
+use App\Http\Controllers\Admin\Grade\GradeController;
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Admin\Section\SectionController;
 use App\Http\Controllers\Admin\Setting\SettingController;
+use App\Http\Controllers\Admin\Subject\SubjectController;
+use App\Http\Controllers\Admin\Term\TermController;
 use App\Http\Controllers\Auth\ForgetRestPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
@@ -30,6 +33,9 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
+
+
 
 
 
