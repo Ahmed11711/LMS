@@ -24,7 +24,9 @@ trait ApiResponseTrait
                 'message' => $message,
                 'data'    => $data,
             ], fn($v) => $v !== null),
-            $status
+            $status,
+            [],
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
     }
 
@@ -42,7 +44,9 @@ trait ApiResponseTrait
                 'message' => $message,
                 'data'    => $data,
             ], fn($v) => $v !== null),
-            $status
+            $status,
+            [],
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
     }
 
@@ -74,6 +78,7 @@ trait ApiResponseTrait
             default                            => 400,
         };
     }
+
     public function handleException(\Throwable $e): JsonResponse
     {
         if ($e instanceof ValidationException) {
@@ -99,12 +104,12 @@ trait ApiResponseTrait
             'success' => true,
             'status'  => $status ?? 200,
             'message' => $message,
-        ], $status ?? 200);
+        ], $status ?? 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     public function successResponsePaginate($data, string $message = '', int $code = 200): JsonResponse
     {
-        $ss = response()->json([
+        return response()->json([
             'status' => true,
             'message' => $message,
             'data' => $data->items(),
@@ -114,26 +119,6 @@ trait ApiResponseTrait
                 'per_page' => $data->perPage(),
                 'total' => $data->total(),
             ],
-        ], $code);
-
-
-        return $ss;
-
-
-        if (method_exists($data, 'resource') && $data->resource instanceof LengthAwarePaginator) {
-            $paginator = $data->resource;
-
-            return response()->json([
-                'status' => true,
-                'message' => $message,
-                'data' => $data->collection,
-                'meta' => [
-                    'current_page' => $paginator->currentPage(),
-                    'last_page' => $paginator->lastPage(),
-                    'per_page' => $paginator->perPage(),
-                    'total' => $paginator->total(),
-                ],
-            ], $code);
-        }
+        ], $code, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

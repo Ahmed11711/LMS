@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Response;
-
 use App\Repositories\Setting\SettingRepositoryInterface;
 use App\Repositories\Setting\SettingRepository;
 
@@ -181,14 +179,6 @@ class AppServiceProvider extends ServiceProvider
         Scramble::routes(function (Route $route) {
             return str_starts_with($route->uri(), 'api/')
                 || str_starts_with($route->uri(), 'admin/');
-        });
-        Response::macro('json', function ($data = [], $status = 200, array $headers = [], $options = 0) {
-            return new \Illuminate\Http\JsonResponse(
-                $data,
-                $status,
-                $headers,
-                $options | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-            );
         });
     }
 }
