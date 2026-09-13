@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Response;
+
 use App\Repositories\Setting\SettingRepositoryInterface;
 use App\Repositories\Setting\SettingRepository;
 
@@ -123,8 +125,9 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {
-$this->app->bind(
+    public function register(): void
+    {
+        $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -163,7 +166,7 @@ $this->app->bind(
         $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
         $this->app->bind(CategoryBagRepositoryInterface::class, CategoryBagRepository::class);
         $this->app->bind(SettingRepositoryInterface::class, SettingRepository::class);
-}
+    }
 
     /**
      * Bootstrap any application services.
@@ -178,6 +181,14 @@ $this->app->bind(
         Scramble::routes(function (Route $route) {
             return str_starts_with($route->uri(), 'api/')
                 || str_starts_with($route->uri(), 'admin/');
+        });
+        Response::macro('json', function ($data = [], $status = 200, array $headers = [], $options = 0) {
+            return new \Illuminate\Http\JsonResponse(
+                $data,
+                $status,
+                $headers,
+                $options | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            );
         });
     }
 }
