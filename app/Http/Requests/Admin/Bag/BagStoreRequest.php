@@ -18,7 +18,7 @@ class BagStoreRequest extends BaseRequest
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|file|image|',
+            'image' => 'nullable|file|',
 
             'category_bag_id' => 'required|integer|exists:category_bags,id',
 

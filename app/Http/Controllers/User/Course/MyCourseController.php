@@ -37,22 +37,20 @@ class MyCourseController extends Controller
             ])
             ->get()
             ->map(function ($course) {
-                // بما إن الكورس ممكن يكون ليه أكتر من subscribe لنفس اليوزر (نظريًا)
-                // بناخد أول واحد، أو ممكن تحدد أولوية active الأول
+
                 $subscribe = $course->subscribes->sortBy(function ($s) {
                     return $s->status === 'active' ? 0 : 1;
                 })->first();
 
                 $course->subscription_status = $subscribe?->status; // active أو pending
-                unset($course->subscribes); // مش لازمة تتبعت للفرونت
+                unset($course->subscribes);
 
                 return $course;
             });
 
         $fromPlan = $this->planAccessService->getAccessibleCourses($user)
             ->map(function ($course) {
-                // الكورسات الجايه من الـ plan مالهاش subscribe status حقيقي
-                $course->subscription_status = 'plan'; // أو null لو حابب تفرقهم بشكل تاني
+                $course->subscription_status = 'plan';
                 return $course;
             });
 
