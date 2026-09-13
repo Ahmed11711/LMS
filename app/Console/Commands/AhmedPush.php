@@ -8,54 +8,54 @@ use Symfony\Component\Process\Process;
 class AhmedPush extends Command
 {
     /**
-     * الاستخدام:
-     *   php artisan ahmed:push "رسالة الكوميت"
+     * Usage:
+     *   php artisan ahmed:push "commit message"
      */
-    protected $signature = 'ahmed:push {message : رسالة الكوميت}';
+    protected $signature = 'ahmed:push {message : The commit message}';
 
-    protected $description = 'يعمل git fetch + status + add + commit + push في أمر واحد';
+    protected $description = 'Runs git fetch + status + add + commit + push in one command';
 
     public function handle(): int
     {
         $message = $this->argument('message');
         $basePath = base_path();
 
-        // 1) جيب آخر تحديثات من الريموت من غير ما يغيّر حاجة
-        $this->info('== بنجيب آخر حالة من GitHub ==');
+        // 1) Fetch the latest state from the remote without changing anything
+        $this->info('== Fetching latest state from GitHub ==');
         $this->runProcess(['git', 'fetch', 'origin'], $basePath);
 
-        // 2) اعرض الحالة الحالية (فيه حاجة متأخرة/متقدمة عن origin ولا لأ)
+        // 2) Show current status (ahead/behind origin, etc.)
         $this->info('');
         $this->info('== git status ==');
-        $status = $this->runProcess(['git', 'status'], $basePath, true);
+        $this->runProcess(['git', 'status'], $basePath);
 
-        // لو مفيش أي تغييرات، وقف من غير ما تعمل كوميت فاضي
+        // Stop if there are no changes to commit
         $clean = $this->runProcess(['git', 'status', '--porcelain'], $basePath, false, true);
         if (trim($clean) === '') {
-            $this->warn('مفيش أي تعديلات لعمل كوميت ليها.');
+            $this->warn('No changes to commit.');
             return self::SUCCESS;
         }
 
         // 3) add + commit + push
         $this->info('');
-        $this->info('== بنعمل add + commit + push ==');
+        $this->info('== Running add + commit + push ==');
         $this->runProcess(['git', 'add', '.'], $basePath);
         $this->runProcess(['git', 'commit', '-m', $message], $basePath);
         $this->runProcess(['git', 'push'], $basePath);
 
         $this->info('');
-        $this->info('تم بنجاح.');
+        $this->info('Done.');
 
         return self::SUCCESS;
     }
 
     /**
-     * ينفذ أمر شل ويطبع النتيجة على الشاشة.
+     * Runs a shell command and prints its output.
      *
      * @param array<int, string> $command
      * @param string $cwd
-     * @param bool $silent لو true منطبعش النتيجة على الشاشة (لسه بترجع كـ string)
-     * @param bool $quiet لو true منطبعش الأمر نفسه على الشاشة
+     * @param bool $silent If true, output is not printed (still returned as a string)
+     * @param bool $quiet If true, suppresses both output and error printing
      */
     protected function runProcess(array $command, string $cwd, bool $silent = false, bool $quiet = false): string
     {
@@ -70,7 +70,7 @@ class AhmedPush extends Command
         }
 
         if (! $process->isSuccessful() && ! $quiet) {
-            $this->error("فشل الأمر: " . implode(' ', $command));
+            $this->error('Command failed: ' . implode(' ', $command));
         }
 
         return $output;
