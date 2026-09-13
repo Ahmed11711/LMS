@@ -41,6 +41,7 @@ class BagPurchaseController extends Controller
     {
         $userId = auth('api')->id();
         $bag = Bag::findOrFail($request->input('bag_id'));
+        $isFree = $bag->type_price === 'free';
 
         // منع الاشتراك المتكرر لو عنده طلب pending أو approved بالفعل
         $alreadyPurchased = BagPurchase::where('bag_id', $bag->id)
@@ -56,25 +57,32 @@ class BagPurchaseController extends Controller
         }
 
         try {
-            $file = $request->file('receipt');
+            $path = null;
 
-            $originalName = preg_replace('/\s+/', '_', trim($file->getClientOriginalName()));
-            $filename = time() . '_' . $userId . '_' . $originalName;
+            // لو الحقيبة مدفوعة بس، نرفع الإيصال
+            if (!$isFree) {
+                $file = $request->file('receipt');
+                $originalName = preg_replace('/\s+/', '_', trim($file->getClientOriginalName()));
+                $filename = time() . '_' . $userId . '_' . $originalName;
+                $path = $file->storeAs('uploads/BagPurchase/receipts', $filename, $this->uploadDisk);
+            }
 
-            $path = $file->storeAs('uploads/BagPurchase/receipts', $filename, $this->uploadDisk);
-
-            $purchase = DB::transaction(function () use ($bag, $userId, $request, $path) {
+            $purchase = DB::transaction(function () use ($bag, $userId, $request, $path, $isFree) {
                 return BagPurchase::create([
                     'bag_id' => $bag->id,
                     'user_id' => $userId,
-                    'payment_info_id' => $request->input('payment_info_id'),
-                    'receipt' => '/storage/' . $path,
-                    'amount' => $bag->discount_price ?? $bag->price,
-                    'status' => 'pending',
+                    'payment_info_id' => $isFree ? null : $request->input('payment_info_id'),
+                    'receipt' => $path ? '/storage/' . $path : null,
+                    'amount' => $isFree ? 0 : ($bag->discount_price ?? $bag->price),
+                    'status' => $isFree ? 'approved' : 'pending',
                 ]);
             });
 
-            return $this->successResponse(new BagPurchaseResource($purchase), 'تم إرسال طلب الاشتراك بنجاح، في انتظار المراجعة.');
+            $message = $isFree
+                ? 'تم تفعيل المنتج المجاني بنجاح.'
+                : 'تم إرسال طلب الاشتراك بنجاح، في انتظار المراجعة.';
+
+            return $this->successResponse(new BagPurchaseResource($purchase), $message);
         } catch (\Throwable $e) {
             Log::error('Bag purchase failed: ' . $e->getMessage());
 
