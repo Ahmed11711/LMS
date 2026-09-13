@@ -4,36 +4,35 @@ namespace App\Http\Requests\User\UserSubscribe;
 
 use App\Http\Requests\BaseRequest\BaseRequest;
 use App\Models\Course;
-use App\Models\InstructorReceiverAccount;
 use Illuminate\Validation\Rule;
 
 class StoreUserSubscribeRequest extends BaseRequest
 {
     public function rules(): array
     {
+        $course = Course::find($this->input('course_id'));
+        $isFree = $course && $course->price_type === 'free';
+
         return [
             'course_id' => ['required', 'exists:courses,id'],
             'receiver_account_id' => [
-                'nullable',
+                $isFree ? 'nullable' : 'required',
                 'integer',
                 Rule::exists('instructor_receiver_accounts', 'id')
                     ->where('is_active', true),
             ],
-            'receipt' => 'required|image',
+            'receipt' => [
+                $isFree ? 'nullable' : 'required',
+                'image',
+            ],
         ];
     }
-    // public function withValidator($validator): void
-    // {
-    //     $validator->after(function ($validator) {
-    //         $course = Course::find($this->course_id);
-    //         $account = InstructorReceiverAccount::find($this->receiver_account_id);
 
-    //         if ($course && $account && (int) $account->user_id !== (int) $course->user_id) {
-    //             $validator->errors()->add(
-    //                 'receiver_account_id',
-    //                 'This receiver account does not belong to the course instructor.'
-    //             );
-    //         }
-    //     });
-    // }
+    public function messages(): array
+    {
+        return [
+            'receipt.required' => 'لازم ترفع صورة الإيصال.',
+            'receiver_account_id.required' => 'لازم تختار وسيلة الدفع.',
+        ];
+    }
 }

@@ -54,7 +54,9 @@ class UserSubscribeService
         if (!$payment) {
             return [
                 'success' => true,
-                'message' => 'Your subscription is being processed and will be activated shortly.',
+                'message' => $status === 'active'
+                    ? 'تم تفعيل اشتراكك في الكورس بنجاح.'
+                    : 'Your subscription is being processed and will be activated shortly.',
             ];
         }
 
@@ -65,9 +67,8 @@ class UserSubscribeService
             tenantDomain: $tenantDomain,
         );
 
-        return $result; // كانت ناقصة قبل كده
+        return $result;
     }
-
     protected function createPaymentUrl($course, string $customerContact, string $transactionReference, ?string $tenantDomain): array
     {
         $paymentUrl = $this->kashierService->createSession(
