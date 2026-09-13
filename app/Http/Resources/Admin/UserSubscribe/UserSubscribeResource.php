@@ -14,6 +14,7 @@ class UserSubscribeResource extends JsonResource
             'course_id' => $this->course_id,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at ?? null,
+            'price' => $this->price  ?? null,
             'receipt' => $this->receipt
                 ? asset('storage/' . ltrim(
                     preg_replace('#^https?://[^/]+/(storage/)?#', '', $this->receipt),
