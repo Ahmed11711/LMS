@@ -34,20 +34,20 @@ class SettingController extends BaseController
 
     public function store(Request $request): JsonResponse
     {
-        $payload = $request->all(); // array of {key, value}
+        $keys   = $request->input('key', []);   // array of strings
+        $values = $request->input('value', []); // array of strings (non-file values only)
 
         try {
             DB::beginTransaction();
 
-            foreach ($payload as $index => $item) {
-                $key   = $item['key'] ?? null;
-                $value = $item['value'] ?? null;
-
+            foreach ($keys as $index => $key) {
                 if (!$key) continue;
 
-                // لو الـ key ده معروف إنه صورة، دور على الملف بنفس المسار في الـ request
-                if (in_array($key, $this->imageKeys) && $request->hasFile("{$index}.value")) {
-                    $file = $request->file("{$index}.value");
+                $value = $values[$index] ?? null;
+
+                // لو فيه ملف اترفع على نفس الـ index ده في حقل value
+                if (in_array($key, $this->imageKeys) && $request->hasFile("value.{$index}")) {
+                    $file = $request->file("value.{$index}");
 
                     $originalName = $file->getClientOriginalName();
                     $decodedName  = urldecode($originalName);
@@ -58,13 +58,11 @@ class SettingController extends BaseController
 
                     // احذف الصورة القديمة لو موجودة
                     $old = $this->repository->query()->where('key', $key)->first();
-                    if ($old && !empty($old->value)) {
-                        $oldPath = str_replace(Storage::disk('public')->url(''), '', $old->value);
-                        Storage::disk('public')->delete($oldPath);
+                    if ($old && !empty($old->value) && !str_starts_with($old->value, 'http')) {
+                        Storage::disk('public')->delete($old->value);
                     }
 
-                    // خزن الـ path النسبي في الداتابيز (مش الرابط الكامل)
-                    $value = $path;
+                    $value = $path; // خزن الـ path النسبي بس
                 }
 
                 $this->repository->query()->updateOrCreate(
@@ -77,14 +75,13 @@ class SettingController extends BaseController
 
             $settings = $this->repository->query()->get();
 
-            // رجّع الـ response بالـ full URL للصور
             $formatted = $settings->map(function ($setting) {
                 $isImage = in_array($setting->key, $this->imageKeys);
 
                 return [
                     'key'   => $setting->key,
                     'value' => $isImage && $setting->value
-                        ? Storage::disk('public')->url($setting->value)
+                        ? $this->resolveFullUrl($setting->value)
                         : $setting->value,
                 ];
             });
@@ -95,5 +92,14 @@ class SettingController extends BaseController
             Log::error("Error updating settings: " . $e->getMessage());
             return $this->errorResponse("Failed to update settings", 500);
         }
+    }
+
+    protected function resolveFullUrl(string $value): string
+    {
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return Storage::disk('public')->url($value);
     }
 }
