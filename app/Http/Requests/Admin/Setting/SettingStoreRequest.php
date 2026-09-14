@@ -14,8 +14,8 @@ class SettingStoreRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'key' => 'required|string|max:255|unique:settings,key',
-            'value' => 'required|string',
+            '*.key'   => 'required|string',
+            '*.value' => 'nullable|string',
         ];
     }
 }
