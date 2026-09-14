@@ -190,12 +190,30 @@ class UserPackageController extends BaseController
                 DB::purge('tenant');
                 DB::reconnect('tenant');
 
+                // ============ الحل: نجيب الـ user المحلي جوه الـ Tenant عن طريق academy_id ============
+                $tenantLocalUser = DB::connection('tenant')->table('users')
+                    ->where('academy_id', $pendingRequest->user_id)
+                    ->first();
+
+                if (!$tenantLocalUser) {
+                    Log::error('Tenant local user not found for academy_id', [
+                        'academy_id' => $pendingRequest->user_id,
+                        'tenant_db'  => $tenant->db_name,
+                    ]);
+
+                    return response()->json([
+                        'message' => 'تعذر إيجاد المستخدم المقابل داخل قاعدة بيانات الأكاديمية'
+                    ], 404);
+                }
+
+                $tenantUserId = $tenantLocalUser->id;
+
                 DB::connection('tenant')->table('user_packages')
                     ->where('status', 'active')
                     ->update(['active' => false, 'status' => 'expired']);
 
                 DB::connection('tenant')->table('user_packages')->insert([
-                    'user_id'      => $pendingRequest->user_id,
+                    'user_id'      => $tenantUserId, // ← بدل $pendingRequest->user_id
                     'package_id'   => $pendingRequest->package_id,
                     'package_name' => $pendingRequest->package_name,
                     'start_date'   => now(),
@@ -212,7 +230,7 @@ class UserPackageController extends BaseController
                         [
                             'total_limit' => $f->value,
                             'used_amount' => 0,
-                            'type'        => ($f->value == -1 || (int)$f->value > 1) ? 'numeric' : 'boolean',
+                            'type'        => ($f->value == -1 || (int) $f->value > 1) ? 'numeric' : 'boolean',
                             'is_enabled'  => $f->value != 0,
                             'updated_at'  => now(),
                         ]
