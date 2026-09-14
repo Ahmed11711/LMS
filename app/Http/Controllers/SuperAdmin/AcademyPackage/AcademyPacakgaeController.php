@@ -5,15 +5,16 @@ namespace App\Http\Controllers\SuperAdmin\AcademyPackage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
 use App\Models\Central\UserPackage;
-use App\Traits\ApiResponseTrait;
 use App\QueryFilters\ColumnFilter;
 use App\QueryFilters\Search;
 use App\QueryFilters\SelectFields;
 use App\QueryFilters\SortBy;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AcademyPacakgaeController extends Controller
 {
@@ -58,65 +59,77 @@ class AcademyPacakgaeController extends Controller
 
     public function dashboard(Request $request)
     {
+        $data = Cache::remember('super_admin_dashboard_stats', now()->addMinutes(10), function () {
+            return $this->buildDashboardStats();
+        });
+
+        return $this->successResponse($data, 'Dashboard data fetched successfully');
+    }
+
+    private function buildDashboardStats(): array
+    {
         $now = Carbon::now();
 
         $startOfThisMonth = $now->copy()->startOfMonth();
-        $endOfThisMonth   = $now->copy()->endOfMonth();
-
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
 
-        // 1) عدد الاشتراكات الجدد هذا الشهر
-        $newSubsThisMonth = UserPackage::whereBetween('created_at', [$startOfThisMonth, $endOfThisMonth])->count();
-        $newSubsLastMonth = UserPackage::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
+        $stats = DB::table('user_packages')
+            ->selectRaw("
+                COUNT(CASE WHEN created_at >= ? THEN 1 END) as new_subs_this_month,
+                COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as new_subs_last_month,
 
-        // 2) عدد الأكاديميات النشطة (باشتراك ساري)
-        $activeAcademiesNow = UserPackage::where('ends_at', '>=', $now)
-            ->distinct('user_id')->count('user_id');
+                COALESCE(SUM(CASE WHEN created_at >= ? THEN price END), 0) as revenue_this_month,
+                COALESCE(SUM(CASE WHEN created_at BETWEEN ? AND ? THEN price END), 0) as revenue_last_month,
 
-        $activeAcademiesLastMonth = UserPackage::where('ends_at', '>=', $startOfThisMonth)
-            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-            ->distinct('user_id')->count('user_id');
+                COUNT(DISTINCT CASE WHEN active = 1 AND status = 'active' AND end_date >= ? THEN user_id END) as active_academies_now,
+                COUNT(DISTINCT CASE WHEN active = 1 AND status = 'active' AND end_date >= ? AND created_at <= ? THEN user_id END) as active_academies_prev,
 
-        // 3) عدد الأكاديميات باشتراك منتهي
-        $expiredAcademiesNow = UserPackage::where('ends_at', '<', $now)
-            ->distinct('user_id')->count('user_id');
+                COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) THEN user_id END) as expired_academies_now,
+                COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) AND created_at <= ? THEN user_id END) as expired_academies_prev
+            ", [
+                $startOfThisMonth,                               // new_subs_this_month
+                $startOfLastMonth,
+                $endOfLastMonth,               // new_subs_last_month
+                $startOfThisMonth,                               // revenue_this_month
+                $startOfLastMonth,
+                $endOfLastMonth,               // revenue_last_month
+                $now,                                            // active_academies_now
+                $startOfThisMonth,
+                $endOfLastMonth,               // active_academies_prev
+                $now,                                            // expired_academies_now
+                $startOfThisMonth,
+                $endOfLastMonth,               // expired_academies_prev
+            ])
+            ->first();
 
-        $expiredAcademiesLastMonth = UserPackage::where('ends_at', '<', $startOfThisMonth)
-            ->distinct('user_id')->count('user_id');
-
-        // 4) اجمالي الايراد الحالي
-        $revenueThisMonth = UserPackage::whereBetween('created_at', [$startOfThisMonth, $endOfThisMonth])->sum('price');
-        $revenueLastMonth = UserPackage::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('price');
-
-        // 5) تفاصيل آخر 12 شهر (عدد الاشتراكات لكل شهر)
-        $chart = UserPackage::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total")
+        // ============ كويري خفيفة للشارت (Group By شهري) ============
+        $chart = DB::table('user_packages')
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total")
             ->where('created_at', '>=', $now->copy()->subMonths(11)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        $data = [
+        return [
             'new_subscriptions_this_month' => [
-                'value'      => $newSubsThisMonth,
-                'change_pct' => $this->percentageChange($newSubsThisMonth, $newSubsLastMonth),
+                'value'      => (int) $stats->new_subs_this_month,
+                'change_pct' => $this->percentageChange($stats->new_subs_this_month, $stats->new_subs_last_month),
             ],
             'active_academies' => [
-                'value'      => $activeAcademiesNow,
-                'change_pct' => $this->percentageChange($activeAcademiesNow, $activeAcademiesLastMonth),
+                'value'      => (int) $stats->active_academies_now,
+                'change_pct' => $this->percentageChange($stats->active_academies_now, $stats->active_academies_prev),
             ],
             'expired_academies' => [
-                'value'      => $expiredAcademiesNow,
-                'change_pct' => $this->percentageChange($expiredAcademiesNow, $expiredAcademiesLastMonth),
+                'value'      => (int) $stats->expired_academies_now,
+                'change_pct' => $this->percentageChange($stats->expired_academies_now, $stats->expired_academies_prev),
             ],
             'total_revenue' => [
-                'value'      => (float) $revenueThisMonth,
-                'change_pct' => $this->percentageChange($revenueThisMonth, $revenueLastMonth),
+                'value'      => (float) $stats->revenue_this_month,
+                'change_pct' => $this->percentageChange($stats->revenue_this_month, $stats->revenue_last_month),
             ],
             'chart_last_12_months' => $chart,
         ];
-
-        return $this->successResponse($data, 'Dashboard data fetched successfully');
     }
 
     private function percentageChange($current, $previous): float
