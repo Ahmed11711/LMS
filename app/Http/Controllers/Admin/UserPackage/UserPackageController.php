@@ -138,9 +138,6 @@ class UserPackageController extends BaseController
             'data'    => $pendingRequest,
         ]);
     }
-    /**
-     * السوبر أدمن بيوافق: بيتفعل الصف اللي كان pending ويقفل القديم
-     */
     public function approveUpgrade(int $userPackageId, UserPackageRepositoryInterface $repository)
     {
         $pendingRequest = $repository->findPendingRequest($userPackageId);
@@ -170,6 +167,8 @@ class UserPackageController extends BaseController
 
             $features = DB::connection('LMS_CENTER')->table('feature_packages')
                 ->where('package_id', $pendingRequest->package_id)
+                ->whereNotNull('key_feature')
+                ->where('key_feature', '!=', '')
                 ->get();
 
             DB::connection('LMS_CENTER')->commit();
@@ -190,7 +189,7 @@ class UserPackageController extends BaseController
                 DB::purge('tenant');
                 DB::reconnect('tenant');
 
-                // ============ الحل: نجيب الـ user المحلي جوه الـ Tenant عن طريق academy_id ============
+                // نجيب الـ user المحلي جوه الـ Tenant عن طريق academy_id
                 $tenantLocalUser = DB::connection('tenant')->table('users')
                     ->where('academy_id', $pendingRequest->user_id)
                     ->first();
@@ -213,7 +212,7 @@ class UserPackageController extends BaseController
                     ->update(['active' => false, 'status' => 'expired']);
 
                 DB::connection('tenant')->table('user_packages')->insert([
-                    'user_id'      => $tenantUserId, // ← بدل $pendingRequest->user_id
+                    'user_id'      => $tenantUserId,
                     'package_id'   => $pendingRequest->package_id,
                     'package_name' => $pendingRequest->package_name,
                     'start_date'   => now(),
@@ -225,6 +224,15 @@ class UserPackageController extends BaseController
                 ]);
 
                 foreach ($features as $f) {
+                    if (empty($f->key_feature)) {
+                        Log::warning('Feature package missing key_feature, skipped', [
+                            'feature_package_id' => $f->id,
+                            'package_id'          => $f->package_id,
+                            'feature_id'          => $f->feature_id,
+                        ]);
+                        continue;
+                    }
+
                     DB::connection('tenant')->table('tenant_feature_usage')->updateOrInsert(
                         ['feature_slug' => $f->key_feature],
                         [
