@@ -23,6 +23,7 @@ use App\Http\Controllers\User\Course\MyCourseController;
 use App\Http\Controllers\User\Lesson\LessonCommentController;
 use App\Http\Controllers\User\Lesson\LessonNoteController;
 use App\Http\Controllers\User\Lesson\LessonProgressController;
+use App\Http\Controllers\User\Profile\MeController;
 use App\Http\Controllers\User\Profile\ProfileController;
 use App\Http\Controllers\User\UserPlan\UserPlanController;
 use App\Http\Controllers\User\UserSubscribe\UserSubscribeController;
@@ -33,6 +34,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -80,6 +82,7 @@ Route::prefix('front')->group(function () {
 
 
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
+    Route::get('me', [MeController::class, 'me'])->middleware(TenantJwtMiddleware::class . ':student');
 
     Route::get('pages', [PagesController::class, 'index']);
 
