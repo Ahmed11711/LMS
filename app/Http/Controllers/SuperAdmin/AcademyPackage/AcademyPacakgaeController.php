@@ -77,36 +77,36 @@ class AcademyPacakgaeController extends Controller
 
         $stats = DB::table('user_packages')
             ->selectRaw("
-                COUNT(CASE WHEN created_at >= ? THEN 1 END) as new_subs_this_month,
-                COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as new_subs_last_month,
+            COUNT(CASE WHEN created_at >= ? THEN 1 END) as new_subs_this_month,
+            COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as new_subs_last_month,
 
-                COALESCE(SUM(CASE WHEN created_at >= ? THEN price END), 0) as revenue_this_month,
-                COALESCE(SUM(CASE WHEN created_at BETWEEN ? AND ? THEN price END), 0) as revenue_last_month,
+            COALESCE(SUM(CASE WHEN created_at >= ? THEN price END), 0) as revenue_this_month,
+            COALESCE(SUM(CASE WHEN created_at BETWEEN ? AND ? THEN price END), 0) as revenue_last_month,
 
-                COUNT(DISTINCT CASE WHEN active = 1 AND status = 'active' AND end_date >= ? THEN user_id END) as active_academies_now,
-                COUNT(DISTINCT CASE WHEN active = 1 AND status = 'active' AND end_date >= ? AND created_at <= ? THEN user_id END) as active_academies_prev,
+            COUNT(DISTINCT CASE WHEN active = true AND status = 'active' AND end_date >= ? THEN user_id END) as active_academies_now,
+            COUNT(DISTINCT CASE WHEN active = true AND status = 'active' AND end_date >= ? AND created_at <= ? THEN user_id END) as active_academies_prev,
 
-                COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) THEN user_id END) as expired_academies_now,
-                COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) AND created_at <= ? THEN user_id END) as expired_academies_prev
-            ", [
-                $startOfThisMonth,                               // new_subs_this_month
+            COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) THEN user_id END) as expired_academies_now,
+            COUNT(DISTINCT CASE WHEN (status = 'expired' OR end_date < ?) AND created_at <= ? THEN user_id END) as expired_academies_prev
+        ", [
+                $startOfThisMonth,                 // new_subs_this_month
                 $startOfLastMonth,
-                $endOfLastMonth,               // new_subs_last_month
-                $startOfThisMonth,                               // revenue_this_month
+                $endOfLastMonth,                   // new_subs_last_month
+                $startOfThisMonth,                 // revenue_this_month
                 $startOfLastMonth,
-                $endOfLastMonth,               // revenue_last_month
-                $now,                                            // active_academies_now
+                $endOfLastMonth,                   // revenue_last_month
+                $now,                              // active_academies_now
                 $startOfThisMonth,
-                $endOfLastMonth,               // active_academies_prev
-                $now,                                            // expired_academies_now
+                $endOfLastMonth,                   // active_academies_prev
+                $now,                              // expired_academies_now
                 $startOfThisMonth,
-                $endOfLastMonth,               // expired_academies_prev
+                $endOfLastMonth,                   // expired_academies_prev
             ])
             ->first();
 
         // ============ كويري خفيفة للشارت (Group By شهري) ============
         $chart = DB::table('user_packages')
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total")
+            ->selectRaw($this->monthExpression() . " as month, COUNT(*) as total")
             ->where('created_at', '>=', $now->copy()->subMonths(11)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
@@ -131,6 +131,15 @@ class AcademyPacakgaeController extends Controller
             ],
             'chart_last_12_months' => $chart,
         ];
+    }
+
+    private function monthExpression(): string
+    {
+        $driver = DB::connection()->getDriverName();
+
+        return $driver === 'pgsql'
+            ? "TO_CHAR(created_at, 'YYYY-MM')"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
     }
 
     private function percentageChange($current, $previous): float
