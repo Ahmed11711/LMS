@@ -41,6 +41,7 @@ Route::prefix('superAdmin')->group(function () {
         Route::match(['put', 'patch'], 'packages/{package}', [PackageController::class, 'update'])
             ->middleware('sync.feature.package')
             ->name('package.update');
+
         Route::apiResource('features', FeaturesController::class)->names('features');
         Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->middleware('sync.feature.package');
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
