@@ -36,10 +36,7 @@ class PackageController extends BaseController
         ];
     }
 
-    /**
-     * قبل الإنشاء: نطلع الـ features برة، عشان ميتبعتوش
-     * لجدول packages نفسه (لإنهم مش أعمدة فيه)
-     */
+
     protected function beforeStore(array $data, Request $request): array
     {
         $this->pendingFeatures = $data['features'] ?? [];
@@ -49,7 +46,6 @@ class PackageController extends BaseController
     }
 
     /**
-     * بعد الإنشاء: نربط الـ features بالـ package الجديد
      */
     protected function afterStore($record, Request $request): void
     {

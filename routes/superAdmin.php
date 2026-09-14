@@ -33,7 +33,14 @@ Route::prefix('superAdmin')->group(function () {
         Route::get('Statistics-dashboard', [AcademyPacakgaeController::class, 'dashboard']);
 
         Route::apiResource('academy-packages', AcademyPacakgaeController::class);
-        Route::apiResource('packages', PackageController::class)->names('package');
+        // Route::apiResource('packages', PackageController::class)->names('package');
+        Route::apiResource('packages', PackageController::class)
+            ->except(['update'])
+            ->names('package');
+
+        Route::match(['put', 'patch'], 'packages/{package}', [PackageController::class, 'update'])
+            ->middleware('sync.feature.package')
+            ->name('package.update');
         Route::apiResource('features', FeaturesController::class)->names('features');
         Route::apiResource('feature_packages', FeaturePackageController::class)->names('feature_package')->middleware('sync.feature.package');
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');

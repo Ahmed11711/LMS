@@ -33,30 +33,9 @@ class SyncFeaturePackageAfterResponse
                 return;
             }
 
-            $featurePackageId = $request->route('feature_package');
-
-            if (is_null($featurePackageId) && $request->method() === 'POST') {
-                $responseData     = json_decode($response->getContent(), true);
-                $featurePackageId = $responseData['data']['id'] ?? $responseData['id'] ?? null;
-            }
-
-            if (is_null($featurePackageId)) {
-                Log::error('Feature package id is null, aborting sync');
-                return;
-            }
-
-            $featurePackage = FeaturePackage::find($featurePackageId);
-
-            if (! $featurePackage) {
-                Log::error('FeaturePackage not found', ['id' => $featurePackageId]);
-                return;
-            }
-
-            $package = Package::with(['featurePackages.feature'])
-                ->find($featurePackage->package_id);
+            $package = $this->resolvePackage($request, $response);
 
             if (! $package) {
-                Log::error('Package not found', ['package_id' => $featurePackage->package_id]);
                 return;
             }
 
@@ -108,6 +87,68 @@ class SyncFeaturePackageAfterResponse
                 'trace'   => $e->getTraceAsString(),
             ]);
         }
+    }
+
+    /**
+     * يحدد الـ Package اللي هنعمله sync حسب مصدر الطلب:
+     * - جاي من feature_packages: نلاقي الـ FeaturePackage الأول وناخد package_id منه
+     * - جاي من packages مباشرة: ناخد الـ package id من الـ route مباشرة
+     */
+    private function resolvePackage(Request $request, Response $response): ?Package
+    {
+        // ============ حالة 1: الطلب جاي من route بتاعت packages مباشرة ============
+        if ($this->isPackagesRoute($request)) {
+            $packageId = $request->route('package');
+
+            // لو الـ route model binding بيرجع الموديل نفسه مش الـ id
+            if (is_object($packageId)) {
+                $packageId = $packageId->id;
+            }
+
+            if (is_null($packageId)) {
+                Log::error('Package id is null on packages route, aborting sync');
+                return null;
+            }
+
+            $package = Package::with(['featurePackages.feature'])->find($packageId);
+
+            if (! $package) {
+                Log::error('Package not found (packages route)', ['package_id' => $packageId]);
+                return null;
+            }
+
+            return $package;
+        }
+
+        // ============ حالة 2: الطلب جاي من route بتاعت feature_packages (المنطق القديم) ============
+        $featurePackageId = $request->route('feature_package');
+
+        if (is_null($featurePackageId) && $request->method() === 'POST') {
+            $responseData     = json_decode($response->getContent(), true);
+            $featurePackageId = $responseData['data']['id'] ?? $responseData['id'] ?? null;
+        }
+
+        if (is_null($featurePackageId)) {
+            Log::error('Feature package id is null, aborting sync');
+            return null;
+        }
+
+        $featurePackage = FeaturePackage::find($featurePackageId);
+
+        if (! $featurePackage) {
+            Log::error('FeaturePackage not found', ['id' => $featurePackageId]);
+            return null;
+        }
+
+        $package = Package::with(['featurePackages.feature'])
+            ->find($featurePackage->package_id);
+
+        if (! $package) {
+            Log::error('Package not found', ['package_id' => $featurePackage->package_id]);
+            return null;
+        }
+
+        return $package;
     }
 
     private function handleDeleteSync(Request $request): void
@@ -209,10 +250,37 @@ class SyncFeaturePackageAfterResponse
             ->delete();
     }
 
+    private function isPackagesRoute(Request $request): bool
+    {
+        return str_contains($request->path(), 'packages')
+            && ! str_contains($request->path(), 'feature_packages');
+    }
+
     private function shouldSync(Request $request, Response $response): bool
     {
-        return in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])
-            && str_contains($request->path(), 'feature_packages')
-            && $response->isSuccessful();
+        if (! $response->isSuccessful()) {
+            return false;
+        }
+
+        $method = $request->method();
+
+        // ============ حالة feature_packages (المنطق القديم زي ما هو) ============
+        if (
+            str_contains($request->path(), 'feature_packages')
+            && in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'])
+        ) {
+            return true;
+        }
+
+        // ============ حالة packages: بس لو الطلب فيه features فعليًا ============
+        if (
+            $this->isPackagesRoute($request)
+            && in_array($method, ['PUT', 'PATCH'])
+            && $request->has('features')
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }
