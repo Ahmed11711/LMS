@@ -16,7 +16,7 @@ class UpgradeRequestStoreRequest extends BaseRequest
     {
         return [
             'package_id'     => ['required', 'exists:LMS_CENTER.packages,id'],
-            'payment_proof'  => ['required', 'image', 'mimes:jpg,jpeg,png,pdf', 'max:4096'], // 4MB
+            'payment_proof'  => ['required', 'image'], // 4MB
         ];
     }
 }
