@@ -77,6 +77,14 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
             'lessons_with_global_scope' => $lessonsWithScope,
         ]);
     });
+    Route::get('debug-all-lessons', function () {
+        return response()->json([
+            'connection' => DB::connection()->getDatabaseName(),
+            'total_lessons' => \App\Models\Lesson::count(),
+            'all_lessons' => \App\Models\Lesson::all(),
+            'all_chapters' => \App\Models\Chapter::all(),
+        ]);
+    });
 
     Route::post('/upgrade-packages', [UserPackageController::class, 'requestUpgrade']);
 
