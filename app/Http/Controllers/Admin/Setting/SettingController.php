@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Storage;
 
 class SettingController extends BaseController
 {
-    // الـ keys اللي المفروض تتعامل معاها كملفات (صور) مش نصوص
     protected array $imageKeys = ['logo', 'avatar_url', 'logo_url'];
 
     public function __construct(SettingRepositoryInterface $repository)
@@ -32,10 +31,36 @@ class SettingController extends BaseController
         $this->resourceClass = SettingResource::class;
     }
 
+    /**
+     * Override: رجّع كل الإعدادات من غير pagination.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $settings = $this->repository->query()->get();
+
+            $formatted = $settings->map(function ($setting) {
+                $isImage = in_array($setting->key, $this->imageKeys);
+
+                return [
+                    'key'   => $setting->key,
+                    'value' => $isImage && $setting->value
+                        ? $this->resolveFullUrl($setting->value)
+                        : $setting->value,
+                ];
+            });
+
+            return $this->successResponse($formatted, 'Settings retrieved successfully');
+        } catch (\Throwable $e) {
+            Log::error("Error fetching settings: " . $e->getMessage());
+            return $this->errorResponse("Failed to fetch settings", 500);
+        }
+    }
+
     public function store(Request $request): JsonResponse
     {
-        $keys   = $request->input('key', []);   // array of strings
-        $values = $request->input('value', []); // array of strings (non-file values only)
+        $keys   = $request->input('key', []);
+        $values = $request->input('value', []);
 
         try {
             DB::beginTransaction();
@@ -45,7 +70,6 @@ class SettingController extends BaseController
 
                 $value = $values[$index] ?? null;
 
-                // لو فيه ملف اترفع على نفس الـ index ده في حقل value
                 if (in_array($key, $this->imageKeys) && $request->hasFile("value.{$index}")) {
                     $file = $request->file("value.{$index}");
 
@@ -56,13 +80,12 @@ class SettingController extends BaseController
                     $filename = time() . '_' . $cleanName;
                     $path     = $file->storeAs("uploads/settings", $filename, 'public');
 
-                    // احذف الصورة القديمة لو موجودة
                     $old = $this->repository->query()->where('key', $key)->first();
                     if ($old && !empty($old->value) && !str_starts_with($old->value, 'http')) {
                         Storage::disk('public')->delete($old->value);
                     }
 
-                    $value = $path; // خزن الـ path النسبي بس
+                    $value = $path;
                 }
 
                 $this->repository->query()->updateOrCreate(
