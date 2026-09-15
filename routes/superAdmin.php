@@ -1,6 +1,7 @@
 <?php
 
 use \App\Http\Controllers\SuperAdmin\Acdamey\AcademyController;
+use \App\Http\Controllers\SuperAdmin\Auth\MeController;
 use App\Http\Controllers\Admin\Country\CountryController;
 use App\Http\Controllers\Admin\FeaturePackage\FeaturePackageController;
 use App\Http\Controllers\Admin\Features\FeaturesController;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::prefix('superAdmin')->group(function () {
 
     Route::post('login', [LoginController::class, 'login']);
@@ -29,6 +31,8 @@ Route::prefix('superAdmin')->group(function () {
 
 
     Route::middleware(SuperAdminMiddleware::class)->group(function () {
+        Route::get('me', [MeController::class, 'me']);
+        Route::put('update-profile', [MeController::class, 'updateProfile']);
         Route::post('/academy-packages/{userPackageId}/approve', [UserPackageController::class, 'approveUpgrade']);
         Route::get('Statistics-dashboard', [AcademyPacakgaeController::class, 'dashboard']);
 
