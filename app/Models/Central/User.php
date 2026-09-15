@@ -2,6 +2,7 @@
 
 namespace App\Models\Central;
 
+use App\Casts\StorageUrlCast;
 use App\Models\Tenant;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,6 +11,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
+
 
     protected $connection = 'LMS_CENTER'; // Central DB
     protected $table = 'users';
@@ -20,6 +22,7 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'profile_image' => StorageUrlCast::class,
     ];
 
     // JWT
