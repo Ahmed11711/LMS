@@ -119,7 +119,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('settings', SettingController::class)->names('setting');
 
     Route::apiResource('profile-academic', ProfileController::class)->except('post', 'delete', 'put');
-    Route::put('profile-academic', [InstructorController::class, 'update']);
+    Route::put('profile-academic', [ProfileController::class, 'update']);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
