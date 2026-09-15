@@ -38,13 +38,14 @@ class BagResource extends JsonResource
             // 🔑 فلاج بيبين هل اليوزر اشترى الحقيبة دي فعلاً وموافق عليها
             'is_purchased' => $isPurchased,
 
-            // 🔒 الـ items: لو مش مشترى، اللينك (file) يترجع null
+            // 🔒 الـ items: لو مش مشترى، path يترجع null
             'items' => $this->whenLoaded('items', function () use ($isPurchased) {
                 return $this->items->map(function ($item) use ($isPurchased) {
                     return [
                         'id' => $item->id,
-                        'title' => $item->title ?? null,
-                        'file' => $isPurchased ? $item->file : null, // 👈 عدّل اسم الحقل هنا لو مختلف
+                        'bag_id' => $item->bag_id,
+                        'path' => $isPurchased ? $item->path : null,
+                        'type' => $item->type,
                         'created_at' => $item->created_at,
                         'updated_at' => $item->updated_at,
                     ];
