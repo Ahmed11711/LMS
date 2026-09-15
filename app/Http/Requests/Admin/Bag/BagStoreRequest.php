@@ -43,7 +43,7 @@ class BagStoreRequest extends BaseRequest
             'payment_info_ids' => 'nullable|array',
             'payment_info_ids.*' => 'integer|exists:instructor_receiver_accounts,id',
             'gallery' => 'nullable|array',
-            'gallery.*' => 'file|image|',
+            'gallery.*' => 'file|',
         ];
     }
 }
