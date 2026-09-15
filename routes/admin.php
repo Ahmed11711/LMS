@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Auth\CheckOtpController;
 use App\Http\Controllers\Admin\Bag\BagController;
 use App\Http\Controllers\Admin\BagPurchase\BagPurchaseController;
 use App\Http\Controllers\Admin\Category\CategoryController;
+use App\Http\Controllers\Admin\CategoryBag\CategoryBagController;
 use App\Http\Controllers\Admin\Chapter\ChapterController;
 use App\Http\Controllers\Admin\Course\CourseController;
 use App\Http\Controllers\Admin\Course\CourseStatisticsController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Admin\InstructorReceiverAccount\InstructorReceiverAccou
 use App\Http\Controllers\Admin\LandingPage\LandingPageController;
 use App\Http\Controllers\Admin\Lesson\LessonController;
 use App\Http\Controllers\Admin\Me\MeController;
+use App\Http\Controllers\Admin\Me\ProfileController;
 use App\Http\Controllers\Admin\OnlineSession\OnlineSessionController;
 use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController;
 use App\Http\Controllers\Admin\Pages\PagesController;
@@ -24,14 +26,15 @@ use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailControll
 use App\Http\Controllers\Admin\Plan\PlanController;
 use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
 use App\Http\Controllers\Admin\Section\SectionController;
+use App\Http\Controllers\Admin\Setting\SettingController;
+
 use App\Http\Controllers\Admin\Subject\SubjectController;
 use App\Http\Controllers\Admin\Template\TemplateController;
-use App\Http\Controllers\Admin\Term\TermController;
 
+
+use App\Http\Controllers\Admin\Term\TermController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
-
-
 use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
 use App\Http\Controllers\Admin\UserPlan\UserPlanController;
@@ -44,8 +47,7 @@ use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\Setting\SettingController;
-use App\Http\Controllers\Admin\CategoryBag\CategoryBagController;
+
 
 
 
@@ -116,7 +118,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     Route::apiResource('settings', SettingController::class)->names('setting');
 
-    Route::apiResource('profile-academic', InstructorController::class)->except('post', 'delete', 'put');
+    Route::apiResource('profile-academic', ProfileController::class)->except('post', 'delete', 'put');
     Route::put('profile-academic', [InstructorController::class, 'update']);
 });
 
