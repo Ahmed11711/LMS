@@ -7,20 +7,23 @@ use App\Http\Requests\SuperAdmin\Auth\UpdateProfileRequest;
 use App\Http\Resources\User\Me\MeResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class MeController extends Controller
 {
     use ApiResponseTrait;
+
     public function me(Request $request)
     {
-        return response()->json(new MeResource($request->user()));
+        return response()->json(new MeResource(Auth::guard('central')->user()));
     }
 
     public function updateProfile(UpdateProfileRequest $request)
     {
-        $user = $request->user();
+        $user = Auth::guard('central')->user();
+
         $data = $request->validated();
 
         if ($request->hasFile('profile_image')) {
@@ -32,7 +35,6 @@ class MeController extends Controller
                 ->store('profile_images', 'public');
         }
 
-
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -40,8 +42,9 @@ class MeController extends Controller
         }
 
         $user->update($data);
+
         return $this->successResponse(
-            new MeResource($user),
+            new MeResource($user->fresh()),
             'Profile updated successfully'
         );
     }
