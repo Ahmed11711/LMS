@@ -115,6 +115,9 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('bag_purchases', BagPurchaseController::class);
 
     Route::apiResource('settings', SettingController::class)->names('setting');
+
+    Route::apiResource('profile-academic', InstructorController::class)->except('post', 'delete', 'put');
+    Route::put('profile-academic', [InstructorController::class, 'update']);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
