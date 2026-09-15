@@ -28,7 +28,6 @@ class BagsController extends BaseController
 
     protected function getIndexRelationships(): array
     {
-        // نجيب بس عمليات الشراء الخاصة باليوزر الحالي، عشان نتجنب N+1 والداتا الزيادة
         return [
             'purchases' => function ($query) {
                 $query->where('user_id', auth('api')->id());

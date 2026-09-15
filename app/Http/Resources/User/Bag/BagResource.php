@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\User\Bag;
 
-use App\Http\Resources\Admin\Bag\BagItemResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BagResource extends JsonResource
@@ -39,33 +38,33 @@ class BagResource extends JsonResource
             // 🔑 فلاج بيبين هل اليوزر اشترى الحقيبة دي فعلاً وموافق عليها
             'is_purchased' => $isPurchased,
 
-            'items' => BagItemResource::collection($this->whenLoaded('items')),
-
-            // 🔒 الجاليري: لو مش مشترى، اللينكات كلها null
-            'gallery' => $this->whenLoaded('gallery', function () use ($isPurchased) {
-                return $this->gallery->map(function ($item) use ($isPurchased) {
+            // 🔒 الـ items: لو مش مشترى، اللينك (file) يترجع null
+            'items' => $this->whenLoaded('items', function () use ($isPurchased) {
+                return $this->items->map(function ($item) use ($isPurchased) {
                     return [
                         'id' => $item->id,
-                        'image' => $isPurchased ? $item->image : null,
+                        'title' => $item->title ?? null,
+                        'file' => $isPurchased ? $item->file : null, // 👈 عدّل اسم الحقل هنا لو مختلف
                         'created_at' => $item->created_at,
+                        'updated_at' => $item->updated_at,
                     ];
                 });
             }),
+
+            // ✅ الجاليري بيرجع عادي زي ما هو من غير أي تعديل
+            'gallery' => $this->whenLoaded('gallery'),
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
     }
 
-    /**
-     * هل اليوزر الحالي اشترى الحقيبة دي وتم الموافقة عليها؟
-     */
     protected function isPurchasedByCurrentUser(): bool
     {
         $userId = auth('api')->id();
 
         if (!$userId) {
-            return false; // زائر مش لوجين
+            return false;
         }
 
         if ($this->relationLoaded('purchases')) {
