@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\User\Bags\Bags;
 
 use App\Http\Controllers\BaseController\BaseController;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\Bag\BagResource;
+use App\Http\Resources\User\Bag\BagResource;
 use App\Repositories\Bag\BagRepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -20,19 +19,29 @@ class BagsController extends BaseController
             fileFields: ['image']
         );
 
-
         $this->resourceClass = BagResource::class;
-
 
         $this->hasGallery = true;
 
-        $this->withRelationships = ['items', 'userPaymentInfos', 'gallery', 'category'];
+        $this->withRelationships = ['items', 'gallery', 'category', 'purchases'];
     }
 
-    /**
-     */
     protected function getIndexRelationships(): array
     {
-        return [];
+        // نجيب بس عمليات الشراء الخاصة باليوزر الحالي، عشان نتجنب N+1 والداتا الزيادة
+        return [
+            'purchases' => function ($query) {
+                $query->where('user_id', auth('api')->id());
+            },
+        ];
+    }
+
+    protected function getShowRelationships(): array
+    {
+        return array_merge($this->withRelationships, [
+            'purchases' => function ($query) {
+                $query->where('user_id', auth('api')->id());
+            },
+        ]);
     }
 }
