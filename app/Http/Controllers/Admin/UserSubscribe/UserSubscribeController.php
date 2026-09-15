@@ -55,39 +55,44 @@ class UserSubscribeController extends BaseController
         $userId   = (int) $validated['user_id'];
         $courseId = (int) $validated['course_id'];
 
-        $activeSubscription = $this->repository->query()
+        // دور على أي صف موجود أصلاً (مش بس active) لأن الـ unique constraint
+        // شغالة على (user_id, course_id) بغض النظر عن status
+        $existingSubscription = $this->repository->query()
             ->where('user_id', $userId)
             ->where('course_id', $courseId)
-            ->where('status', 'active')
-            ->where(function ($q) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
-            })
             ->first();
 
-        // No active subscription -> normal creation flow (parent handles it)
-        if (!$activeSubscription) {
+        // مفيش أي اشتراك قبل كده خالص -> إنشاء عادي
+        if (!$existingSubscription) {
             return parent::store($request);
         }
 
+        // هل الاشتراك الموجود لسه active وسريان؟
+        $isCurrentlyActive = $existingSubscription->status === 'active'
+            && ($existingSubscription->ends_at === null || $existingSubscription->ends_at > now());
+
         $renewalToken = $request->input('renewal_token');
 
-        // No token sent yet -> reject and hand back a token to confirm renewal
-        if (!$renewalToken || !$this->isValidRenewalToken($renewalToken, $userId, $courseId)) {
-            return $this->errorResponse(
-                'هذا اليوزر مشترك بالفعل في هذا الكورس. لو عايز تجدد الاشتراك، ابعت نفس الطلب مع renewal_token اللي هنبعتهولك.',
-                409,
-                ['renewal_token' => $this->generateRenewalToken($userId, $courseId)]
-            );
+        // لو الاشتراك لسه سريان وactive فعلاً، لازم تأكيد تجديد
+        if ($isCurrentlyActive) {
+            if (!$renewalToken || !$this->isValidRenewalToken($renewalToken, $userId, $courseId)) {
+                return $this->errorResponse(
+                    'هذا اليوزر مشترك بالفعل في هذا الكورس. لو عايز تجدد الاشتراك، ابعت نفس الطلب مع renewal_token اللي هنبعتهولك.',
+                    409,
+                    ['renewal_token' => $this->generateRenewalToken($userId, $courseId)]
+                );
+            }
         }
 
-        // Token confirmed -> reuse the SAME row (unique constraint on user_id/course_id)
+        // سواء كان منتهي أو نحتاج تجديد مؤكد -> نعمل update على نفس الصف
+        // (مينفعش insert تاني بسبب الـ unique constraint)
         try {
             DB::beginTransaction();
 
             $course   = Course::find($courseId);
             $startsAt = $validated['starts_at'] ?? now();
 
-            $activeSubscription->update([
+            $existingSubscription->update([
                 'status'    => $validated['status'] ?? 'active',
                 'starts_at' => $startsAt,
                 'ends_at'   => $this->calculateEndsAt($course, $startsAt),
@@ -95,10 +100,10 @@ class UserSubscribeController extends BaseController
 
             DB::commit();
 
-            $activeSubscription->load($this->withRelationships);
+            $existingSubscription->load($this->withRelationships);
 
             return $this->successResponse(
-                new $this->resourceClass($activeSubscription),
+                new $this->resourceClass($existingSubscription),
                 'تم تجديد الاشتراك بنجاح',
                 200
             );
@@ -108,7 +113,6 @@ class UserSubscribeController extends BaseController
             return $this->errorResponse('فشل تجديد الاشتراك', 500);
         }
     }
-
     /**
      * When status is changed to 'active' via a normal update (not renewal),
      * auto-calculate ends_at based on the course's access settings.
