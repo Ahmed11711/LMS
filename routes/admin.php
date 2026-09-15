@@ -46,6 +46,7 @@ use App\Http\Controllers\Tenant\TenantMigrationController;
 use App\Http\Middleware\CheckFeatureLimit;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 
@@ -55,7 +56,27 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
+
+
+    Route::get('debug-lessons/{chapterId}', function ($chapterId) {
+        $chapter = \App\Models\Chapter::find($chapterId);
+
+        $lessonsWithoutScope = \App\Models\Lesson::withoutGlobalScopes()
+            ->where('chapter_id', $chapterId)
+            ->get();
+
+        $lessonsWithScope = \App\Models\Lesson::where('chapter_id', $chapterId)
+            ->get();
+
+        return response()->json([
+            'connection' => DB::connection()->getDatabaseName(),
+            'chapter' => $chapter,
+            'lessons_without_global_scope' => $lessonsWithoutScope,
+            'lessons_with_global_scope' => $lessonsWithScope,
+        ]);
+    });
 
     Route::post('/upgrade-packages', [UserPackageController::class, 'requestUpgrade']);
 
