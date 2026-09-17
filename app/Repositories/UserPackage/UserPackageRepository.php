@@ -20,7 +20,23 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
     }
     public function MyPackageWithStatus($userId)
     {
-        return $this->model->where('user_id', $userId)->first();
+        // 1) جرب تجيب آخر باقة اكتيف
+        $activePackage = $this->model
+            ->where('user_id', $userId)
+            ->where('is_active', 1)
+            ->latest()
+            ->first();
+
+        if ($activePackage) {
+            return $activePackage;
+        }
+
+        // 2) لو مفيش اكتيف، هات آخر باقة مش pending
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('status', '!=', 'pending')
+            ->latest()
+            ->first();
     }
     public function cancelPendingRequests($tenantUserId, $centralUserId): void
     {
