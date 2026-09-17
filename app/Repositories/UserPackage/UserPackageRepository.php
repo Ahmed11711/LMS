@@ -34,7 +34,7 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
         // 2) لو مفيش اكتيف، هات آخر باقة مش pending
         return $this->model
             ->where('user_id', $userId)
-            ->where('status', '!=', 'pending')
+            ->where('is_active', 0)
             ->latest()
             ->first();
     }
