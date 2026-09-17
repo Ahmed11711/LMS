@@ -54,8 +54,8 @@ class CourseController extends BaseController
         return [
 
             'chapters.lessons',
-            // 'chapters.onlineSessions',
-            // 'chapters.physicalCourseDetails',
+            'chapters.onlineSessions',
+            'chapters.physicalCourseDetails',
             'infos',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
             'category:id,name',
