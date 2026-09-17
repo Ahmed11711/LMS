@@ -2,6 +2,7 @@
 
 namespace App\Models\Central;
 
+use App\Casts\StorageUrlCast;
 use App\Models\Central\Package;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,9 @@ class UserPackage extends Model
     public $filterable = ['status', 'package_name', 'user_id', 'package_id'];
     public $sortable = ['id', 'user_id', 'created_at', 'updated_at', 'package_id', 'package_name', 'status'];
 
+    protected $casts = [
+        'payment_proof' => StorageUrlCast::class,
+    ];
     protected static function boot()
     {
         parent::boot();
