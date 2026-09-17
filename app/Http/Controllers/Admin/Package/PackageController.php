@@ -26,13 +26,13 @@ class PackageController extends BaseController
         $this->storeRequestClass = PackageStoreRequest::class;
         $this->updateRequestClass = PackageUpdateRequest::class;
         $this->resourceClass = PackageResource::class;
-        $this->withRelationships = ['packageFeatures'];
+        $this->withRelationships = ['packageFeatures.feature'];
     }
 
     protected function getShowRelationships(): array
     {
         return [
-            'packageFeatures'
+            'packageFeatures.feature'
         ];
     }
 

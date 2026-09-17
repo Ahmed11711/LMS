@@ -13,8 +13,8 @@ class FeaturePackageResource extends JsonResource
             'package_id' => $this->package_id,
             'feature_id' => $this->feature_id,
             'value' => $this->value,
-            'lable' => $this->lable,
-            'key_feature' => $this->key_feature,
+            'lable' => $this->whenLoaded('feature', fn() => $this->feature->label),
+            'key_feature' => $this->whenLoaded('feature', fn() => $this->feature->key),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
