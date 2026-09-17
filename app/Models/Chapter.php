@@ -18,4 +18,15 @@ class Chapter extends TenantModel
     {
         return $this->hasMany(Lesson::class, 'chapter_id');
     }
+
+
+    public function onlineSessions()
+    {
+        return $this->hasMany(OnlineSession::class);
+    }
+
+    public function physicalCourseDetails()
+    {
+        return $this->hasMany(PhysicalCourseDetail::class);
+    }
 }

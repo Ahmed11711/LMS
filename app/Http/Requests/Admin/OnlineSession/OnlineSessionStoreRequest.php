@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\OnlineSession;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class OnlineSessionStoreRequest extends BaseRequest
 {
     public function authorize(): bool

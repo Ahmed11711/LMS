@@ -52,7 +52,10 @@ class CourseController extends BaseController
     protected function getShowRelationships(): array
     {
         return [
+
             'chapters.lessons',
+            'chapters.onlineSessions',
+            'chapters.physicalCourseDetails',
             'infos',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
             'category:id,name',
