@@ -42,10 +42,12 @@ class AcademyPacakgaeController extends Controller
 
         $packages->getCollection()->transform(function ($package) use ($hasReceipt) {
             $package->receipt = $hasReceipt && $package->receipt
-                ? asset('storage/' . ltrim($package->receipt, '/'))
+                ? asset(ltrim($package->receipt, '/'))
                 : null;
 
-
+            // $this->image
+            //                 ? asset(ltrim($this->image, '/'))
+            //                 : null,
             return $package;
         });
 
