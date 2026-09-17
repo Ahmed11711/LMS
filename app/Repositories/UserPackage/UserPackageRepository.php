@@ -18,6 +18,10 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
     {
         return $this->model->where('user_id', $userId)->where('active', 1)->first();
     }
+    public function MyPackageWithStatus($userId)
+    {
+        return $this->model->where('user_id', $userId)->first();
+    }
     public function cancelPendingRequests($tenantUserId, $centralUserId): void
     {
         UserPackage::where('user_id', $tenantUserId)

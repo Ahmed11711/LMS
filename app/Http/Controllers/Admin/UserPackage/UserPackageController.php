@@ -35,7 +35,7 @@ class UserPackageController extends BaseController
     {
         $userId = $request->get('user_id');
 
-        $myPackage = $repository->MyPackage($userId);
+        $myPackage = $repository->MyPackageWithStatus($userId);
 
         if (!$myPackage) {
             return response()->json(['message' => 'No active package'], 404);
