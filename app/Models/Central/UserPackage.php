@@ -3,6 +3,7 @@
 namespace App\Models\Central;
 
 use App\Casts\StorageUrlCast;
+use App\Casts\StorageUrlWithFolderCast;
 use App\Models\Central\Package;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,7 +14,7 @@ class UserPackage extends Model
     public $sortable = ['id', 'user_id', 'created_at', 'updated_at', 'package_id', 'package_name', 'status'];
 
     protected $casts = [
-        'payment_proof' => StorageUrlCast::class,
+        'payment_proof' => StorageUrlWithFolderCast::class,
     ];
     protected static function boot()
     {
