@@ -84,15 +84,13 @@ class UserPackageController extends BaseController
             'status'        => 'pending',
             'active'        => false,
             'price'         => $newPackage->price ?? 0,
-            // 'payment_proof' => $path,
+            'payment_proof' => $path,
         ];
 
-        // 1) بيانات الـ Tenant: user_id = اليوزر نفسه
         $tenantData = array_merge($baseData, [
             'user_id' => $user->id,
         ]);
 
-        // 2) بيانات الـ Central: user_id = academy_id
         $centralData = array_merge($baseData, [
             'user_id' => $user->academy_id,
         ]);
@@ -101,10 +99,8 @@ class UserPackageController extends BaseController
         $centralInserted = false;
 
         try {
-            // إلغاء أي طلبات pending سابقة في الاتنين قبل إنشاء طلب جديد
             $repository->cancelPendingRequests($user->id, $user->academy_id);
 
-            // تخزين في قاعدة بيانات الـ Tenant الحالية
             $pendingRequest = $repository->createPendingUpgrade($tenantData);
 
             // تخزين في قاعدة البيانات المركزية (Central)
