@@ -18,7 +18,7 @@ class PackageUpdateRequest extends BaseRequest
             'desc' => 'nullable|sometimes|string',
             'price' => 'sometimes|required|numeric',
             'discount' => 'sometimes|required|numeric',
-            'is_active' => 'sometimes|required|integer',
+            'is_active' => 'sometimes|required|boolean',
             'duration_months' => 'sometimes|required|integer',
             'order' => 'sometimes|required|integer',
             'recomnd' => 'sometimes|required|integer',

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Package extends Model
 {
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
     protected $guarded = [];
 
     public function packageFeatures()
