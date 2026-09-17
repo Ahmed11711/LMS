@@ -23,7 +23,7 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
         // 1) جرب تجيب آخر باقة اكتيف
         $activePackage = $this->model
             ->where('user_id', $userId)
-            ->where('is_active', 1)
+            ->where('active', 1)
             ->latest()
             ->first();
 
@@ -34,7 +34,7 @@ class UserPackageRepository extends BaseRepository implements UserPackageReposit
         // 2) لو مفيش اكتيف، هات آخر باقة مش pending
         return $this->model
             ->where('user_id', $userId)
-            ->where('is_active', 0)
+            ->where('active', 0)
             ->latest()
             ->first();
     }
