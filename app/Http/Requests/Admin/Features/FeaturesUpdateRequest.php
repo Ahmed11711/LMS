@@ -15,7 +15,7 @@ class FeaturesUpdateRequest extends BaseRequest
     {
         return [
             'title' => 'sometimes|required|string|max:255',
-            // 'key' => 'sometimes|required|string|max:255',
+            'key' => 'sometimes|required|string|max:255',
             'label' => 'nullable|string',
 
         ];
