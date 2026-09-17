@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\PhysicalCourseDetail;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class PhysicalCourseDetailStoreRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -13,6 +15,8 @@ class PhysicalCourseDetailStoreRequest extends BaseRequest
     {
         return [
             'course_id' => 'required|integer|exists:courses,id',
+            'chapter_id' => 'required|integer|exists:chapters,id',
+
             'address' => 'required|string|max:255',
             'map_url' => 'nullable|string|max:255',
             'start_date' => 'required|date',

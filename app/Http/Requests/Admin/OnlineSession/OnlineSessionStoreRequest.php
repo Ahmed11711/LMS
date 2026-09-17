@@ -15,6 +15,8 @@ class OnlineSessionStoreRequest extends BaseRequest
     {
         return [
             'course_id' => 'required|integer|exists:courses,id',
+            'chapter_id' => 'required|integer|exists:chapters,id',
+
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'session_url' => 'required|string|max:255',

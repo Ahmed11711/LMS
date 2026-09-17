@@ -22,11 +22,11 @@ class Chapter extends TenantModel
 
     public function onlineSessions()
     {
-        return $this->hasMany(OnlineSession::class);
+        return $this->hasMany(OnlineSession::class, 'chapter_id');
     }
 
     public function physicalCourseDetails()
     {
-        return $this->hasMany(PhysicalCourseDetail::class);
+        return $this->hasMany(PhysicalCourseDetail::class, 'chapter_id');
     }
 }

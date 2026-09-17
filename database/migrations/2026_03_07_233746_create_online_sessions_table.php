@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('online_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('chapter_id')
+                ->nullable()
+                ->after('course_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('session_url');

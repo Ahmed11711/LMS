@@ -14,6 +14,11 @@ return new class extends Migration
         Schema::create('physical_course_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('chapter_id')
+                ->nullable()
+                ->after('course_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->string('address');
             $table->string('map_url')->nullable();
             $table->date('start_date');
