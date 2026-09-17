@@ -12,6 +12,7 @@ class FeaturesResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'key' => $this->key,
+            'label' => $this->label ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

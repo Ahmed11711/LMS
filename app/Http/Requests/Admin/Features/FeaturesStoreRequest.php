@@ -15,6 +15,7 @@ class FeaturesStoreRequest extends BaseRequest
     {
         return [
             'title' => 'required|string|max:255',
+            'label' => 'nullable|string',
         ];
     }
 }
