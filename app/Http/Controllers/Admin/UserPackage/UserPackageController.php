@@ -30,7 +30,6 @@ class UserPackageController extends BaseController
         $this->updateRequestClass = UserPackageUpdateRequest::class;
         $this->resourceClass = UserPackageResource::class;
     }
-
     public function myPacake(UserPackageRepositoryInterface $repository, Request $request)
     {
         $userId = $request->get('user_id');
@@ -43,7 +42,16 @@ class UserPackageController extends BaseController
 
         $packageDetails = DB::connection('LMS_CENTER')
             ->table('feature_packages')
-            ->where('package_id', $myPackage->package_id)
+            ->join('features', 'features.id', '=', 'feature_packages.feature_id')
+            ->where('feature_packages.package_id', $myPackage->package_id)
+            ->select(
+                'feature_packages.id',
+                'feature_packages.package_id',
+                'feature_packages.feature_id',
+                'feature_packages.value',
+                'features.label',
+                'features.key as key_feature'
+            )
             ->get();
 
         return response()->json([
@@ -51,7 +59,6 @@ class UserPackageController extends BaseController
             'features' => $packageDetails
         ]);
     }
-
     /**
      * الأكاديمية بتطلب ترقية: بيتعمل صف جديد في user_packages بحالة pending
      */
