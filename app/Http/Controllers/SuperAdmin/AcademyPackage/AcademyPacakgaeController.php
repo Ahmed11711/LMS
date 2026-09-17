@@ -41,7 +41,7 @@ class AcademyPacakgaeController extends Controller
             ->paginate($perPage);
 
         $packages->getCollection()->transform(function ($package) use ($hasReceipt) {
-            $package->receipt = $hasReceipt && $package->payment_proof
+            $package->receipt = $hasReceipt && $package->receipt
                 ? asset(ltrim($package->payment_proof, '/'))
                 : null;
 
