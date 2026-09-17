@@ -15,6 +15,8 @@ class UserPackage extends Model
 
     protected $casts = [
         'payment_proof' => StorageUrlWithFolderCast::class,
+        'receipt' => StorageUrlWithFolderCast::class,
+
     ];
     protected static function boot()
     {

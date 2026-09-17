@@ -45,6 +45,7 @@ class AcademyPacakgaeController extends Controller
                 ? asset(ltrim($package->receipt, '/'))
                 : null;
 
+
             return $package;
         });
 
