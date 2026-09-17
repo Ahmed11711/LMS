@@ -43,7 +43,7 @@ class AcademyPacakgaeController extends Controller
         $packages->getCollection()->transform(function ($package) use ($hasReceipt) {
             $package->receipt = $hasReceipt && $package->receipt
                 ? asset('storage/' . ltrim($package->receipt, '/'))
-                : 'https://placehold.co/400x300?text=Receipt'; // رابط تجريبي مؤقت
+                : null;
 
             return $package;
         });
