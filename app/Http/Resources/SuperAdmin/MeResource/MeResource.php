@@ -21,11 +21,25 @@ class MeResource extends JsonResource
             'role' => $this->role,
             'is_active' => $this->is_active,
             // 'profile_image' => $this->profile_image,
-            'profile_image' => $this->profile_image
-                ? asset(ltrim($this->profile_image, '/'))
-                : null,
+            'profile_image' => $this->profileImageUrl(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+    private function profileImageUrl(): ?string
+    {
+        $image = $this->profile_image;
+
+        if (!$image) return null;
+
+        if (str_starts_with($image, 'http')) return $image;
+
+        $path = ltrim($image, '/');
+
+        if (!str_starts_with($path, 'storage/')) {
+            $path = 'storage/' . $path;
+        }
+
+        return asset($path);
     }
 }
