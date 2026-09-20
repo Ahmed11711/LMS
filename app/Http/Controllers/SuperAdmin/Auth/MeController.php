@@ -4,7 +4,7 @@ namespace App\Http\Controllers\SuperAdmin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SuperAdmin\Auth\UpdateProfileRequest;
-use App\Http\Resources\User\Me\MeResource;
+use App\Http\Resources\SuperAdmin\MeResource\MeResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
