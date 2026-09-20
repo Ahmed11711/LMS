@@ -143,6 +143,7 @@ class UserPackageController extends BaseController
     }
     public function approveUpgrade(int $userPackageId, UserPackageRepositoryInterface $repository)
     {
+        Log::info('Approving upgrade request', ['user_package_id' => $userPackageId]);
         $pendingRequest = $repository->findPendingRequest($userPackageId);
 
         if (!$pendingRequest) {
