@@ -25,7 +25,7 @@ class LimitPackageController extends Controller
 
     public function getUsageSummary()
     {
-        $labels = DB::connection('central')
+        $labels = DB::connection('LMS_CENTER')
             ->table('features')
             ->pluck('name', 'slug');
 
