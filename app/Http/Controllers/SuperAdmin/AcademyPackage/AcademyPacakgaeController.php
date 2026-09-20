@@ -4,7 +4,6 @@ namespace App\Http\Controllers\SuperAdmin\AcademyPackage;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserPackage\UserPackageUpdateRequest;
-use App\Models\Central\User;
 use App\Models\Central\UserPackage;
 use App\QueryFilters\ColumnFilter;
 use App\QueryFilters\Search;
@@ -14,9 +13,9 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class AcademyPacakgaeController extends Controller
 {
@@ -24,12 +23,12 @@ class AcademyPacakgaeController extends Controller
 
     public function index(Request $request)
     {
-        return User::get();
+
         $perPage = $request->query('per_page', 15);
 
         $hasReceipt = Schema::hasColumn('user_packages', 'receipt');
 
-        $query = UserPackage::query()->with('user:id,name,email');
+        $query = UserPackage::query()->with('user:id,name,email,username');
 
         $packages = app(Pipeline::class)
             ->send($query)
