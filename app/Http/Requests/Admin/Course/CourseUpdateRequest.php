@@ -17,6 +17,8 @@ class CourseUpdateRequest extends BaseRequest
             'title'           => 'sometimes|required|string|max:255',
             'type'            => 'sometimes|required|in:recorded,online,physical',
             'category_id'     => 'nullable|sometimes|integer|exists:categories,id',
+            'short_description' => 'nullable|string|max:255',
+
             'description'     => 'nullable|sometimes|string',
             'image'           => 'nullable|sometimes|image|mimes:jpeg,png,jpg,webp|max:2048',
             'price_type'      => 'sometimes|required|in:free,paid',
