@@ -53,7 +53,6 @@ class PackageController extends BaseController
     }
 
     /**
-     * قبل التحديث: نفس الفكرة، نطلع الـ features برة
      */
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
@@ -64,7 +63,6 @@ class PackageController extends BaseController
     }
 
     /**
-     * بعد التحديث: نعمل sync للـ features (تحديث الموجود + إضافة الجديد + حذف المشطوب)
      */
     protected function afterUpdate($updatedRecord, $oldRecord, Request $request): void
     {
@@ -72,7 +70,6 @@ class PackageController extends BaseController
     }
 
     /**
-     * الدالة المسؤولة عن ربط الـ Package بالـ Features بتاعته
      */
     protected function syncFeatures($package, array $features): void
     {
