@@ -12,7 +12,7 @@ class AcademyResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->username,
-            'academy_name' => $this->name,
+            'academy_name' => $this->username,
             'email' => $this->email,
             'phone' => $this->phone,
             'phone_academy' => $this->phone_academy,
