@@ -23,6 +23,7 @@ class AcademyPacakgaeController extends Controller
 
     public function index(Request $request)
     {
+        return User::get();
         $perPage = $request->query('per_page', 15);
 
         $hasReceipt = Schema::hasColumn('user_packages', 'receipt');
