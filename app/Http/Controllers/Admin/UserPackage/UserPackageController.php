@@ -333,12 +333,19 @@ class UserPackageController extends BaseController
                 ])->values()->all(),
             ]);
 
-            $features = DB::connection('LMS_CENTER')->table('feature_packages')
-                ->where('package_id', $pendingRequest->package_id)
-                ->whereNotNull('key_feature')
-                ->where('key_feature', '!=', '')
-                ->get();
+            // $features = DB::connection('LMS_CENTER')->table('feature_packages')
+            //     ->where('package_id', $pendingRequest->package_id)
+            //     ->whereNotNull('key_feature')
+            //     ->where('key_feature', '!=', '')
+            //     ->get();
 
+            $features = DB::connection('LMS_CENTER')->table('feature_packages as fp')
+                ->join('features as f', 'f.id', '=', 'fp.feature_id')
+                ->where('fp.package_id', $pendingRequest->package_id)
+                ->whereNotNull('f.key')
+                ->where('f.key', '!=', '')
+                ->select('fp.id', 'fp.package_id', 'fp.feature_id', 'fp.value', 'f.key as key_feature')
+                ->get();
             Log::info('[approveUpgrade] 6b. FILTERED features', [
                 'package_id' => $pendingRequest->package_id,
                 'count'      => $features->count(),
