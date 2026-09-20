@@ -192,7 +192,6 @@ class UserPackageController extends BaseController
                 DB::purge('tenant');
                 DB::reconnect('tenant');
 
-                // نجيب الـ user المحلي جوه الـ Tenant عن طريق academy_id
                 $tenantLocalUser = DB::connection('tenant')->table('users')
                     ->where('academy_id', $pendingRequest->user_id)
                     ->first();
@@ -227,6 +226,13 @@ class UserPackageController extends BaseController
                 ]);
 
                 foreach ($features as $f) {
+                    Log::info('Processing feature for tenant', [
+                        'feature_package_id' => $f->id,
+                        'package_id'         => $f->package_id,
+                        'feature_id'         => $f->feature_id,
+                        'key_feature'        => $f->key_feature,
+                        'value'              => $f->value,
+                    ]);
                     if (empty($f->key_feature)) {
                         Log::warning('Feature package missing key_feature, skipped', [
                             'feature_package_id' => $f->id,
