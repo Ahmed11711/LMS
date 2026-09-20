@@ -56,6 +56,7 @@ class CourseController extends BaseController
             'chapters.lessons',
             'chapters.onlineSessions',
             'chapters.physicalCourseDetails',
+            'chapters.course:id,type',
             'infos',
             'courseReceiverAccounts.instructorReceiverAccount.receiverAccount',
             'category:id,name',

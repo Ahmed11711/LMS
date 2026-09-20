@@ -26,12 +26,12 @@ class ChapterResource extends JsonResource
 
     private function resolveLessons()
     {
-        $type = $this->whenLoaded('course', fn() => $this->course->type);
+        $type = $this->relationLoaded('course') ? $this->course?->type : null;
 
         return match ($type) {
             'online'  => OnlineSessionResource::collection($this->whenLoaded('onlineSessions')),
             'offline' => PhysicalCourseDetailResource::collection($this->whenLoaded('physicalCourseDetails')),
-            default   => LessonResource::collection($this->whenLoaded('lessons')), // recorded أو أي نوع تاني
+            default   => LessonResource::collection($this->whenLoaded('lessons')),
         };
     }
 }

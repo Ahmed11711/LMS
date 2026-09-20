@@ -35,11 +35,9 @@ class BagResource extends JsonResource
             'count_view' => $this->count_view,
             'status' => $this->status,
 
-            // 🔑 فلاج بيبين هل اليوزر اشترى الحقيبة دي فعلاً وموافق عليها
-            'is_purchased' => $isPurchased,
+             'is_purchased' => $isPurchased,
 
-            // 🔒 الـ items: لو مش مشترى، path يترجع null
-            'items' => $this->whenLoaded('items', function () use ($isPurchased) {
+             'items' => $this->whenLoaded('items', function () use ($isPurchased) {
                 return $this->items->map(function ($item) use ($isPurchased) {
                     return [
                         'id' => $item->id,
