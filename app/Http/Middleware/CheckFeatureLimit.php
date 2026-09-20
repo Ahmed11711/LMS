@@ -17,13 +17,19 @@ class CheckFeatureLimit
             ->first();
 
         if (!$feature) {
-            return response()->json(['message' => 'Feature locked or not found'], 403);
+            return response()->json([
+                'code'    => 'FEATURE_NOT_FOUND',
+                'message' => __('limits.not_found'),
+            ], 403);
         }
 
-        // 1. Boolean features (on/off features)
+        // 1. Boolean features
         if ($feature->type === 'boolean') {
             if ($feature->is_enabled == false || $feature->total_limit == 0) {
-                return response()->json(['message' => 'This feature is locked or not available in your current plan.'], 403);
+                return response()->json([
+                    'code'    => 'FEATURE_LOCKED',
+                    'message' => __('limits.locked'),
+                ], 403);
             }
             return $next($request);
         }
@@ -33,24 +39,28 @@ class CheckFeatureLimit
             return $next($request);
         }
 
-        // 3. Storage check (file size based)
+        // 3. Storage check
         if ($fileInputName && $request->hasFile($fileInputName)) {
             $fileSizeInMB = $request->file($fileInputName)->getSize() / (1024 * 1024);
 
             if (($feature->used_amount + $fileSizeInMB) > $feature->total_limit) {
+                $available = max(0, $feature->total_limit - $feature->used_amount);
+
                 return response()->json([
-                    'message'   => 'مساحة التخزين المتبقية غير كافية.',
-                    'available' => round($feature->total_limit - $feature->used_amount, 2) . ' MB',
+                    'code'      => 'STORAGE_FULL',
+                    'message'   => __('limits.storage_full'),
+                    'available' => round($available, 2) . ' ' . __('limits.mb'),
                 ], 403);
             }
 
             return $next($request);
         }
 
-        // 4. Count check (number of items used)
+        // 4. Count check
         if ($feature->used_amount >= $feature->total_limit) {
             return response()->json([
-                'message' => 'You have reached the maximum limit for this feature.',
+                'code'    => 'FEATURE_LIMIT_REACHED',
+                'message' => __('limits.limit_reached'),
                 'limit'   => (int) $feature->total_limit,
                 'current' => (int) $feature->used_amount,
             ], 403);

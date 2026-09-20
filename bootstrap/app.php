@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SyncFeaturePackageAfterResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,9 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'kashier/webhook/academy/*',
             'bunny/webhook',
         ]);
+
+        $middleware->api(prepend: [
+            SetLocale::class,
+        ]);
+
         $middleware->alias([
-            'sync.feature.package' =>
-            SyncFeaturePackageAfterResponse::class,
+            'sync.feature.package' => SyncFeaturePackageAfterResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
