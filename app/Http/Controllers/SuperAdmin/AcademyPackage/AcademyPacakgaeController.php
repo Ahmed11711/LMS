@@ -10,25 +10,60 @@ use App\QueryFilters\Search;
 use App\QueryFilters\SelectFields;
 use App\QueryFilters\SortBy;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Cache;
 
 class AcademyPacakgaeController extends Controller
 {
     use ApiResponseTrait;
 
+    // public function index(Request $request)
+    // {
+
+    //     $perPage = $request->query('per_page', 15);
+
+    //     $hasReceipt = Schema::hasColumn('user_packages', 'receipt');
+
+    //     $query = UserPackage::query()->with('user:id,name,email,username');
+
+    //     $packages = app(Pipeline::class)
+    //         ->send($query)
+    //         ->through([
+    //             Search::class,
+    //             ColumnFilter::class,
+    //             SelectFields::class,
+    //             SortBy::class,
+    //         ])
+    //         ->thenReturn()
+    //         ->paginate($perPage);
+
+    //     $packages->getCollection()->transform(function ($package) use ($hasReceipt) {
+    //         $package->receipt = $hasReceipt && $package->receipt
+    //             ? asset(ltrim($package->payment_proof, '/'))
+    //             : null;
+
+
+    //         return $package;
+    //     });
+
+
+    //     return $this->successResponsePaginate($packages, 'Packages fetched successfully');
+    // }
     public function index(Request $request)
     {
-
         $perPage = $request->query('per_page', 15);
 
         $hasReceipt = Schema::hasColumn('user_packages', 'receipt');
 
         $query = UserPackage::query()->with('user:id,name,email,username');
+
+        $query = $this->applyDateFilter($query, $request);
+        $query = $this->applyStatusFilter($query, $request);
 
         $packages = app(Pipeline::class)
             ->send($query)
@@ -46,13 +81,58 @@ class AcademyPacakgaeController extends Controller
                 ? asset(ltrim($package->payment_proof, '/'))
                 : null;
 
-
             return $package;
         });
 
-
         return $this->successResponsePaginate($packages, 'Packages fetched successfully');
     }
+    public function stats(Request $request): JsonResponse
+    {
+        $base = UserPackage::query();
+        $base = $this->applyDateFilter($base, $request);
+        $base = $this->applyStatusFilter($base, $request);
+
+        return $this->successResponse([
+            'total'     => (clone $base)->count(),
+            'active'    => (clone $base)->where('status', 'active')->count(),
+            'pending'   => (clone $base)->where('status', 'pending')->count(),
+            'expired'   => (clone $base)->where('status', 'expired')->count(),
+            'cancelled' => (clone $base)->where('status', 'cancelled')->count(),
+            'failed'    => (clone $base)->where('status', 'failed')->count(),
+        ], 'Stats retrieved successfully');
+    }
+
+    protected function applyDateFilter($query, Request $request)
+    {
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            if ($request->filled('date_from')) {
+                $query->where('created_at', '>=', Carbon::parse($request->date_from)->startOfDay());
+            }
+            if ($request->filled('date_to')) {
+                $query->where('created_at', '<=', Carbon::parse($request->date_to)->endOfDay());
+            }
+            return $query;
+        }
+
+        return match ($request->get('period')) {
+            'today', 'day' => $query->whereDate('created_at', Carbon::today()),
+            'yesterday'    => $query->whereDate('created_at', Carbon::yesterday()),
+            'week'         => $query->where('created_at', '>=', Carbon::now()->subWeek()),
+            'month'        => $query->where('created_at', '>=', Carbon::now()->subMonth()),
+            'year'         => $query->where('created_at', '>=', Carbon::now()->subYear()),
+            default        => $query,
+        };
+    }
+
+    protected function applyStatusFilter($query, Request $request)
+    {
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        return $query;
+    }
+
 
     public function update(UserPackageUpdateRequest $request, UserPackage $academyPackage)
     {
