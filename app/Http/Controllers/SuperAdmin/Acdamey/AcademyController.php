@@ -130,6 +130,18 @@ class AcademyController extends BaseController
                 ->where('status', 'active');
         });
     }
+    public function stats(Request $request): JsonResponse
+    {
+        $base = User::query()->where('role', 'academy');
+        $base = $this->applyDateFilter($base, $request);
+        $base = $this->applyPackageFilter($base, $request);
+
+        return $this->successResponse([
+            'active'   => (clone $base)->where('is_active', true)->count(),
+            'inactive' => (clone $base)->where('is_active', false)->count(),
+            'total'    => (clone $base)->count(),
+        ], 'Stats retrieved successfully');
+    }
 
     public function packagesList()
     {
