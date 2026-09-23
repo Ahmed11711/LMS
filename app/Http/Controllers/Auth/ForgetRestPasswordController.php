@@ -42,20 +42,18 @@ class ForgetRestPasswordController extends Controller
         ]);
 
         if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
-            // TODO: رجّع الإرسال الفعلي بكرة - متنساش تشيل التعليق ده
-            // $result = $this->sendEmail($contact, $otp);
-            //
-            // if ($result !== true) {
-            //     return $this->errorResponse('Failed to send OTP email', 500);
-            // }
+            $result = $this->sendEmail($contact, $otp);
+
+            if ($result !== true) {
+                return $this->errorResponse('Failed to send OTP email', 500);
+            }
         } elseif ($this->isEgyptianPhone($contact)) {
-            // TODO: رجّع الإرسال الفعلي بكرة - متنساش تشيل التعليق ده
-            // $message = "كود التحقق الخاص بك هو: {$otp}";
-            // $smsResult = $this->smsService->sendSms($this->normalizeEgyptianPhone($contact), $message);
-            //
-            // if (($smsResult['status'] ?? null) === 'error') {
-            //     return $this->errorResponse('Failed to send OTP SMS', 500);
-            // }
+            $message = "كود التحقق الخاص بك هو: {$otp}";
+            $smsResult = $this->smsService->sendSms($this->normalizeEgyptianPhone($contact), $message);
+
+            if (($smsResult['status'] ?? null) === 'error') {
+                return $this->errorResponse('Failed to send OTP SMS', 500);
+            }
         } else {
             return $this->errorResponse('Unsupported contact method', 422);
         }
