@@ -14,7 +14,8 @@ class CreateAccountRequest extends BaseRequest
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:tenant.users,email',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6',
+            'phone' => ['required', 'string', 'max:20', Rule::unique('tenant.users', 'phone')],
         ];
     }
 }
