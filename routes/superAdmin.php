@@ -52,5 +52,6 @@ Route::prefix('superAdmin')->group(function () {
         Route::apiResource('countries', CountryController::class)->names('country');
         Route::apiResource('payment_methods', PaymentMethodController::class)->names('payment_method');
         Route::apiResource('academies', AcademyController::class)->names('academy');
+        Route::get('academies/stats', [AcademyController::class, 'stats'])->name('academy.stats');
     });
 });

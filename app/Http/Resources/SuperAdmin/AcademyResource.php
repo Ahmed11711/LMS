@@ -20,6 +20,10 @@ class AcademyResource extends JsonResource
             'domain' => $this->whenLoaded('tenant', function () {
                 return $this->tenant?->domain;
             }),
+            'package' => $this->activePackage?->package?->name
+                ?? $this->activePackage?->package_name
+                ?? 'غير محدد',
+            'package_id' => $this->activePackage?->package_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

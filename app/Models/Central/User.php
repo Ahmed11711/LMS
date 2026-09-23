@@ -38,4 +38,15 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Tenant::class, 'name', 'username');
     }
+    public function packages()
+    {
+        return $this->hasMany(\App\Models\Central\UserPackage::class, 'user_id');
+    }
+
+    public function activePackage()
+    {
+        return $this->hasOne(\App\Models\Central\UserPackage::class, 'user_id')
+            ->where('status', 'active')
+            ->latestOfMany();
+    }
 }
