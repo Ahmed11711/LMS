@@ -51,7 +51,10 @@ Route::prefix('superAdmin')->group(function () {
         Route::apiResource('user_packages', UserPackageController::class)->names('user_package');
         Route::apiResource('countries', CountryController::class)->names('country');
         Route::apiResource('payment_methods', PaymentMethodController::class)->names('payment_method');
-        Route::apiResource('academies', AcademyController::class)->names('academy');
         Route::get('academies/stats', [AcademyController::class, 'stats'])->name('academy.stats');
+        Route::get('academies/packages-list', [AcademyController::class, 'packagesList'])->name('academy.packages-list');
+
+        // بعدين apiResource
+        Route::apiResource('academies', AcademyController::class)->names('academy');
     });
 });
