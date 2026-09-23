@@ -64,6 +64,7 @@ class AcademyPacakgaeController extends Controller
 
         $query = $this->applyDateFilter($query, $request);
         $query = $this->applyStatusFilter($query, $request);
+        $query = $this->applyPackageFilter($query, $request);   // ✅ إضافة
 
         $packages = app(Pipeline::class)
             ->send($query)
@@ -86,11 +87,13 @@ class AcademyPacakgaeController extends Controller
 
         return $this->successResponsePaginate($packages, 'Packages fetched successfully');
     }
+
     public function stats(Request $request): JsonResponse
     {
         $base = UserPackage::query();
         $base = $this->applyDateFilter($base, $request);
         $base = $this->applyStatusFilter($base, $request);
+        $base = $this->applyPackageFilter($base, $request);
 
         return $this->successResponse([
             'total'     => (clone $base)->count(),
@@ -101,7 +104,14 @@ class AcademyPacakgaeController extends Controller
             'failed'    => (clone $base)->where('status', 'failed')->count(),
         ], 'Stats retrieved successfully');
     }
+    protected function applyPackageFilter($query, Request $request)
+    {
+        if ($request->filled('package_id')) {
+            $query->where('package_id', $request->get('package_id'));
+        }
 
+        return $query;
+    }
     protected function applyDateFilter($query, Request $request)
     {
         if ($request->filled('date_from') || $request->filled('date_to')) {
