@@ -9,6 +9,7 @@ class Package extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+    protected $allowedFields = ['id', 'title',  'is_active', 'created_at', 'updated_at'];
     protected $guarded = [];
 
     public function packageFeatures()
