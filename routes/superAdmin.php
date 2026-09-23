@@ -36,8 +36,9 @@ Route::prefix('superAdmin')->group(function () {
         Route::post('/academy-packages/{userPackageId}/approve', [UserPackageController::class, 'approveUpgrade']);
         Route::get('Statistics-dashboard', [AcademyPacakgaeController::class, 'dashboard']);
 
-        Route::apiResource('academy-packages', AcademyPacakgaeController::class);
+
         Route::get('academy-packages/stats', [AcademyPacakgaeController::class, 'stats'])->name('academy-packages.stats');
+        Route::apiResource('academy-packages', AcademyPacakgaeController::class)->names('academy-packages');
 
         // Route::apiResource('packages', PackageController::class)->names('package');
         Route::apiResource('packages', PackageController::class)
