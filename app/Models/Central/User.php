@@ -15,7 +15,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $connection = 'LMS_CENTER'; // Central DB
     protected $table = 'users';
-    public $searchable = ['email', 'academy_name', 'username', 'phone'];
+    public $searchable = ['email', 'name', 'username', 'phone'];
 
     // protected $fillable = ['name', 'email', 'password', 'role', 'phone'];
     protected $guarded = [];
