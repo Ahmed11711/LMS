@@ -6,6 +6,12 @@ use App\Models\Central\User;
 use App\Models\Central\Package;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Pipeline\Pipeline;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
 use App\Http\Controllers\BaseController\BaseController;
 use App\Http\Resources\SuperAdmin\AcademyResource;
 use App\Http\Requests\SuperAdmin\Academy\AcademyUpdateRequest;
@@ -41,24 +47,48 @@ class AcademyController extends BaseController
         return $query;
     }
 
-    public function stats(Request $request)
+    /**
+     * Override بيحافظ على نفس الـ Pipeline بتاع BaseController بالظبط،
+     * وبيضيف بس stats (active/inactive/total) جوا نفس الـ response.
+     */
+    public function index(Request $request): JsonResponse
     {
-        $base = User::query()->where('role', 'academy');
-        $base = $this->applyDateFilter($base, $request);
-        $base = $this->applyPackageFilter($base, $request);
+        try {
+            $query = $this->repository->query()->with($this->getIndexRelationships());
+            $query = $this->applyScoping($query);
 
-        return response()->json([
-            'active'   => (clone $base)->where('is_active', true)->count(),
-            'inactive' => (clone $base)->where('is_active', false)->count(),
-            'total'    => (clone $base)->count(),
-        ]);
-    }
+            // stats محسوبة على نفس الـ scoping (نفس الفلاتر: date/package/role)
+            // لكن قبل ما الـ Pipeline يطبق Search/ColumnFilter عشان الكروت تفضل ثابتة
+            // مع فلاتر التاريخ والباقة بس، مش متأثرة بالبحث النصي في الجدول
+            $statsBase = clone $query;
+            $stats = [
+                'active'   => (clone $statsBase)->where('is_active', true)->count(),
+                'inactive' => (clone $statsBase)->where('is_active', false)->count(),
+                'total'    => (clone $statsBase)->count(),
+            ];
 
-    public function packagesList()
-    {
-        return response()->json(
-            Package::select('id', 'name')->get()
-        );
+            $data = app(Pipeline::class)
+                ->send($query)
+                ->through([
+                    Search::class,
+                    ColumnFilter::class,
+                    SelectFields::class,
+                    SortBy::class,
+                ])
+                ->thenReturn()
+                ->latest()
+                ->paginate($request->input('per_page', 10));
+
+            if (class_exists($this->resourceClass)) {
+                $data = $this->resourceClass::collection($data)
+                    ->additional(['stats' => $stats]);
+            }
+
+            return $this->successResponsePaginate($data, "Data retrieved via Pipeline");
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Pipeline Error: " . $e->getMessage());
+            return $this->errorResponse("Failed to fetch data", 500);
+        }
     }
 
     protected function applyDateFilter($query, Request $request)
@@ -99,5 +129,12 @@ class AcademyController extends BaseController
             $q->where('package_id', $request->package_id)
                 ->where('status', 'active');
         });
+    }
+
+    public function packagesList()
+    {
+        return response()->json(
+            Package::select('id', 'name')->get()
+        );
     }
 }
