@@ -63,28 +63,52 @@ class DashboardController extends Controller
             ', [$today])
             ->first();
 
-        // ===== مبيعات الدورات =====
-        $courseSalesStats = UserSubscribe::query()
-            ->where('status', 'active')
-            ->when(!$isAdmin, fn($q) => $q->whereHas('course', fn($qq) => $qq->where('user_id', $user->id)))
+        // ===== مبيعات الدورات لكل عملة =====
+        $courseSalesByCurrency = UserSubscribe::query()
+            ->join('courses', 'courses.id', '=', 'user_subscribes.course_id')
+            ->where('user_subscribes.status', 'active')
+            ->when(!$isAdmin, fn($q) => $q->where('courses.user_id', $user->id))
             ->selectRaw("
-                COALESCE(SUM(CASE WHEN price ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(price AS numeric) ELSE 0 END), 0) as total,
-                COALESCE(SUM(CASE WHEN created_at < ? AND price ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(price AS numeric) ELSE 0 END), 0) as before_today
+                COALESCE(courses.currency, 'UNKNOWN') as currency,
+                COALESCE(SUM(CASE WHEN user_subscribes.price ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(user_subscribes.price AS numeric) ELSE 0 END), 0) as total,
+                COALESCE(SUM(CASE WHEN user_subscribes.created_at < ? AND user_subscribes.price ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(user_subscribes.price AS numeric) ELSE 0 END), 0) as before_today
             ", [$today])
-            ->first();
+            ->groupBy('courses.currency')
+            ->get();
 
-        // ===== مبيعات الحقائب =====
-        $bagSalesStats = BagPurchase::query()
-            ->where('status', 'approved')
-            ->when(!$isAdmin, fn($q) => $q->whereHas('bag', fn($qq) => $qq->where('user_id', $user->id)))
-            ->selectRaw('
-                COALESCE(SUM(amount), 0) as total,
-                COALESCE(SUM(CASE WHEN created_at < ? THEN amount ELSE 0 END), 0) as before_today
-            ', [$today])
-            ->first();
+        // ===== مبيعات الحقائب لكل عملة =====
+        $bagSalesByCurrency = BagPurchase::query()
+            ->join('bags', 'bags.id', '=', 'bag_purchases.bag_id')
+            ->where('bag_purchases.status', 'approved')
+            ->when(!$isAdmin, fn($q) => $q->where('bags.user_id', $user->id))
+            ->selectRaw("
+                COALESCE(bags.currency, 'UNKNOWN') as currency,
+                COALESCE(SUM(bag_purchases.amount), 0) as total,
+                COALESCE(SUM(CASE WHEN bag_purchases.created_at < ? THEN bag_purchases.amount ELSE 0 END), 0) as before_today
+            ", [$today])
+            ->groupBy('bags.currency')
+            ->get();
 
-        $salesTotal       = $courseSalesStats->total + $bagSalesStats->total;
-        $salesBeforeToday = $courseSalesStats->before_today + $bagSalesStats->before_today;
+        // ===== دمج المبيعات من المصدرين لكل عملة =====
+        $salesByCurrency = [];
+
+        foreach ($courseSalesByCurrency as $row) {
+            $salesByCurrency[$row->currency]['total']        = ($salesByCurrency[$row->currency]['total'] ?? 0) + (float) $row->total;
+            $salesByCurrency[$row->currency]['before_today'] = ($salesByCurrency[$row->currency]['before_today'] ?? 0) + (float) $row->before_today;
+        }
+
+        foreach ($bagSalesByCurrency as $row) {
+            $salesByCurrency[$row->currency]['total']        = ($salesByCurrency[$row->currency]['total'] ?? 0) + (float) $row->total;
+            $salesByCurrency[$row->currency]['before_today'] = ($salesByCurrency[$row->currency]['before_today'] ?? 0) + (float) $row->before_today;
+        }
+
+        $totalSales = [];
+        foreach ($salesByCurrency as $currency => $values) {
+            $totalSales[$currency] = [
+                'total'      => round($values['total'], 2),
+                'percentage' => $this->percentageChange($values['total'], $values['before_today']),
+            ];
+        }
 
         // ===== آخر 3 دورات =====
         $latestCourses = Course::query()
@@ -118,10 +142,7 @@ class DashboardController extends Controller
                 'total'      => (int) $studentsStats->total,
                 'percentage' => $this->percentageChange($studentsStats->total, $studentsStats->before_today),
             ],
-            'total_sales' => [
-                'total'      => round($salesTotal, 2),
-                'percentage' => $this->percentageChange($salesTotal, $salesBeforeToday),
-            ],
+            'total_sales' => $totalSales,
             'latest_courses' => $latestCourses,
             'latest_users'   => $latestUsers,
         ];
