@@ -32,21 +32,32 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        $coursesStats = Course::query()
+        // ===== قيمة الكورسات لكل عملة =====
+        $coursesByCurrency = Course::query()
             ->when(!$isAdmin, fn($q) => $q->where('user_id', $user->id))
-            ->selectRaw('
-                COUNT(*) as total,
-                COUNT(*) FILTER (WHERE created_at < ?) as before_today
-            ', [$today])
-            ->first();
+            ->selectRaw("
+                COALESCE(currency, 'UNKNOWN') as currency,
+                COALESCE(SUM(COALESCE(final_price, price, 0)), 0) as total,
+                COALESCE(SUM(CASE WHEN created_at < ? THEN COALESCE(final_price, price, 0) ELSE 0 END), 0) as before_today
+            ", [$today])
+            ->groupBy('currency')
+            ->get();
 
-        // ===== الحقائب لكل عملة =====
+        $coursesStats = [];
+        foreach ($coursesByCurrency as $row) {
+            $coursesStats[$row->currency] = [
+                'total'      => round((float) $row->total, 2),
+                'percentage' => $this->percentageChange($row->total, $row->before_today),
+            ];
+        }
+
+        // ===== قيمة الحقائب لكل عملة =====
         $bagsByCurrency = Bag::query()
             ->when(!$isAdmin, fn($q) => $q->where('user_id', $user->id))
             ->selectRaw("
                 COALESCE(currency, 'UNKNOWN') as currency,
-                COUNT(*) as total,
-                COUNT(*) FILTER (WHERE created_at < ?) as before_today
+                COALESCE(SUM(COALESCE(discount_price, price, 0)), 0) as total,
+                COALESCE(SUM(CASE WHEN created_at < ? THEN COALESCE(discount_price, price, 0) ELSE 0 END), 0) as before_today
             ", [$today])
             ->groupBy('currency')
             ->get();
@@ -54,7 +65,7 @@ class DashboardController extends Controller
         $bagsStats = [];
         foreach ($bagsByCurrency as $row) {
             $bagsStats[$row->currency] = [
-                'total'      => (int) $row->total,
+                'total'      => round((float) $row->total, 2),
                 'percentage' => $this->percentageChange($row->total, $row->before_today),
             ];
         }
@@ -140,10 +151,7 @@ class DashboardController extends Controller
             ->get();
 
         return [
-            'courses' => [
-                'total'      => (int) $coursesStats->total,
-                'percentage' => $this->percentageChange($coursesStats->total, $coursesStats->before_today),
-            ],
+            'courses' => $coursesStats,
             'bags' => $bagsStats,
             'new_students' => [
                 'total'      => (int) $studentsStats->total,
