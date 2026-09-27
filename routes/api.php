@@ -17,6 +17,7 @@ use App\Http\Controllers\Center\Auth\LoginAccountController;
 use App\Http\Controllers\Center\Payment\KashierPaymentController;
 use App\Http\Controllers\Front\Package\PackageController;
 use App\Http\Controllers\Tenant\CreateTenantController;
+use App\Http\Controllers\User\Bags\Bags\BagDownloadController;
 use App\Http\Controllers\User\Bags\Bags\BagsController;
 use App\Http\Controllers\User\Course\CourseController;
 use App\Http\Controllers\User\Course\MyCourseController;
@@ -34,6 +35,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -98,6 +100,7 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
 
 
     Route::apiResource('bags', BagsController::class)->except(['store', 'update', 'destroy']);
+    Route::post('bags/{bag}/download', [BagDownloadController::class, 'download']);
 
 
 
