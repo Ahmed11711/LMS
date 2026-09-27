@@ -61,7 +61,6 @@ class BagDownloadController extends Controller
             $remaining = null; // unlimited
         }
 
-        // ===== تسجيل عملية التحميل =====
         UserBagDownload::create([
             'user_id'     => $userId,
             'bag_id'      => $bagId,
