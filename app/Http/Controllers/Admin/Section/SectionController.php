@@ -13,6 +13,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
+use Illuminate\Pipeline\Pipeline;
 
 class SectionController extends BaseController
 {
@@ -30,7 +35,34 @@ class SectionController extends BaseController
         $this->resourceClass      = SectionResource::class;
         $this->withRelationships  = ['items'];
     }
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $query = $this->repository->query()->with($this->getIndexRelationships());
+            $query = $this->applyScoping($query);
 
+            $data = app(Pipeline::class)
+                ->send($query)
+                ->through([
+                    Search::class,
+                    ColumnFilter::class,
+                    SelectFields::class,
+                    SortBy::class,
+                ])
+                ->thenReturn()
+                ->latest()
+                ->get();
+
+            if (class_exists($this->resourceClass)) {
+                $data = $this->resourceClass::collection($data);
+            }
+
+            return $this->successResponse($data, "Data retrieved successfully");
+        } catch (\Throwable $e) {
+            Log::error("Pipeline Error: " . $e->getMessage());
+            return $this->errorResponse("Failed to fetch data", 500);
+        }
+    }
     /**
      */
     public function byPage(): JsonResponse
