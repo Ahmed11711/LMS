@@ -176,7 +176,7 @@ Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddlewa
         Route::apiResource('instructor_receiver_accounts', InstructorReceiverAccountController::class)->names('instructor_receiver_accounts');
         Route::apiResource('bags', BagController::class)->names('instructor.bag');
         // Route::apiResource('user_withdraws', UserWithdrawController::class)->names('user_withdraw');
-        Route::apiResource('bag_purchases', BagPurchaseController::class)->names('bag_purchase');
+        Route::apiResource('bag_purchases', BagPurchaseController::class)->names('bag_purchases');
         Route::apiResource('academic_years', AcademicYearController::class)
             ->only(['index', 'show'])
             ->names('instructor.academic_year');
