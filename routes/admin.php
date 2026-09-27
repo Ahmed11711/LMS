@@ -124,7 +124,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::post('check-otp', [CheckOtpController::class, 'checkOtp'])->name('check_otp');
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
-    Route::get('user-subscribes/stats', [UserSubscribeController::class, 'stats']);
+    Route::get('user_subscribes/stats', [UserSubscribeController::class, 'stats']);
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
 
     /////////////////Custom Domasin ////////////////////////////////////
