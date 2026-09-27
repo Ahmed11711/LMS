@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User\Bag;
 
+use App\Http\Resources\Admin\InstructorReceiverAccount\InstructorReceiverAccountResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BagResource extends JsonResource
@@ -35,9 +36,9 @@ class BagResource extends JsonResource
             'count_view' => $this->count_view,
             'status' => $this->status,
 
-             'is_purchased' => $isPurchased,
+            'is_purchased' => $isPurchased,
 
-             'items' => $this->whenLoaded('items', function () use ($isPurchased) {
+            'items' => $this->whenLoaded('items', function () use ($isPurchased) {
                 return $this->items->map(function ($item) use ($isPurchased) {
                     return [
                         'id' => $item->id,
@@ -52,6 +53,11 @@ class BagResource extends JsonResource
 
             // ✅ الجاليري بيرجع عادي زي ما هو من غير أي تعديل
             'gallery' => $this->whenLoaded('gallery'),
+
+            // ✅ طرق الدفع المتاحة لشراء الباج ده
+            'payment_infos' => InstructorReceiverAccountResource::collection(
+                $this->whenLoaded('userPaymentInfos')
+            ),
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

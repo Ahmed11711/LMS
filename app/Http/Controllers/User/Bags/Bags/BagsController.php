@@ -23,24 +23,36 @@ class BagsController extends BaseController
 
         $this->hasGallery = true;
 
-        $this->withRelationships = ['items', 'gallery', 'category', 'purchases'];
+        $this->withRelationships = [
+            'items',
+            'gallery',
+            'category',
+            'purchases',
+            'userPaymentInfos.receiverAccount',
+        ];
     }
 
     protected function getIndexRelationships(): array
     {
-        return [
-            'purchases' => function ($query) {
-                $query->where('user_id', auth('api')->id());
-            },
-        ];
+        return array_merge(
+            array_diff($this->withRelationships, ['purchases']),
+            [
+                'purchases' => function ($query) {
+                    $query->where('user_id', auth('api')->id());
+                },
+            ]
+        );
     }
 
     protected function getShowRelationships(): array
     {
-        return array_merge($this->withRelationships, [
-            'purchases' => function ($query) {
-                $query->where('user_id', auth('api')->id());
-            },
-        ]);
+        return array_merge(
+            array_diff($this->withRelationships, ['purchases']),
+            [
+                'purchases' => function ($query) {
+                    $query->where('user_id', auth('api')->id());
+                },
+            ]
+        );
     }
 }
