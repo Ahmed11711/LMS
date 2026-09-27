@@ -67,4 +67,8 @@ class Bag extends Model
     {
         return $this->hasMany(BagPurchase::class, 'bag_id');
     }
+    public function downloads()
+    {
+        return $this->hasMany(UserBagDownload::class);
+    }
 }
