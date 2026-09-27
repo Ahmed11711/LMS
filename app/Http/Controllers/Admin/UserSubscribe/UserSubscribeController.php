@@ -8,8 +8,13 @@ use App\Http\Requests\Admin\UserSubscribe\UserSubscribeStoreRequest;
 use App\Http\Requests\Admin\UserSubscribe\UserSubscribeUpdateRequest;
 use App\Http\Resources\Admin\UserSubscribe\UserSubscribeResource;
 use App\Models\Course;
+use App\QueryFilters\ColumnFilter;
+use App\QueryFilters\Search;
+use App\QueryFilters\SelectFields;
+use App\QueryFilters\SortBy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -33,6 +38,83 @@ class UserSubscribeController extends BaseController
     }
 
     /**
+    
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $request->validate([
+            'period' => ['nullable', 'in:today,yesterday,week,month,year'],
+            'date'   => ['nullable', 'date'],
+            'from'   => ['nullable', 'date'],
+            'to'     => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+
+        try {
+            $query = $this->repository->query()->with($this->getIndexRelationships());
+            $query = $this->applyScoping($query);
+            $query = $this->applyDateFilter($query, $request);
+
+            $data = app(Pipeline::class)
+                ->send($query)
+                ->through([
+                    Search::class,
+                    ColumnFilter::class,
+                    SelectFields::class,
+                    SortBy::class,
+                ])
+                ->thenReturn()
+                ->latest()
+                ->paginate($request->input('per_page', 10));
+
+            if (class_exists($this->resourceClass)) {
+                $data = $this->resourceClass::collection($data);
+            }
+
+            return $this->successResponsePaginate($data, "Data retrieved via Pipeline");
+        } catch (\Throwable $e) {
+            Log::error("Pipeline Error: " . $e->getMessage());
+            return $this->errorResponse("Failed to fetch data", 500);
+        }
+    }
+
+    /**
+     */
+    private function applyDateFilter($query, Request $request)
+    {
+        if ($request->filled('period')) {
+            [$start, $end] = $this->resolvePeriodRange($request->input('period'));
+            return $query->whereBetween('created_at', [$start, $end]);
+        }
+
+        if ($request->filled('date')) {
+            $date = Carbon::parse($request->input('date'));
+            return $query->whereDate('created_at', $date);
+        }
+
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->input('from'))->startOfDay();
+            $to   = Carbon::parse($request->input('to'))->endOfDay();
+            return $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        return $query;
+    }
+
+    private function resolvePeriodRange(string $period): array
+    {
+        $now = Carbon::now();
+
+        return match ($period) {
+            'today'     => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
+            'yesterday' => [$now->copy()->subDay()->startOfDay(), $now->copy()->subDay()->endOfDay()],
+            'week'      => [$now->copy()->subDays(6)->startOfDay(), $now->copy()->endOfDay()],
+            'month'     => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
+            'year'      => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
+            default     => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
+        };
+    }
+
+    /**
      * Override store to handle the "already actively subscribed" case
      * and the renewal confirmation flow.
      */
@@ -48,6 +130,7 @@ class UserSubscribeController extends BaseController
 
         return $data;
     }
+
     public function store(Request $request): JsonResponse
     {
         $validated = app($this->storeRequestClass)->validated();
@@ -55,25 +138,20 @@ class UserSubscribeController extends BaseController
         $userId   = (int) $validated['user_id'];
         $courseId = (int) $validated['course_id'];
 
-        // دور على أي صف موجود أصلاً (مش بس active) لأن الـ unique constraint
-        // شغالة على (user_id, course_id) بغض النظر عن status
         $existingSubscription = $this->repository->query()
             ->where('user_id', $userId)
             ->where('course_id', $courseId)
             ->first();
 
-        // مفيش أي اشتراك قبل كده خالص -> إنشاء عادي
         if (!$existingSubscription) {
             return parent::store($request);
         }
 
-        // هل الاشتراك الموجود لسه active وسريان؟
         $isCurrentlyActive = $existingSubscription->status === 'active'
             && ($existingSubscription->ends_at === null || $existingSubscription->ends_at > now());
 
         $renewalToken = $request->input('renewal_token');
 
-        // لو الاشتراك لسه سريان وactive فعلاً، لازم تأكيد تجديد
         if ($isCurrentlyActive) {
             if (!$renewalToken || !$this->isValidRenewalToken($renewalToken, $userId, $courseId)) {
                 return $this->errorResponse(
@@ -84,8 +162,6 @@ class UserSubscribeController extends BaseController
             }
         }
 
-        // سواء كان منتهي أو نحتاج تجديد مؤكد -> نعمل update على نفس الصف
-        // (مينفعش insert تاني بسبب الـ unique constraint)
         try {
             DB::beginTransaction();
 
@@ -113,10 +189,7 @@ class UserSubscribeController extends BaseController
             return $this->errorResponse('فشل تجديد الاشتراك', 500);
         }
     }
-    /**
-     * When status is changed to 'active' via a normal update (not renewal),
-     * auto-calculate ends_at based on the course's access settings.
-     */
+
     protected function beforeUpdate(array $data, $existingRecord, Request $request): array
     {
         if (
@@ -175,65 +248,5 @@ class UserSubscribeController extends BaseController
         return (int) $payload['user_id'] === $userId
             && (int) $payload['course_id'] === $courseId
             && now()->timestamp <= (int) $payload['expires_at'];
-    }
-
-    public function stats(Request $request): JsonResponse
-    {
-        $request->validate([
-            'date' => ['nullable', 'date'],
-            'from' => ['nullable', 'date'],
-            'to'   => ['nullable', 'date', 'after_or_equal:from'],
-        ]);
-
-        $today     = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        $weekAgo   = Carbon::today()->subDays(7);
-        $yearAgo   = Carbon::today()->subYear();
-
-        $data = [
-            'today' => $this->repository->query()
-                ->whereDate('created_at', $today)
-                ->count(),
-
-            'yesterday' => $this->repository->query()
-                ->whereDate('created_at', $yesterday)
-                ->count(),
-
-            'last_7_days' => $this->repository->query()
-                ->where('created_at', '>=', $weekAgo)
-                ->count(),
-
-            'last_year' => $this->repository->query()
-                ->where('created_at', '>=', $yearAgo)
-                ->count(),
-        ];
-
-        // ===== تاريخ محدد =====
-        if ($request->filled('date')) {
-            $date = Carbon::parse($request->input('date'));
-
-            $data['custom_date'] = [
-                'date'  => $date->toDateString(),
-                'total' => $this->repository->query()
-                    ->whereDate('created_at', $date)
-                    ->count(),
-            ];
-        }
-
-        // ===== فترة محددة (من - إلى) =====
-        if ($request->filled('from') && $request->filled('to')) {
-            $from = Carbon::parse($request->input('from'))->startOfDay();
-            $to   = Carbon::parse($request->input('to'))->endOfDay();
-
-            $data['custom_range'] = [
-                'from'  => $from->toDateString(),
-                'to'    => $to->toDateString(),
-                'total' => $this->repository->query()
-                    ->whereBetween('created_at', [$from, $to])
-                    ->count(),
-            ];
-        }
-
-        return $this->successResponse($data, 'Subscription stats retrieved successfully');
     }
 }
