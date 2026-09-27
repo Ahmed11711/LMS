@@ -145,7 +145,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('subjects', SubjectController::class)->names('subject');
     Route::apiResource('templates', TemplateController::class)->names('academy.template');
     Route::apiResource('category_bags', CategoryBagController::class);
-    Route::apiResource('bag_purchases', BagPurchaseController::class);
+    Route::get('bag_purchases/stats', [BagPurchaseController::class, 'stats']);
+    Route::apiResource('bag_purchases', BagPurchaseController::class)->names('bag_purchase');
 
     Route::apiResource('settings', SettingController::class)->names('setting');
 
