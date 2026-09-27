@@ -176,4 +176,64 @@ class UserSubscribeController extends BaseController
             && (int) $payload['course_id'] === $courseId
             && now()->timestamp <= (int) $payload['expires_at'];
     }
+
+    public function stats(Request $request): JsonResponse
+    {
+        $request->validate([
+            'date' => ['nullable', 'date'],
+            'from' => ['nullable', 'date'],
+            'to'   => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+
+        $today     = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $weekAgo   = Carbon::today()->subDays(7);
+        $yearAgo   = Carbon::today()->subYear();
+
+        $data = [
+            'today' => $this->repository->query()
+                ->whereDate('created_at', $today)
+                ->count(),
+
+            'yesterday' => $this->repository->query()
+                ->whereDate('created_at', $yesterday)
+                ->count(),
+
+            'last_7_days' => $this->repository->query()
+                ->where('created_at', '>=', $weekAgo)
+                ->count(),
+
+            'last_year' => $this->repository->query()
+                ->where('created_at', '>=', $yearAgo)
+                ->count(),
+        ];
+
+        // ===== تاريخ محدد =====
+        if ($request->filled('date')) {
+            $date = Carbon::parse($request->input('date'));
+
+            $data['custom_date'] = [
+                'date'  => $date->toDateString(),
+                'total' => $this->repository->query()
+                    ->whereDate('created_at', $date)
+                    ->count(),
+            ];
+        }
+
+        // ===== فترة محددة (من - إلى) =====
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->input('from'))->startOfDay();
+            $to   = Carbon::parse($request->input('to'))->endOfDay();
+
+            $data['custom_range'] = [
+                'from'  => $from->toDateString(),
+                'to'    => $to->toDateString(),
+                'total' => $this->repository->query()
+                    ->whereBetween('created_at', [$from, $to])
+                    ->count(),
+            ];
+        }
+
+        return $this->successResponse($data, 'Subscription stats retrieved successfully');
+    }
 }

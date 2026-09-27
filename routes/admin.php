@@ -125,6 +125,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::get('my-usage-limit', [LimitPackageController::class, 'getUsageSummary']);
     Route::get('my-package', [UserPackageController::class, 'myPacake']);
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
+    Route::get('user-subscribes/stats', [UserSubscribeController::class, 'stats']);
     /////////////////Custom Domasin ////////////////////////////////////
     Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
     Route::put('custom-subdomain', [CustomSubdomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_subdomains');
