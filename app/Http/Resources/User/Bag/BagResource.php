@@ -75,13 +75,13 @@ class BagResource extends JsonResource
         if ($this->relationLoaded('purchases')) {
             return $this->purchases
                 ->where('user_id', $userId)
-                ->where('status', 'approved')
+                ->whereIn('status', ['approved', 'accepted'])
                 ->isNotEmpty();
         }
 
         return $this->purchases()
             ->where('user_id', $userId)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'accepted'])
             ->exists();
     }
 }
