@@ -39,6 +39,12 @@ class UserSubscribeResource extends JsonResource
                     'id' => $this->user->id,
                     'name' => $this->user->name,
                     'email' => $this->user->email,
+                    'profile_image' => $this->user->profile_image
+                        ? asset('storage/' . ltrim(
+                            preg_replace('#^https?://[^/]+/(storage/)?#', '', $this->user->profile_image),
+                            '/'
+                        ))
+                        : null,
                 ];
             }),
         ];

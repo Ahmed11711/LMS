@@ -34,7 +34,7 @@ class UserSubscribeController extends BaseController
         $this->storeRequestClass  = UserSubscribeStoreRequest::class;
         $this->updateRequestClass = UserSubscribeUpdateRequest::class;
         $this->resourceClass      = UserSubscribeResource::class;
-        $this->withRelationships  = ['course:id,title', 'user:id,name,email'];
+        $this->withRelationships  = ['course:id,title,currency', 'user:id,name,email,profile_image'];
     }
 
     /**
