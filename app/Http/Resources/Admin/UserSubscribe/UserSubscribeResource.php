@@ -30,6 +30,7 @@ class UserSubscribeResource extends JsonResource
                 return [
                     'id' => $this->course->id,
                     'title' => $this->course->title,
+                    'currency' => $this->course->currency,
                 ];
             }),
 
