@@ -29,7 +29,7 @@ class BagDownloadController extends Controller
         // ===== تأكد إن اليوزر اشترى الباج فعلاً وتم قبوله =====
         $purchase = $bag->purchases()
             ->where('user_id', $userId)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'accepted'])
             ->latest('id')
             ->first();
 
