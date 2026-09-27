@@ -40,14 +40,24 @@ class DashboardController extends Controller
             ', [$today])
             ->first();
 
-        // ===== الحقائب =====
-        $bagsStats = Bag::query()
+        // ===== الحقائب لكل عملة =====
+        $bagsByCurrency = Bag::query()
             ->when(!$isAdmin, fn($q) => $q->where('user_id', $user->id))
-            ->selectRaw('
+            ->selectRaw("
+                COALESCE(currency, 'UNKNOWN') as currency,
                 COUNT(*) as total,
                 COUNT(*) FILTER (WHERE created_at < ?) as before_today
-            ', [$today])
-            ->first();
+            ", [$today])
+            ->groupBy('currency')
+            ->get();
+
+        $bagsStats = [];
+        foreach ($bagsByCurrency as $row) {
+            $bagsStats[$row->currency] = [
+                'total'      => (int) $row->total,
+                'percentage' => $this->percentageChange($row->total, $row->before_today),
+            ];
+        }
 
         // ===== الطلاب الجدد =====
         $studentsBaseQuery = User::query()->where('role', 'student');
@@ -134,10 +144,7 @@ class DashboardController extends Controller
                 'total'      => (int) $coursesStats->total,
                 'percentage' => $this->percentageChange($coursesStats->total, $coursesStats->before_today),
             ],
-            'bags' => [
-                'total'      => (int) $bagsStats->total,
-                'percentage' => $this->percentageChange($bagsStats->total, $bagsStats->before_today),
-            ],
+            'bags' => $bagsStats,
             'new_students' => [
                 'total'      => (int) $studentsStats->total,
                 'percentage' => $this->percentageChange($studentsStats->total, $studentsStats->before_today),
