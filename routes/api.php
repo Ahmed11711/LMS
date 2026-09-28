@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Section\SectionController;
 use App\Http\Controllers\Admin\Setting\SettingController;
 use App\Http\Controllers\Admin\Subject\SubjectController;
 use App\Http\Controllers\Admin\Term\TermController;
+use App\Http\Controllers\Admin\Video\VideoController;
 use App\Http\Controllers\Auth\ForgetRestPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Center\Auth\CreateAccountAcademyController;
@@ -35,6 +36,7 @@ use App\Models\Central\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -84,6 +86,7 @@ Route::prefix('front')->group(function () {
 
 
 Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
+    Route::get('videos', [VideoController::class, 'index']); // List all videos
     Route::get('me', [MeController::class, 'me'])->middleware(TenantJwtMiddleware::class . ':student');
 
     Route::get('pages', [PagesController::class, 'index']);
@@ -129,6 +132,9 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
         Route::post('login', [LoginController::class, 'login']);
         Route::post('register', [LoginController::class, 'register']);
     });
+
+    // handle video
+
 
     Route::get('plans', [PlanController::class, 'index']);
     Route::post('subscribe-plan', [UserPlanController::class, 'store'])->middleware(TenantJwtMiddleware::class . ':student');
