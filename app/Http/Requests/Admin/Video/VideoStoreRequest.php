@@ -15,12 +15,11 @@ class VideoStoreRequest extends BaseRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'video_id' => 'required|string|max:255|exists:videos,id',
+            'video_id' => 'required|string|max:255',
             'video_url' => 'required|string|max:255',
             'library_id' => 'required|string|max:255',
             'description' => 'nullable|string',
             'order' => 'required|integer',
-            'file_size_mb' => 'required|numeric|file|max:2048',
         ];
     }
 }
