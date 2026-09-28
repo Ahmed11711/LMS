@@ -48,6 +48,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Video\VideoController;
 
 
 
@@ -58,40 +59,12 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':admin'])->group(function () {
-
-
-    Route::get('debug-lessons/{chapterId}', function ($chapterId) {
-        $chapter = \App\Models\Chapter::find($chapterId);
-
-        $lessonsWithoutScope = \App\Models\Lesson::withoutGlobalScopes()
-            ->where('chapter_id', $chapterId)
-            ->get();
-
-        $lessonsWithScope = \App\Models\Lesson::where('chapter_id', $chapterId)
-            ->get();
-
-        return response()->json([
-            'connection' => DB::connection()->getDatabaseName(),
-            'chapter' => $chapter,
-            'lessons_without_global_scope' => $lessonsWithoutScope,
-            'lessons_with_global_scope' => $lessonsWithScope,
-        ]);
-    });
-    Route::get('debug-all-lessons', function () {
-        return response()->json([
-            'connection' => DB::connection()->getDatabaseName(),
-            'total_lessons' => \App\Models\Lesson::count(),
-            'all_lessons' => \App\Models\Lesson::all(),
-            'all_chapters' => \App\Models\Chapter::all(),
-        ]);
-    });
-
     Route::post('/upgrade-packages', [UserPackageController::class, 'requestUpgrade']);
 
 
 
 
-
+    // handle pages and sections
     Route::apiResource('pages', PagesController::class)->names('pages');
     Route::apiResource('sections', SectionController::class)->names('section')->except(['store', 'update', 'get']);
     Route::get('sections', [SectionController::class, 'byPage']);
@@ -152,6 +125,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
 
     Route::apiResource('profile-academic', ProfileController::class)->except('post', 'delete', 'put');
     Route::put('profile-academic', [ProfileController::class, 'update']);
+    //handel video
+    Route::apiResource('videos', VideoController::class)->names('video');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])

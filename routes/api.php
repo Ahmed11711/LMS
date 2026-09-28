@@ -94,15 +94,8 @@ Route::prefix('user')->middleware([ResolveTenant::class])->group(function () {
     Route::get('terms', [TermController::class, 'index']);
     Route::get('subjects', [SubjectController::class, 'index']);
 
-
-
-
-
-
     Route::apiResource('bags', BagsController::class)->except(['store', 'update', 'destroy']);
     Route::post('bags/{bag}/download', [BagDownloadController::class, 'download']);
-
-
 
 
     Route::get('sections', [SectionController::class, 'index']);

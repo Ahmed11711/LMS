@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Video\VideoRepositoryInterface;
+use App\Repositories\Video\VideoRepository;
+
 use App\Repositories\Setting\SettingRepositoryInterface;
 use App\Repositories\Setting\SettingRepository;
 
@@ -123,9 +126,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        $this->app->bind(
+    public function register(): void {
+$this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
         );
@@ -164,7 +166,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TemplateRepositoryInterface::class, TemplateRepository::class);
         $this->app->bind(CategoryBagRepositoryInterface::class, CategoryBagRepository::class);
         $this->app->bind(SettingRepositoryInterface::class, SettingRepository::class);
-    }
+        $this->app->bind(VideoRepositoryInterface::class, VideoRepository::class);
+}
 
     /**
      * Bootstrap any application services.

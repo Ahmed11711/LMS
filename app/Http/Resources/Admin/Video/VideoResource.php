@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Http\Resources\Admin\Video;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class VideoResource extends JsonResource
+{
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'title' => $this->title,
+            'video_id' => $this->video_id,
+            'video_url' => $this->video_url,
+            'library_id' => $this->library_id,
+            'description' => $this->description,
+            'order' => $this->order,
+            'file_size_mb' => $this->file_size_mb,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
+    }
+}
