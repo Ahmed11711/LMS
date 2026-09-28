@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Requests\Admin\Video;
+
 use App\Http\Requests\BaseRequest\BaseRequest;
+
 class VideoUpdateRequest extends BaseRequest
 {
     public function authorize(): bool
@@ -12,7 +14,6 @@ class VideoUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'sometimes|required|integer|exists:users,id',
             'title' => 'sometimes|required|string|max:255',
             'video_id' => 'sometimes|required|string|max:255|exists:videos,id',
             'video_url' => 'sometimes|required|string|max:255',
