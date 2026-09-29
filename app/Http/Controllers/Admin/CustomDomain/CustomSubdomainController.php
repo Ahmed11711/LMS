@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\Admin\CustomDomain;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\CustomDomain\CustomDomainRequest;
 use App\Http\Requests\Admin\CustomDomain\CustomSubDomain;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CustomSubdomainController extends Controller
 {
+    private const BASE_DOMAIN = 'darab.academy';
+
     public function setup(CustomSubDomain $request)
     {
         $request->validated();
 
-        $domain    = strtolower(trim($request->domain));
+        $subdomain = strtolower(trim($request->domain));
+        $domain    = $subdomain . '.' . self::BASE_DOMAIN;
+
         $tenant    = app('tenant');
         $tenantId  = $tenant->id;
         $oldDomain = $tenant->domain;
@@ -48,6 +50,7 @@ class CustomSubdomainController extends Controller
                     'domain'     => $domain,
                     'updated_at' => now(),
                 ]);
+
             cache()->forget("tenant_meta_{$oldDomain}");
             cache()->forget("tenant_meta_{$domain}");
 
