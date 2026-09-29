@@ -101,7 +101,11 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('user_subscribes', UserSubscribeController::class)->names('user_subscribe');
 
     /////////////////Custom Domasin ////////////////////////////////////
-    Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
+    // Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
+    Route::prefix('custom-domain')->group(function () {
+        Route::post('/', [CustomDomainController::class, 'setup'])->middleware('throttle:5,1');
+        Route::get('/status', [CustomDomainController::class, 'status'])->middleware('throttle:60,1');
+    });
     Route::put('custom-subdomain', [CustomSubdomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_subdomains');
     Route::apiResource('plans', PlanController::class)->names('plan');
     Route::apiResource('user_plan', UserPlanController::class)->except('post');
