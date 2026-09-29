@@ -97,7 +97,7 @@ class CustomDomainController extends Controller
 
         // 6. Hand the slow part (nginx + certbot) to the queue.
         try {
-            SetupCustomDomainJob::dispatch($tenantId, $domain);
+            SetupCustomDomainJob::dispatch($tenantId, $domain)->afterResponse();
         } catch (\Throwable $e) {
             Log::error("Failed to dispatch SetupCustomDomainJob: " . $e->getMessage());
 

@@ -30,6 +30,7 @@ class SetupCustomDomainJob implements ShouldQueue
 
     public function handle(DomainService $service): void
     {
+        set_time_limit(0);
         $tenant = $this->tenants()->where('id', $this->tenantId)->first();
 
         // Request was superseded or cancelled.

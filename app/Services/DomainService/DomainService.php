@@ -71,8 +71,7 @@ class DomainService
             return $this->fail("This domain is protected and cannot be used.");
         }
 
-        $lock = Cache::lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
-
+        $lock = Cache::store('file')->lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
         if (!$lock->get()) {
             return $this->fail("A setup operation is already in progress for {$domain}.");
         }
@@ -98,8 +97,7 @@ class DomainService
             return;
         }
 
-        $lock = Cache::lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
-
+        $lock = Cache::store('file')->lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
         if (!$lock->get()) {
             Log::warning("Could not acquire lock to cleanup {$domain} — a setup may be in progress.");
             return;
