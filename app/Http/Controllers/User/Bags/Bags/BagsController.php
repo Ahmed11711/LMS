@@ -24,35 +24,42 @@ class BagsController extends BaseController
         $this->hasGallery = true;
 
         $this->withRelationships = [
-            'items',
-            'gallery',
             'category',
-            'purchases',
-            'userPaymentInfos.receiverAccount',
         ];
     }
 
+    /**
+     * index: العلاقات الأساسية بس (خفيف)
+     */
     protected function getIndexRelationships(): array
     {
-        return array_merge(
-            array_diff($this->withRelationships, ['purchases']),
-            [
-                'purchases' => function ($query) {
-                    $query->where('user_id', auth('api')->id());
-                },
-            ]
-        );
+        return $this->withRelationships;
     }
 
+    /**
+     * show: العلاقات الأساسية + التقيلة
+     */
     protected function getShowRelationships(): array
     {
-        return array_merge(
-            array_diff($this->withRelationships, ['purchases']),
-            [
-                'purchases' => function ($query) {
-                    $query->where('user_id', auth('api')->id());
-                },
-            ]
-        );
+        return array_merge($this->withRelationships, [
+            'items',
+            'gallery',
+            'userPaymentInfos.receiverAccount',
+            'purchases' => function ($query) {
+                $query->where('user_id', auth('api')->id());
+            },
+        ]);
+    }
+
+
+    protected function afterStore($record, Request $request): void
+    {
+        $record->load($this->getShowRelationships());
+    }
+
+
+    protected function afterUpdate($updatedRecord, $oldRecord, Request $request): void
+    {
+        $updatedRecord->load($this->getShowRelationships());
     }
 }
