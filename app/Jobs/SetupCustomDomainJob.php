@@ -16,11 +16,7 @@ class SetupCustomDomainJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // Never retry automatically: each attempt can burn Let's Encrypt rate limits.
     public int $tries = 1;
-
-    // Must be higher than the worst-case setup time (~260s) and LOWER than
-    // `retry_after` in config/queue.php for the connection.
     public int $timeout = 420;
 
     public function __construct(
@@ -30,7 +26,9 @@ class SetupCustomDomainJob implements ShouldQueue
 
     public function handle(DomainService $service): void
     {
+        // Runs after the HTTP response (afterResponse), so PHP's time limit must be lifted.
         set_time_limit(0);
+
         $tenant = $this->tenants()->where('id', $this->tenantId)->first();
 
         // Request was superseded or cancelled.
@@ -52,14 +50,15 @@ class SetupCustomDomainJob implements ShouldQueue
             return;
         }
 
-        // 2. Switch the tenant to the new domain.
+        // 2. Switch the tenant to the new domain and start the cooldown.
         try {
             $this->tenants()->where('id', $this->tenantId)->update([
-                'domain'         => $this->domain,
-                'pending_domain' => null,
-                'domain_status'  => 'active',
-                'domain_error'   => null,
-                'updated_at'     => now(),
+                'domain'            => $this->domain,
+                'pending_domain'    => null,
+                'domain_status'     => 'active',
+                'domain_error'      => null,
+                'domain_changed_at' => now(),
+                'updated_at'        => now(),
             ]);
         } catch (\Throwable $e) {
             Log::error("Failed to save tenant domain: " . $e->getMessage(), [
@@ -88,7 +87,7 @@ class SetupCustomDomainJob implements ShouldQueue
         ]);
     }
 
-    /** Called by Laravel on uncaught exceptions AND on worker timeout. */
+    /** Called by Laravel on uncaught exceptions. */
     public function failed(\Throwable $e): void
     {
         Log::error("SetupCustomDomainJob crashed: " . $e->getMessage(), [
@@ -101,6 +100,13 @@ class SetupCustomDomainJob implements ShouldQueue
 
     private function markFailed(string $message): void
     {
+        Log::warning("Domain setup failed", [
+            'tenant_id' => $this->tenantId,
+            'domain'    => $this->domain,
+            'reason'    => $message,
+        ]);
+
+        // A failed attempt does NOT touch domain_changed_at, so it never starts the cooldown.
         $this->tenants()
             ->where('id', $this->tenantId)
             ->where('pending_domain', $this->domain)

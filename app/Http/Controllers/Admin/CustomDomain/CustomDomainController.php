@@ -8,13 +8,14 @@ use App\Jobs\SetupCustomDomainJob;
 use App\Services\DomainService\DomainService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class CustomDomainController extends Controller
 {
-    /** A "pending" request older than this is considered dead (worker crashed). */
+    /** A "pending" request older than this is considered dead. */
     private const STALE_AFTER_MINUTES = 10;
 
     private const MAX_CHANGES_PER_DAY = 5;
@@ -24,11 +25,11 @@ class CustomDomainController extends Controller
     ) {}
 
     // ------------------------------------------------------------
-    // POST /custom-domain
+    // POST|PUT /custom-domain
     // ------------------------------------------------------------
     public function setup(CustomDomainRequest $request): JsonResponse
     {
-        $domain   = $request->validated()['domain']; // already lowercased/trimmed
+        $domain   = $request->validated()['domain'];
         $tenantId = app('tenant')->id;
 
         // 1. Protected domain check
@@ -47,7 +48,22 @@ class CustomDomainController extends Controller
             ]);
         }
 
-        // 3. Uniqueness (checks both live domains and domains other tenants are setting up)
+        // 3. Cooldown: one successful change every N days
+        $cooldownDays = (int) config('domain.change_cooldown_days', 60);
+
+        if ($tenant && $tenant->domain_changed_at) {
+            $nextAllowed = Carbon::parse($tenant->domain_changed_at)->addDays($cooldownDays);
+
+            if ($nextAllowed->isFuture()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "You can change your domain once every {$cooldownDays} days. Next change allowed on " . $nextAllowed->toDateString() . ".",
+                    'data'    => ['next_change_allowed_at' => $nextAllowed->toIso8601String()],
+                ], 429);
+            }
+        }
+
+        // 4. Uniqueness (live domains + domains other tenants are setting up)
         $taken = $this->tenants()
             ->where('id', '!=', $tenantId)
             ->where(fn($q) => $q->where('domain', $domain)->orWhere('pending_domain', $domain))
@@ -57,7 +73,7 @@ class CustomDomainController extends Controller
             return $this->error("This domain is already taken. Please choose a different one.", 422);
         }
 
-        // 4. Daily limit per tenant (protects Let's Encrypt quotas)
+        // 5. Daily attempts limit per tenant (protects Let's Encrypt quotas)
         $limiterKey = "domain-change:{$tenantId}";
         if (RateLimiter::tooManyAttempts($limiterKey, self::MAX_CHANGES_PER_DAY)) {
             return $this->error(
@@ -66,10 +82,14 @@ class CustomDomainController extends Controller
             );
         }
 
-        // 5. Atomically claim the tenant: only one change at a time.
+        // 6. Atomically claim the tenant: only one change at a time + cooldown check
         try {
             $claimed = $this->tenants()
                 ->where('id', $tenantId)
+                ->where(function ($q) use ($cooldownDays) {
+                    $q->whereNull('domain_changed_at')
+                        ->orWhere('domain_changed_at', '<=', now()->subDays($cooldownDays));
+                })
                 ->where(function ($q) {
                     $q->where('domain_status', '!=', 'pending')
                         ->orWhereNull('domain_status')
@@ -90,16 +110,16 @@ class CustomDomainController extends Controller
         }
 
         if ($claimed === 0) {
-            return $this->error("A domain change is already in progress. Please wait until it finishes.", 409);
+            return $this->error("A domain change is already in progress, or the change limit was reached.", 409);
         }
 
         RateLimiter::hit($limiterKey, 86400);
 
-        // 6. Hand the slow part (nginx + certbot) to the queue.
+        // 7. Run the slow part (nginx + certbot) right after the response is sent.
         try {
             SetupCustomDomainJob::dispatch($tenantId, $domain)->afterResponse();
         } catch (\Throwable $e) {
-            Log::error("Failed to dispatch SetupCustomDomainJob: " . $e->getMessage());
+            Log::error("Failed to start SetupCustomDomainJob: " . $e->getMessage());
 
             $this->tenants()->where('id', $tenantId)->update([
                 'pending_domain' => null,
@@ -133,7 +153,7 @@ class CustomDomainController extends Controller
         $status = $tenant->domain_status ?: 'active';
         $error  = $tenant->domain_error;
 
-        // Worker died without calling failed(): don't leave the UI spinning forever.
+        // Process died without reporting: don't leave the UI spinning forever.
         if (
             $status === 'pending'
             && $tenant->domain_requested_at
@@ -143,13 +163,21 @@ class CustomDomainController extends Controller
             $error  = 'The request timed out. Please try again.';
         }
 
+        $cooldownDays = (int) config('domain.change_cooldown_days', 60);
+        $nextAllowed  = $tenant->domain_changed_at
+            ? Carbon::parse($tenant->domain_changed_at)->addDays($cooldownDays)
+            : null;
+        $onCooldown = $nextAllowed && $nextAllowed->isFuture();
+
         return response()->json([
             'success' => true,
             'data'    => [
-                'domain'         => $tenant->domain,          // the domain currently serving traffic
-                'pending_domain' => $tenant->pending_domain,  // the one being set up (if any)
-                'status'         => $status,                  // active | pending | failed
-                'error'          => $status === 'failed' ? $error : null,
+                'domain'                 => $tenant->domain,
+                'pending_domain'         => $tenant->pending_domain,
+                'status'                 => $status, // active | pending | failed
+                'error'                  => $status === 'failed' ? $error : null,
+                'can_change'             => $status !== 'pending' && !$onCooldown,
+                'next_change_allowed_at' => $onCooldown ? $nextAllowed->toIso8601String() : null,
             ],
         ]);
     }
