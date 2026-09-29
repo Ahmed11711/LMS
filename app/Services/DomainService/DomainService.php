@@ -9,16 +9,46 @@ class DomainService
 {
     private string $serverIp;
     private string $adminEmail    = 'admin@darab.academy';
-    private string $webUser       = 'hestiamail';
     private string $wildcardCert  = '/etc/letsencrypt/live/darab.academy-0001';
     private string $protectedBase = 'darab.academy';
+    private string $pendingDir    = '/tmp/nginx-pending';
 
-    private array $protectedSubdomains = ['www', 'api', 'mail', 'admin'];
+    /** Subdomains of the base domain that customers can never take. */
+    private const RESERVED_SUBDOMAINS = [
+        'www',
+        'api',
+        'mail',
+        'admin',
+        'cname',
+        'hestia',
+        'webmail',
+        'ftp',
+        'ns1',
+        'ns2',
+        'smtp',
+        'imap',
+        'pop',
+        'pop3',
+        'staging',
+        'test',
+        'dev',
+        'app',
+        'dashboard',
+        'cpanel',
+        'panel',
+        'support',
+        'status',
+        'cdn',
+    ];
 
-    // Max time (seconds) a single setup/cleanup operation is allowed to hold
-    // the lock for a given domain. Generous because certbot + nginx reload
-    // can legitimately take a while.
-    private const LOCK_TIMEOUT_SECONDS = 120;
+    private const CERT_SUFFIXES = ['', '-0001', '-0002', '-0003'];
+
+    // Worst case for a full external setup: ~70s (temp conf) + 120s (certbot) + 70s (final conf).
+    // The lock must outlive that, otherwise a second request can slip in mid-operation.
+    private const LOCK_TIMEOUT_SECONDS = 400;
+
+    private const CRON_WAIT_SECONDS = 70;
+    private const SSL_WAIT_SECONDS  = 120;
 
     public function __construct()
     {
@@ -26,12 +56,16 @@ class DomainService
     }
 
     // ============================================================
-    // Public Entry Point
+    // Public Entry Points
     // ============================================================
 
     public function setupDomain(string $domain): array
     {
         $domain = strtolower(trim($domain));
+
+        if (!$this->isValidFormat($domain)) {
+            return $this->fail("Invalid domain format.");
+        }
 
         if ($this->isProtectedDomain($domain)) {
             return $this->fail("This domain is protected and cannot be used.");
@@ -40,16 +74,16 @@ class DomainService
         $lock = Cache::lock("domain-setup:{$domain}", self::LOCK_TIMEOUT_SECONDS);
 
         if (!$lock->get()) {
-            return $this->fail("A setup operation is already in progress for {$domain}. Please wait a moment and try again.");
+            return $this->fail("A setup operation is already in progress for {$domain}.");
         }
 
         try {
             return $this->isInternalSubdomain($domain)
                 ? $this->setupSubdomain($domain)
                 : $this->setupExternalDomain($domain);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("Domain setup failed for {$domain}: " . $e->getMessage());
-            return $this->fail($e->getMessage());
+            return $this->fail("Unexpected error while setting up {$domain}.");
         } finally {
             $lock->release();
         }
@@ -59,8 +93,8 @@ class DomainService
     {
         $domain = strtolower(trim($domain));
 
-        if (empty($domain) || $this->isProtectedDomain($domain)) {
-            Log::info("Skipping cleanup for protected/empty domain: {$domain}");
+        if ($domain === '' || !$this->isValidFormat($domain) || $this->isProtectedDomain($domain)) {
+            Log::info("Skipping cleanup for invalid/protected/empty domain: {$domain}");
             return;
         }
 
@@ -75,7 +109,7 @@ class DomainService
             $this->isInternalSubdomain($domain)
                 ? $this->cleanupSubdomain($domain)
                 : $this->cleanupExternalDomain($domain);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("Domain cleanup failed for {$domain}: " . $e->getMessage());
         } finally {
             $lock->release();
@@ -83,7 +117,7 @@ class DomainService
     }
 
     // ============================================================
-    // Domain Classification
+    // Classification & Format Validation
     // ============================================================
 
     public function isProtectedDomain(string $domain): bool
@@ -94,13 +128,34 @@ class DomainService
             return true;
         }
 
-        foreach ($this->protectedSubdomains as $sub) {
+        foreach (self::RESERVED_SUBDOMAINS as $sub) {
             if ($domain === "{$sub}.{$this->protectedBase}") {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Strict whitelist. Everything that ends up in a file path, a shell
+     * command or an nginx `server_name` must pass this first.
+     */
+    public function isValidFormat(string $domain): bool
+    {
+        if ($domain === '' || strlen($domain) > 253) {
+            return false;
+        }
+
+        $label = '[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?';
+
+        if ($this->isInternalSubdomain($domain)) {
+            // Exactly one label: the wildcard cert only covers one level.
+            return preg_match('/^' . $label . '\.' . preg_quote($this->protectedBase, '/') . '$/D', $domain) === 1;
+        }
+
+        $tld = '(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})';
+        return preg_match('/^(?:' . $label . '\.)+' . $tld . '$/D', $domain) === 1;
     }
 
     private function isInternalSubdomain(string $domain): bool
@@ -116,12 +171,11 @@ class DomainService
     {
         $config = $this->generateNginxConfig($domain, $this->wildcardCert);
 
-        $written = $this->writeNginxConfig($domain, $config);
-        if (!$written) {
+        if (!$this->writeNginxConfig($domain, $config)) {
             return $this->fail("Failed to write Nginx config for {$domain}");
         }
 
-        return $this->reloadNginx();
+        return ['success' => true];
     }
 
     // ============================================================
@@ -136,61 +190,41 @@ class DomainService
             return $this->fail($validation['message']);
         }
 
-        // 2. Check if a real cert already exists (e.g. re-running setup)
+        // 2. Reuse an existing cert if there is one (retry / re-run).
         $certPath = $this->findCertPath($domain);
 
         if (!$certPath) {
-            // 2a. Write a TEMPORARY config using our wildcard cert.
-            //     This makes Nginx accept connections for this domain
-            //     on port 80/443, so the HTTP-01 challenge can succeed.
+            // 2a. Temporary config on the wildcard cert so port 80 answers
+            //     for this domain and the HTTP-01 challenge can succeed.
             $tempConfig = $this->generateNginxConfig($domain, $this->wildcardCert);
             if (!$this->writeNginxConfig($domain, $tempConfig)) {
                 return $this->fail("Failed to write temporary Nginx config for {$domain}");
             }
 
-            $tempReload = $this->reloadNginx();
-            if (!$tempReload['success']) {
-                $this->deleteNginxConfig($domain);
-                $this->reloadNginx();
-                return $this->fail("Temporary Nginx config invalid for {$domain}: " . ($tempReload['message'] ?? ''));
-            }
-
-            // 2b. Now request the real certificate — port 80 is live for this domain.
+            // 2b. Request the real certificate.
             $this->remountWritable();
             $certResult = $this->generateSSL($domain);
 
             if (!$certResult['success']) {
-                // Roll back: remove the temp config, nothing real was created.
-                $this->deleteNginxConfig($domain);
-                $this->reloadNginx();
+                $this->deleteNginxConfig($domain); // roll back the temp config
                 return $certResult;
             }
 
             $certPath = $certResult['certPath'];
         }
 
-        // 3. Write the FINAL config pointing at the real certificate.
+        // 3. Final config with the real certificate.
         $finalConfig = $this->generateNginxConfig($domain, $certPath);
         if (!$this->writeNginxConfig($domain, $finalConfig)) {
-            // We have a real cert now but couldn't write the final config.
-            // Don't delete the cert — it's valid and reusable on retry.
+            // Keep the cert (valid, reusable on retry) but remove the temp config,
+            // otherwise visitors would get a certificate-mismatch warning.
+            $this->deleteNginxConfig($domain);
             return $this->fail("Failed to write final Nginx config for {$domain}");
         }
 
         Log::info("Nginx config written for external domain: {$domain}");
 
-        // 4. Reload Nginx with the final config.
-        $reload = $this->reloadNginx();
-
-        if (!$reload['success']) {
-            // Roll back the bad config, but keep the cert (it's still valid
-            // and reusable on the next attempt). A scheduled cleanup job
-            // is responsible for removing certs that stay unused too long.
-            $this->deleteNginxConfig($domain);
-            $this->reloadNginx();
-        }
-
-        return $reload;
+        return ['success' => true];
     }
 
     // ============================================================
@@ -199,28 +233,32 @@ class DomainService
 
     private function cleanupSubdomain(string $domain): void
     {
-        $this->deleteNginxConfig($domain);
-        $this->safeExec("sudo nginx -t && sudo systemctl reload nginx");
+        $this->deleteNginxConfig($domain, true);
         Log::info("Cleaned up internal subdomain: {$domain}");
     }
 
     private function cleanupExternalDomain(string $domain): void
     {
-        $this->deleteCert($domain);
-        $this->deleteNginxConfig($domain);
+        // Order matters: config first (wait until the cron really removed it),
+        // reload nginx, and only then delete the cert. Deleting the cert while
+        // the config still references it makes `nginx -t` fail.
+        if (!$this->deleteNginxConfig($domain, true)) {
+            Log::error("Nginx config for {$domain} was not removed in time; keeping the cert.");
+            return;
+        }
+
         $this->safeExec("sudo nginx -t && sudo systemctl reload nginx");
+        $this->deleteCert($domain);
+
         Log::info("Cleaned up external domain: {$domain}");
     }
 
     private function deleteCert(string $domain): void
     {
-        $suffixes = ['', '-0001', '-0002', '-0003'];
-
-        foreach ($suffixes as $suffix) {
+        foreach (self::CERT_SUFFIXES as $suffix) {
             $certName = $domain . $suffix;
-            $certPath = "/etc/letsencrypt/live/{$certName}";
 
-            if (file_exists($certPath)) {
+            if (file_exists("/etc/letsencrypt/live/{$certName}")) {
                 $safe = escapeshellarg($certName);
                 $this->safeExec("sudo certbot delete --cert-name {$safe} --non-interactive");
                 Log::info("Deleted SSL cert: {$certName}");
@@ -228,15 +266,36 @@ class DomainService
         }
     }
 
-    private function deleteNginxConfig(string $domain): void
+    /**
+     * Queue the deletion for the cron job. With $wait = true, blocks until the
+     * file is really gone. Returns false if it is still there after the timeout.
+     */
+    private function deleteNginxConfig(string $domain, bool $wait = false): bool
     {
         $configPath = "/etc/nginx/sites-enabled/{$domain}";
 
-        if (file_exists($configPath)) {
-            $deleteMarker = "/tmp/nginx-pending/{$domain}.delete";
-            file_put_contents($deleteMarker, "");
-            Log::info("Queued Nginx config deletion for: {$domain}");
+        if (!file_exists($configPath)) {
+            return true;
         }
+
+        $this->ensurePendingDir();
+        file_put_contents("{$this->pendingDir}/{$domain}.delete", "");
+        Log::info("Queued Nginx config deletion for: {$domain}");
+
+        if (!$wait) {
+            return true;
+        }
+
+        $start = time();
+        while (time() - $start < self::CRON_WAIT_SECONDS) {
+            clearstatcache(true, $configPath);
+            if (!file_exists($configPath)) {
+                return true;
+            }
+            sleep(2);
+        }
+
+        return false;
     }
 
     // ============================================================
@@ -245,24 +304,21 @@ class DomainService
 
     private function generateSSL(string $domain): array
     {
-        $pending    = "/tmp/nginx-pending/{$domain}.ssl";
-        $resultFile = "/tmp/nginx-pending/{$domain}.ssl.result";
-        $logFile    = "/tmp/nginx-pending/{$domain}.ssl.log";
+        $this->ensurePendingDir();
 
-        // Clean up any previous result
+        $pending    = "{$this->pendingDir}/{$domain}.ssl";
+        $resultFile = "{$this->pendingDir}/{$domain}.ssl.result";
+        $logFile    = "{$this->pendingDir}/{$domain}.ssl.log";
+
         @unlink($resultFile);
         @unlink($logFile);
 
-        // Write the SSL request for the cron job
         file_put_contents($pending, $this->adminEmail);
-
         Log::info("Queued SSL request for: {$domain}");
 
-        // Wait up to 120s for certbot to finish
-        $timeout = 120;
-        $start   = time();
+        $start = time();
 
-        while (time() - $start < $timeout) {
+        while (time() - $start < self::SSL_WAIT_SECONDS) {
             if (file_exists($resultFile)) {
                 $result = trim(file_get_contents($resultFile));
                 $log    = file_exists($logFile) ? file_get_contents($logFile) : '';
@@ -273,26 +329,25 @@ class DomainService
 
                 if ($result === 'success') {
                     $certPath = $this->findCertPath($domain);
-                    if (!$certPath) {
-                        return $this->fail("SSL generation failed for {$domain}", ['ssl_output' => $log]);
+                    if ($certPath) {
+                        return ['success' => true, 'certPath' => $certPath];
                     }
-                    return ['success' => true, 'certPath' => $certPath];
                 }
 
-                return $this->fail("SSL generation failed for {$domain}", ['ssl_output' => $log]);
+                // Certbot output stays in the log, never returned to the customer.
+                return $this->fail("SSL certificate could not be issued for {$domain}. Please check your DNS settings and try again.");
             }
             sleep(2);
         }
 
         @unlink($pending);
         Log::error("Timed out waiting for SSL generation for: {$domain}");
-        return $this->fail("SSL generation timed out for {$domain}");
+        return $this->fail("SSL generation timed out for {$domain}. Please try again later.");
     }
-
 
     private function findCertPath(string $domain): ?string
     {
-        foreach (['', '-0001', '-0002', '-0003'] as $suffix) {
+        foreach (self::CERT_SUFFIXES as $suffix) {
             $path = "/etc/letsencrypt/live/{$domain}{$suffix}";
             if (file_exists("{$path}/fullchain.pem")) {
                 return $path;
@@ -305,54 +360,34 @@ class DomainService
     // Nginx
     // ============================================================
 
-    // private function writeNginxConfig(string $domain, string $config): bool
-    // {
-    //     $dest = "/etc/nginx/sites-enabled/{$domain}";
+    private function ensurePendingDir(): void
+    {
+        if (!is_dir($this->pendingDir)) {
+            mkdir($this->pendingDir, 0775, true);
+        }
+    }
 
-    //     $attempts = 3;
-    //     for ($i = 1; $i <= $attempts; $i++) {
-    //         $result = @file_put_contents($dest, $config);
-
-    //         if ($result !== false) {
-    //             return true;
-    //         }
-
-    //         Log::warning("file_put_contents failed for {$dest} (attempt {$i}/{$attempts})");
-
-    //         if ($i < $attempts) {
-    //             $this->safeExec("sudo mount -o remount,rw /");
-    //             usleep(500_000); // 0.5s
-    //         }
-    //     }
-
-    //     Log::error("file_put_contents failed for {$dest} after {$attempts} attempts");
-    //     return false;
-    // }
-
+    /**
+     * Drops the config in the pending dir and waits for the
+     * nginx-domain-sync.sh cron job to validate + deploy + reload it.
+     */
     private function writeNginxConfig(string $domain, string $config): bool
     {
-        $pendingDir = "/tmp/nginx-pending";
-        if (!is_dir($pendingDir)) {
-            mkdir($pendingDir, 0775, true);
-        }
+        $this->ensurePendingDir();
 
-        $pending      = "{$pendingDir}/{$domain}.conf";
-        $resultFile   = "{$pendingDir}/{$domain}.nginx.result";
+        $pending    = "{$this->pendingDir}/{$domain}.conf";
+        $resultFile = "{$this->pendingDir}/{$domain}.nginx.result";
 
-        // Clean up old result
         @unlink($resultFile);
 
-        $result = file_put_contents($pending, $config);
-        if ($result === false) {
+        if (file_put_contents($pending, $config) === false) {
             Log::error("Failed to write pending config for: {$domain} | error: " . json_encode(error_get_last()));
             return false;
         }
 
-        // Wait up to 70s for the cron job to process it
-        $timeout = 70;
-        $start   = time();
+        $start = time();
 
-        while (time() - $start < $timeout) {
+        while (time() - $start < self::CRON_WAIT_SECONDS) {
             if (file_exists($resultFile)) {
                 $resultContent = trim(file_get_contents($resultFile));
                 @unlink($resultFile);
@@ -371,11 +406,6 @@ class DomainService
         @unlink($pending);
         Log::error("Timed out waiting for nginx config deployment for: {$domain}");
         return false;
-    }
-    private function reloadNginx(): array
-    {
-        // Reload is handled by the nginx-domain-sync.sh cron job.
-        return ['success' => true];
     }
 
     private function generateNginxConfig(string $domain, string $certPath): string
@@ -417,54 +447,42 @@ NGINX;
     }
 
     // ============================================================
-    // Validation
+    // DNS Validation
     // ============================================================
 
     private function isDomainValid(string $domain): array
     {
-        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
-            return ['valid' => false, 'message' => "Invalid domain format"];
-        }
-
-        // 1. Check for a CNAME record first (the path we recommend to customers).
-        $cnameRecords = @dns_get_record($domain, DNS_CNAME);
-
-        // 2. Check for a direct A record too (some customers may use this instead).
-        $aRecords = @dns_get_record($domain, DNS_A);
+        $cnameRecords = @dns_get_record($domain, DNS_CNAME) ?: [];
+        $aRecords     = @dns_get_record($domain, DNS_A) ?: [];
 
         if (empty($cnameRecords) && empty($aRecords)) {
             return [
                 'valid'   => false,
-                'message' => "No DNS records found for {$domain}. Please add a CNAME record pointing to cname.darab.academy, or contact support if DNS was just changed (propagation can take up to 24-48 hours)."
+                'message' => "No DNS records found for {$domain}. Please add a CNAME record pointing to cname.darab.academy. If you just changed DNS, propagation can take up to 24-48 hours.",
             ];
         }
 
-        // 3. If CNAME exists, verify it points to our cname entry (direct or via Cloudflare proxy).
+        // CNAME path (the one we recommend to customers).
         if (!empty($cnameRecords)) {
-            $target = rtrim(strtolower($cnameRecords[0]['target']), '.');
+            $target = rtrim(strtolower($cnameRecords[0]['target'] ?? ''), '.');
+
             if ($target !== 'cname.darab.academy') {
                 return [
                     'valid'   => false,
-                    'message' => "Domain {$domain} has a CNAME pointing to {$target}, but it should point to cname.darab.academy."
+                    'message' => "Domain {$domain} has a CNAME pointing to {$target}, but it should point to cname.darab.academy.",
                 ];
             }
+
             return ['valid' => true, 'message' => "Domain is valid"];
         }
 
-        // 4. If A record exists, verify it points to our server IP directly.
-        $resolvedIp = gethostbyname($domain);
+        // Direct A record path: at least one A record must be our server.
+        $ips = array_column($aRecords, 'ip');
 
-        if ($resolvedIp === $domain) {
+        if (!in_array($this->serverIp, $ips, true)) {
             return [
                 'valid'   => false,
-                'message' => "Could not resolve {$domain} to an IP address. DNS changes can take up to 24-48 hours to propagate."
-            ];
-        }
-
-        if ($resolvedIp !== $this->serverIp) {
-            return [
-                'valid'   => false,
-                'message' => "Domain {$domain} resolves to {$resolvedIp}, but our server is {$this->serverIp}. Please check your DNS settings."
+                'message' => "Domain {$domain} resolves to " . implode(', ', $ips) . ", but our server is {$this->serverIp}. Please check your DNS settings.",
             ];
         }
 
@@ -482,22 +500,12 @@ NGINX;
     }
 
     /**
-     * Execute a shell command safely.
-     * Returns output string (never null).
-     *
-     * NOTE: this does NOT sanitize the command itself — every caller is
-     * responsible for escaping any interpolated value with
-     * escapeshellarg() before it reaches this method.
+     * NOTE: does NOT sanitize the command. Every interpolated value must
+     * already be passed through escapeshellarg() by the caller.
      */
     private function safeExec(string $command): string
     {
-        $output = shell_exec($command . " 2>&1");
-        return $output ?? '';
-    }
-
-    private function outputHasError(string $output): bool
-    {
-        return str_contains($output, 'failed') || str_contains($output, 'error');
+        return shell_exec($command . " 2>&1") ?? '';
     }
 
     private function fail(string $message, array $extra = []): array
