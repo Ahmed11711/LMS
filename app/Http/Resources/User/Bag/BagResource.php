@@ -7,9 +7,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BagResource extends JsonResource
 {
+    protected const APPROVED_STATUSES = ['approved', 'accepted'];
+    protected const PENDING_STATUSES  = ['pending'];
+
     public function toArray($request): array
     {
-        $isPurchased = $this->isPurchasedByCurrentUser();
+        $purchaseStatus = $this->currentUserPurchaseStatus();
+        $canAccessFiles = $purchaseStatus === 'purchased';
 
         return [
             'id' => $this->id,
@@ -36,14 +40,15 @@ class BagResource extends JsonResource
             'count_view' => $this->count_view,
             'status' => $this->status,
 
-            'is_purchased' => $isPurchased,
+            // none | pending | purchased
+            'is_purchased' => $purchaseStatus,
 
-            'items' => $this->whenLoaded('items', function () use ($isPurchased) {
-                return $this->items->map(function ($item) use ($isPurchased) {
+            'items' => $this->whenLoaded('items', function () use ($canAccessFiles) {
+                return $this->items->map(function ($item) use ($canAccessFiles) {
                     return [
                         'id' => $item->id,
                         'bag_id' => $item->bag_id,
-                        'path' => $isPurchased ? $item->path : null,
+                        'path' => $canAccessFiles ? $item->path : null,
                         'type' => $item->type,
                         'created_at' => $item->created_at,
                         'updated_at' => $item->updated_at,
@@ -51,10 +56,8 @@ class BagResource extends JsonResource
                 });
             }),
 
-            // ✅ الجاليري بيرجع عادي زي ما هو من غير أي تعديل
             'gallery' => $this->whenLoaded('gallery'),
 
-            // ✅ طرق الدفع المتاحة لشراء الباج ده
             'payment_infos' => InstructorReceiverAccountResource::collection(
                 $this->whenLoaded('userPaymentInfos')
             ),
@@ -64,24 +67,30 @@ class BagResource extends JsonResource
         ];
     }
 
-    protected function isPurchasedByCurrentUser(): bool
+    /**
+     * Returns: 'none' | 'pending' | 'purchased'
+     */
+    protected function currentUserPurchaseStatus(): string
     {
         $userId = auth('api')->id();
 
         if (!$userId) {
-            return false;
+            return 'none';
         }
 
-        if ($this->relationLoaded('purchases')) {
-            return $this->purchases
-                ->where('user_id', $userId)
-                ->whereIn('status', ['approved', 'accepted'])
-                ->isNotEmpty();
+        $statuses = $this->relationLoaded('purchases')
+            ? $this->purchases->where('user_id', $userId)->pluck('status')
+            : $this->purchases()->where('user_id', $userId)->pluck('status');
+
+        // الأولوية للـ approved حتى لو في pending قديم
+        if ($statuses->intersect(self::APPROVED_STATUSES)->isNotEmpty()) {
+            return 'purchased';
         }
 
-        return $this->purchases()
-            ->where('user_id', $userId)
-            ->whereIn('status', ['approved', 'accepted'])
-            ->exists();
+        if ($statuses->intersect(self::PENDING_STATUSES)->isNotEmpty()) {
+            return 'pending';
+        }
+
+        return 'none';
     }
 }
