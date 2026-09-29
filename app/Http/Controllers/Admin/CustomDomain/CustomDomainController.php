@@ -83,7 +83,7 @@ class CustomDomainController extends Controller
                 ]);
         } catch (QueryException $e) {
             // Unique index on pending_domain: another tenant claimed it a millisecond earlier.
-            if ($e->getCode() === '23000') {
+            if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
                 return $this->error("This domain is already taken. Please choose a different one.", 422);
             }
             throw $e;
