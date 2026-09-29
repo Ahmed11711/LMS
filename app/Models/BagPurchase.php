@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class BagPurchase extends Model
 {
+    public $filterable = ['bag_id', 'user_id'];
+
 
     protected $casts = [
         'receipt' => StorageUrlCast::class,
