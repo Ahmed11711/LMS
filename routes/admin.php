@@ -103,7 +103,8 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     /////////////////Custom Domasin ////////////////////////////////////
     // Route::put('custom-domain', [CustomDomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_domain');
     Route::prefix('custom-domain')->group(function () {
-        Route::post('/', [CustomDomainController::class, 'setup'])->middleware('throttle:5,1');
+        Route::post('/', [CustomDomainController::class, 'setup'])->middleware([CheckFeatureLimit::class . ':custom_domain', 'throttle:5,1']);
+
         Route::get('/status', [CustomDomainController::class, 'status'])->middleware('throttle:60,1');
     });
     Route::put('custom-subdomain', [CustomSubdomainController::class, 'setup'])->middleware(CheckFeatureLimit::class . ':custom_subdomains');
