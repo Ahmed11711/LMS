@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->timestamp('domain_changed_at')->nullable();
-        });
+        Schema::table('tenants', function (Blueprint $table) {});
     }
 
     /**

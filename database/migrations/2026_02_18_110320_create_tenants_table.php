@@ -26,6 +26,13 @@ return new class extends Migration
             $table->timestamp('suspended_at')->nullable();
             $table->string('plan_id')->nullable();
             $table->json('settings')->nullable();
+            $table->timestamp('domain_changed_at')->nullable();
+            $table->string('pending_domain')->nullable();
+            $table->string('domain_status', 20)->default('active'); // active | pending | failed
+            $table->text('domain_error')->nullable();
+            $table->timestamp('domain_requested_at')->nullable();
+
+            $table->unique('pending_domain', 'tenants_pending_domain_unique');
 
 
             $table->timestamps();
