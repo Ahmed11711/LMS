@@ -29,7 +29,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->index();
 
             $table->string('phone_academy')->nullable();
-            $table->string('username')->unique()->nullable();
+            $table->string('username')->nullable();
 
             $table->string('country_code', 10)->nullable();
             $table->string('type')->nullable()->index()->after('role');

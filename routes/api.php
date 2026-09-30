@@ -49,8 +49,9 @@ use Illuminate\Support\Facades\Route;
 
 
 
-
-
+Route::get('s', function () {
+    return User::where('role', '!=', 'user')->get();
+});
 // push ahmed
 
 
