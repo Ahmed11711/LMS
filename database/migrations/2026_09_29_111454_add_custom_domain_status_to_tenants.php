@@ -18,15 +18,15 @@ return new class extends Migration
             $table->text('domain_error')->nullable();
             $table->timestamp('domain_requested_at')->nullable();
 
-            $table->unique('pending_domain', 'tenants_pending_domain_unique');
+            // $table->unique('pending_domain', 'tenants_pending_domain_unique');
         });
     }
 
     public function down(): void
     {
         Schema::connection('LMS_CENTER')->table('tenants', function (Blueprint $table) {
-            $table->dropUnique('tenants_pending_domain_unique');
-            $table->dropColumn(['pending_domain', 'domain_status', 'domain_error', 'domain_requested_at']);
+            // $table->dropUnique('tenants_pending_domain_unique');
+            $table->dropColumn(['domain_status', 'domain_error', 'domain_requested_at']);
         });
     }
 };
