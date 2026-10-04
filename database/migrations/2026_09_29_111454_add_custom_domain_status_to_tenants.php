@@ -14,9 +14,9 @@ return new class extends Migration
     {
         Schema::connection('LMS_CENTER')->table('tenants', function (Blueprint $table) {
             // $table->string('pending_domain')->nullable();
-            $table->string('domain_status', 20)->default('active'); // active | pending | failed
-            $table->text('domain_error')->nullable();
-            $table->timestamp('domain_requested_at')->nullable();
+            // $table->string('domain_status', 20)->default('active'); // active | pending | failed
+            // $table->text('domain_error')->nullable();
+            // $table->timestamp('domain_requested_at')->nullable();
 
             // $table->unique('pending_domain', 'tenants_pending_domain_unique');
         });
@@ -26,7 +26,7 @@ return new class extends Migration
     {
         Schema::connection('LMS_CENTER')->table('tenants', function (Blueprint $table) {
             // $table->dropUnique('tenants_pending_domain_unique');
-            $table->dropColumn(['domain_status', 'domain_error', 'domain_requested_at']);
+            // $table->dropColumn(['domain_status', 'domain_error', 'domain_requested_at']);
         });
     }
 };
