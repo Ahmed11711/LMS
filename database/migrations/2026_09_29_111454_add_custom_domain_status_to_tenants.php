@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::connection('LMS_CENTER')->table('tenants', function (Blueprint $table) {
-            $table->string('pending_domain')->nullable();
+            // $table->string('pending_domain')->nullable();
             $table->string('domain_status', 20)->default('active'); // active | pending | failed
             $table->text('domain_error')->nullable();
             $table->timestamp('domain_requested_at')->nullable();
