@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Quizze\QuizzeRepositoryInterface;
+use App\Repositories\Quizze\QuizzeRepository;
+
 use App\Repositories\Video\VideoRepositoryInterface;
 use App\Repositories\Video\VideoRepository;
 
@@ -167,6 +170,7 @@ $this->app->bind(
         $this->app->bind(CategoryBagRepositoryInterface::class, CategoryBagRepository::class);
         $this->app->bind(SettingRepositoryInterface::class, SettingRepository::class);
         $this->app->bind(VideoRepositoryInterface::class, VideoRepository::class);
+        $this->app->bind(QuizzeRepositoryInterface::class, QuizzeRepository::class);
 }
 
     /**
