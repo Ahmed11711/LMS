@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests\Admin\QuizQuestion;
 
-
-class QuizQuestionUpdateRequest extends QuizQuestionRequest
+class QuizQuestionStoreRequest extends QuizQuestionRequest
 {
     protected function isStore(): bool
     {
-        return false;
+        return true;
     }
 }
