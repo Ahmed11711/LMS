@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     public function up(): void
     {
         Schema::create('quiz_questions', function (Blueprint $table) {
@@ -15,19 +14,11 @@ return new class extends Migration
 
             // true_false | multiple_choice | fill_blanks | short_answer | matching | image_answer
             $table->string('type', 30);
-
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->string('image_path')->nullable();
-
+            $table->jsonb('tags')->nullable();            // ["grammar", "Unit 3"]
+            $table->text('question_text');
+            $table->text('explanation')->nullable();      // explanation answer after user submit the answer
+            $table->string('difficulty', 10)->nullable(); // easy | medium | hard
             $table->decimal('points', 6, 2)->default(1);
-            $table->boolean('is_required')->default(true);
-            $table->boolean('show_points')->default(false);
-            $table->text('explanation')->nullable();
-
-            // إعدادات خاصة بالنوع: {"multiple_correct": true, "randomize_choices": false}
-            $table->jsonb('settings')->nullable();
-
             $table->timestamps();
             $table->softDeletes();
         });
@@ -37,7 +28,17 @@ return new class extends Migration
             ADD CONSTRAINT quiz_questions_type_check
             CHECK (type IN ('true_false','multiple_choice','fill_blanks','short_answer','matching','image_answer'))
         ");
+
+        DB::statement("
+            ALTER TABLE quiz_questions
+            ADD CONSTRAINT quiz_questions_difficulty_check
+            CHECK (difficulty IS NULL OR difficulty IN ('easy','medium','hard'))
+        ");
+
         DB::statement("ALTER TABLE quiz_questions ADD CONSTRAINT quiz_questions_points_check CHECK (points >= 0)");
+
+        // للبحث والفلترة بالوسوم
+        DB::statement("CREATE INDEX quiz_questions_tags_gin ON quiz_questions USING GIN (tags)");
     }
 
     public function down(): void
