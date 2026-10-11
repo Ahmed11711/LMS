@@ -48,6 +48,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\QuizQuestion\QuizQuestionController;
 use App\Http\Controllers\Admin\Quizze\QuizzeController;
 use App\Http\Controllers\Admin\Video\VideoController;
 
@@ -134,6 +135,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     //handel video
     Route::apiResource('videos', VideoController::class)->names('video');
     Route::apiResource('quizzes', QuizzeController::class);
+    Route::apiResource('quiz_questions', QuizQuestionController::class)->names('quiz_question');
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])

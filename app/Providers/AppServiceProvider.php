@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\QuizQuestion\QuizQuestionRepositoryInterface;
+use App\Repositories\QuizQuestion\QuizQuestionRepository;
+
 use App\Repositories\Quizze\QuizzeRepositoryInterface;
 use App\Repositories\Quizze\QuizzeRepository;
 
@@ -171,6 +174,7 @@ $this->app->bind(
         $this->app->bind(SettingRepositoryInterface::class, SettingRepository::class);
         $this->app->bind(VideoRepositoryInterface::class, VideoRepository::class);
         $this->app->bind(QuizzeRepositoryInterface::class, QuizzeRepository::class);
+        $this->app->bind(QuizQuestionRepositoryInterface::class, QuizQuestionRepository::class);
 }
 
     /**
