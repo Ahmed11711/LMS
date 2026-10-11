@@ -12,13 +12,15 @@ return new class extends Migration
         Schema::create('quiz_questions', function (Blueprint $table) {
             $table->id();
 
-            // true_false | multiple_choice | fill_blanks | short_answer | matching | image_answer
+            // mcq | multiple_response | true_false | short_answer | fill_blanks | numeric | essay
             $table->string('type', 30);
-            $table->jsonb('tags')->nullable();            // ["grammar", "Unit 3"]
-            $table->text('question_text');
-            $table->text('explanation')->nullable();      // explanation answer after user submit the answer
-            $table->string('difficulty', 10)->nullable(); // easy | medium | hard
-            $table->decimal('points', 6, 2)->default(1);
+            $table->text('question_text');                 // LaTeX allowed
+            $table->string('image_path')->nullable();      // question image
+            $table->string('difficulty', 10)->nullable();  // easy | medium | hard
+            $table->decimal('points', 6, 2)->default(2);
+            $table->jsonb('tags')->nullable();             // ["grammar", "Unit 3"]
+            $table->text('explanation')->nullable();       // shown to the student after the quiz
+            $table->jsonb('meta')->nullable();             // keep_answers_order | numeric{...} | model_answer
             $table->timestamps();
             $table->softDeletes();
         });
@@ -26,7 +28,7 @@ return new class extends Migration
         DB::statement("
             ALTER TABLE quiz_questions
             ADD CONSTRAINT quiz_questions_type_check
-            CHECK (type IN ('true_false','multiple_choice','fill_blanks','short_answer','matching','image_answer'))
+            CHECK (type IN ('mcq','multiple_response','true_false','short_answer','fill_blanks','numeric','essay'))
         ");
 
         DB::statement("
@@ -35,10 +37,10 @@ return new class extends Migration
             CHECK (difficulty IS NULL OR difficulty IN ('easy','medium','hard'))
         ");
 
-        DB::statement("ALTER TABLE quiz_questions ADD CONSTRAINT quiz_questions_points_check CHECK (points >= 0)");
+        DB::statement('ALTER TABLE quiz_questions ADD CONSTRAINT quiz_questions_points_check CHECK (points >= 0)');
 
-        // للبحث والفلترة بالوسوم
-        DB::statement("CREATE INDEX quiz_questions_tags_gin ON quiz_questions USING GIN (tags)");
+        // tag search / filtering
+        DB::statement('CREATE INDEX quiz_questions_tags_gin ON quiz_questions USING GIN (tags)');
     }
 
     public function down(): void
