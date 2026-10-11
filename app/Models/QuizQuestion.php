@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class QuizQuestion extends Model
 {
@@ -35,5 +36,12 @@ class QuizQuestion extends Model
         return $this->hasMany(QuestionAnswer::class, 'question_id')
             ->orderBy('position')
             ->orderBy('id');
+    }
+
+    public function quizzes(): BelongsToMany
+    {
+        return $this->belongsToMany(Quizze::class, 'quiz_question_pivot', 'question_id', 'quiz_id')
+            ->withPivot('position')
+            ->withTimestamps();
     }
 }

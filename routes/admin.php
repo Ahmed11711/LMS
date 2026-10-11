@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\Quizze\QuizzeController;
 use App\Http\Controllers\Admin\Video\VideoController;
 
 
+use App\Http\Controllers\Admin\Quizze\QuizzeQuestionController;
 
 
 
@@ -135,7 +136,11 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     //handel video
     Route::apiResource('videos', VideoController::class)->names('video');
     Route::apiResource('quizzes', QuizzeController::class);
-    Route::apiResource('quiz_questions', QuizQuestionController::class)->names('quiz_question');
+
+    Route::get('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'index']);
+    Route::post('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'store']);
+    Route::put('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'reorder']);
+    Route::delete('quizzes/{quizId}/questions/{questionId}', [QuizzeQuestionController::class, 'destroy']);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
