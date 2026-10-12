@@ -136,6 +136,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::put('profile-academic', [ProfileController::class, 'update']);
     //handel video
     Route::apiResource('videos', VideoController::class)->names('video');
+    //handel quiz and questions
     Route::apiResource('quizzes', QuizzeController::class);
     Route::apiResource('quiz_questions', QuizQuestionController::class);
     Route::get('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'index']);
