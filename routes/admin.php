@@ -24,14 +24,17 @@ use App\Http\Controllers\Admin\OrganizationProfile\OrganizationProfileController
 use App\Http\Controllers\Admin\Pages\PagesController;
 use App\Http\Controllers\Admin\PhysicalCourseDetail\PhysicalCourseDetailController;
 use App\Http\Controllers\Admin\Plan\PlanController;
+use App\Http\Controllers\Admin\QuizQuestion\QuizQuestionController;
+use App\Http\Controllers\Admin\QuizQuestion\QuizzeQuestionController;
+use App\Http\Controllers\Admin\Quizze\QuizzeController;
+
 use App\Http\Controllers\Admin\ReceiverAccount\ReceiverAccountController;
 use App\Http\Controllers\Admin\Section\SectionController;
-use App\Http\Controllers\Admin\Setting\SettingController;
 
+
+use App\Http\Controllers\Admin\Setting\SettingController;
 use App\Http\Controllers\Admin\Subject\SubjectController;
 use App\Http\Controllers\Admin\Template\TemplateController;
-
-
 use App\Http\Controllers\Admin\Term\TermController;
 use App\Http\Controllers\Admin\User\UserController;
 use App\Http\Controllers\Admin\UserBalance\UserBalalnceController;
@@ -39,6 +42,7 @@ use App\Http\Controllers\Admin\UserPackage\LimitPackageController;
 use App\Http\Controllers\Admin\UserPackage\UserPackageController;
 use App\Http\Controllers\Admin\UserPlan\UserPlanController;
 use App\Http\Controllers\Admin\UserSubscribe\UserSubscribeController;
+use App\Http\Controllers\Admin\Video\VideoController;
 use App\Http\Controllers\Instructor\Course\CourseController as CourseCourseController;
 use App\Http\Controllers\Instructor\InstructorController;
 use App\Http\Controllers\Instructor\UserPaymentInfo\UserPaymentInfoController;
@@ -48,9 +52,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\TenantJwtMiddleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\QuizQuestion\QuizzeQuestionController;
-use App\Http\Controllers\Admin\Quizze\QuizzeController;
-use App\Http\Controllers\Admin\Video\VideoController;
+
 
 
 
@@ -135,7 +137,7 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     //handel video
     Route::apiResource('videos', VideoController::class)->names('video');
     Route::apiResource('quizzes', QuizzeController::class);
-
+    Route::apiResource('quiz_questions', QuizQuestionController::class);
     Route::get('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'index']);
     Route::post('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'store']);
     Route::put('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'reorder']);
