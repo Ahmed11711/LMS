@@ -20,7 +20,7 @@ use Illuminate\Validation\Rule;
  * PUT    /quizzes/{quizId}/questions                 body: question_ids[]  (new order of the attached questions)
  * DELETE /quizzes/{quizId}/questions/{questionId}    detach one question
  */
-class QuizzeQuestionController extends Controller
+class QuizQuestionController extends Controller
 {
     use ApiResponseTrait;
 
