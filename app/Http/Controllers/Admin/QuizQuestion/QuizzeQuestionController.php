@@ -37,7 +37,7 @@ class QuizzeQuestionController extends Controller
         );
     }
 
-    public function store(QuizzeQuestionAttachRequest $request, int $quizId): JsonResponse
+    public function store(QuizzeQuestionAttachRequest $request, int $quizId)
     {
         return  $quiz = Quizze::find($quizId);
 
