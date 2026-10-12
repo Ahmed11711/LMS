@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Admin\QuizQuestion;
+namespace App\Http\Controllers\Admin\Quizze;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Quizze\QuizzeQuestionAttachRequest;
+use App\Http\Requests\Admin\Quizze\QuizzeQuestionReorderRequest;
 use App\Http\Resources\Admin\QuizQuestion\QuizQuestionResource;
-use App\Models\QuizQuestion;
 use App\Models\Quizze;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 /**
  * Links questions from the question bank to a quiz (pivot: quiz_question_pivot).
@@ -20,7 +19,7 @@ use Illuminate\Validation\Rule;
  * PUT    /quizzes/{quizId}/questions                 body: question_ids[]  (new order of the attached questions)
  * DELETE /quizzes/{quizId}/questions/{questionId}    detach one question
  */
-class QuizQuestionController extends Controller
+class QuizzeQuestionController extends Controller
 {
     use ApiResponseTrait;
 
@@ -32,15 +31,13 @@ class QuizQuestionController extends Controller
             return $this->errorResponse('Quiz not found', 404);
         }
 
-        $questions = $quiz->questions()->with('answers')->get();
-
         return $this->successResponse(
-            QuizQuestionResource::collection($questions),
+            QuizQuestionResource::collection($quiz->questions()->with('answers')->get()),
             'Quiz questions retrieved successfully'
         );
     }
 
-    public function store(Request $request, int $quizId): JsonResponse
+    public function store(QuizzeQuestionAttachRequest $request, int $quizId): JsonResponse
     {
         $quiz = Quizze::find($quizId);
 
@@ -48,20 +45,13 @@ class QuizQuestionController extends Controller
             return $this->errorResponse('Quiz not found', 404);
         }
 
-        $data = $request->validate([
-            'question_ids'   => ['required', 'array', 'min:1', 'max:200'],
-            'question_ids.*' => ['integer', 'distinct', Rule::exists(QuizQuestion::class, 'id')->whereNull('deleted_at')],
-        ], [
-            'question_ids.required'   => 'اختار سؤال واحد على الأقل.',
-            'question_ids.*.exists'   => 'في سؤال مش موجود في البنك.',
-            'question_ids.*.distinct' => 'في سؤال متكرر.',
-        ]);
+        $ids = $request->validated()['question_ids'];
 
-        DB::transaction(function () use ($quiz, $data) {
+        DB::transaction(function () use ($quiz, $ids) {
             $attached = $quiz->questions()->pluck('quiz_question_pivot.question_id')->map(fn($i) => (int) $i)->all();
             $position = (int) $quiz->questions()->max('quiz_question_pivot.position');
 
-            foreach ($data['question_ids'] as $id) {
+            foreach ($ids as $id) {
                 if (in_array((int) $id, $attached, true)) {
                     continue;
                 }
@@ -77,7 +67,7 @@ class QuizQuestionController extends Controller
         );
     }
 
-    public function reorder(Request $request, int $quizId): JsonResponse
+    public function reorder(QuizzeQuestionReorderRequest $request, int $quizId): JsonResponse
     {
         $quiz = Quizze::find($quizId);
 
@@ -85,13 +75,8 @@ class QuizQuestionController extends Controller
             return $this->errorResponse('Quiz not found', 404);
         }
 
-        $data = $request->validate([
-            'question_ids'   => ['required', 'array', 'min:1'],
-            'question_ids.*' => ['integer', 'distinct'],
-        ]);
-
+        $given = array_map('intval', $request->validated()['question_ids']);
         $attached = $quiz->questions()->pluck('quiz_question_pivot.question_id')->map(fn($i) => (int) $i)->all();
-        $given    = array_map('intval', $data['question_ids']);
 
         if (array_diff($given, $attached)) {
             return $this->errorResponse('في سؤال مش مضاف للاختبار ده.', 422);
