@@ -137,10 +137,10 @@ Route::prefix('academy')->middleware([ResolveTenant::class, TenantJwtMiddleware:
     Route::apiResource('videos', VideoController::class)->names('video');
     Route::apiResource('quizzes', QuizzeController::class);
 
-    Route::get('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'index']);
-    Route::post('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'store']);
-    Route::put('quizzes/{quizId}/questions', [QuizzeQuestionController::class, 'reorder']);
-    Route::delete('quizzes/{quizId}/questions/{questionId}', [QuizzeQuestionController::class, 'destroy']);
+    Route::get('quizzes/{quizId}/questions', [QuizQuestionController::class, 'index']);
+    Route::post('quizzes/{quizId}/questions', [QuizQuestionController::class, 'store']);
+    Route::put('quizzes/{quizId}/questions', [QuizQuestionController::class, 'reorder']);
+    Route::delete('quizzes/{quizId}/questions/{questionId}', [QuizQuestionController::class, 'destroy']);
 });
 
 Route::prefix('instructor')->middleware([ResolveTenant::class, TenantJwtMiddleware::class . ':academy',])
