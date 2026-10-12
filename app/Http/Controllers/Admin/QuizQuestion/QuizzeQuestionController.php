@@ -39,7 +39,7 @@ class QuizzeQuestionController extends Controller
 
     public function store(QuizzeQuestionAttachRequest $request, int $quizId): JsonResponse
     {
-        $quiz = Quizze::find($quizId);
+        return  $quiz = Quizze::find($quizId);
 
         if (!$quiz) {
             return $this->errorResponse('Quiz not found', 404);
